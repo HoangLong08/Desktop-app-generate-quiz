@@ -1,54 +1,50 @@
-import { cn } from "@/lib/utils";
-import { GraduationCap, Settings } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./ModeToggle";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from "@/components/ui/drawer";
+import { SettingsContent } from "@/ui/pages/SettingsPage";
 
-interface HeaderProps {
-  className?: string;
-}
-
-export function Header({ className }: HeaderProps) {
-  const navigate = useNavigate();
-  const location = useLocation();
+export function FloatingToolbar() {
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
-    <header
-      className={cn(
-        "flex items-center justify-between border-b border-border bg-card px-6 py-3",
-        className,
-      )}
-    >
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => navigate("/")}
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-        >
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary">
-            <GraduationCap className="size-5 text-primary-foreground" />
-          </div>
-          <div className="text-left">
-            <h1 className="text-lg font-bold leading-tight tracking-tight">
-              QuizGen
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Tạo quiz thông minh từ tài liệu
-            </p>
-          </div>
-        </button>
-      </div>
-      <div className="flex items-center gap-3">
+    <>
+      <div className="fixed bottom-4 left-4 z-50 flex items-center gap-2 rounded-full border border-border bg-card/80 px-2 py-1.5 shadow-lg backdrop-blur-md">
         <Button
-          variant={location.pathname === "/settings" ? "secondary" : "ghost"}
-          size="sm"
-          onClick={() => navigate("/settings")}
-          className="gap-1.5"
+          variant={settingsOpen ? "secondary" : "ghost"}
+          size="icon"
+          className="size-8 rounded-full"
+          onClick={() => setSettingsOpen(true)}
         >
           <Settings className="size-4" />
-          <span className="hidden sm:inline">API Keys</span>
         </Button>
         <ModeToggle />
       </div>
-    </header>
+
+      <Drawer
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        direction="right"
+      >
+        <DrawerContent className="h-full w-full sm:max-w-2xl">
+          <DrawerHeader>
+            <DrawerTitle>Cài đặt API Keys</DrawerTitle>
+            <DrawerDescription>
+              Quản lý các Gemini API key dùng để tạo quiz.
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="flex-1 overflow-hidden">
+            <SettingsContent />
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 }

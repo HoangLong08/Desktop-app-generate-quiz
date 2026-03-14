@@ -64,9 +64,21 @@ function timeAgo(isoDate: string | null): string {
 }
 
 const statusConfig = {
-  active: { label: "Active", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30", icon: CheckCircle2 },
-  cooldown: { label: "Cooldown", color: "bg-amber-500/15 text-amber-400 border-amber-500/30", icon: Clock },
-  disabled: { label: "Disabled", color: "bg-zinc-500/15 text-zinc-400 border-zinc-500/30", icon: Ban },
+  active: {
+    label: "Active",
+    color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    icon: CheckCircle2,
+  },
+  cooldown: {
+    label: "Cooldown",
+    color: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+    icon: Clock,
+  },
+  disabled: {
+    label: "Disabled",
+    color: "bg-zinc-500/15 text-zinc-400 border-zinc-500/30",
+    icon: Ban,
+  },
 };
 
 const modelColors: Record<string, string> = {
@@ -76,17 +88,25 @@ const modelColors: Record<string, string> = {
 };
 
 function KeyStatusBadge({ status }: { status: string }) {
-  const cfg = statusConfig[status as keyof typeof statusConfig] || statusConfig.disabled;
+  const cfg =
+    statusConfig[status as keyof typeof statusConfig] || statusConfig.disabled;
   const Icon = cfg.icon;
   return (
-    <Badge variant="outline" className={cn("gap-1 text-xs font-medium", cfg.color)}>
+    <Badge
+      variant="outline"
+      className={cn("gap-1 text-xs font-medium", cfg.color)}
+    >
       <Icon className="size-3" />
       {cfg.label}
     </Badge>
   );
 }
 
-function AddKeyDialog({ onAdd }: { onAdd: (key: string, label: string) => Promise<void> }) {
+function AddKeyDialog({
+  onAdd,
+}: {
+  onAdd: (key: string, label: string) => Promise<void>;
+}) {
   const [key, setKey] = useState("");
   const [label, setLabel] = useState("");
   const [adding, setAdding] = useState(false);
@@ -120,7 +140,8 @@ function AddKeyDialog({ onAdd }: { onAdd: (key: string, label: string) => Promis
         <DialogHeader>
           <DialogTitle>Thêm Gemini API Key</DialogTitle>
           <DialogDescription>
-            Nhập API key từ Google AI Studio. Key sẽ được lưu và dùng xoay vòng khi tạo quiz.
+            Nhập API key từ Google AI Studio. Key sẽ được lưu và dùng xoay vòng
+            khi tạo quiz.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-2">
@@ -184,7 +205,9 @@ function ModelUsageTable({ models }: { models: ModelSummary[] }) {
                 <th className="pb-2 px-3 font-medium text-right">Requests</th>
                 <th className="pb-2 px-3 font-medium text-right">Input</th>
                 <th className="pb-2 px-3 font-medium text-right">Output</th>
-                <th className="pb-2 px-3 font-medium text-right">Tổng tokens</th>
+                <th className="pb-2 px-3 font-medium text-right">
+                  Tổng tokens
+                </th>
                 <th className="pb-2 px-3 font-medium text-right">RPD</th>
                 <th className="pb-2 px-3 font-medium text-right">RPM</th>
                 <th className="pb-2 pl-3 font-medium text-right">TPM</th>
@@ -194,13 +217,20 @@ function ModelUsageTable({ models }: { models: ModelSummary[] }) {
               {models.map((m) => {
                 const color = modelColors[m.model] || "text-foreground";
                 return (
-                  <tr key={m.model} className="border-b border-border/30 last:border-0">
+                  <tr
+                    key={m.model}
+                    className="border-b border-border/30 last:border-0"
+                  >
                     <td className="py-2.5 pr-3">
                       <div className="flex items-center gap-2">
                         <Cpu className={cn("size-3.5 shrink-0", color)} />
                         <div>
-                          <p className={cn("font-medium text-xs", color)}>{m.displayName}</p>
-                          <p className="text-[10px] text-muted-foreground font-mono">{m.model}</p>
+                          <p className={cn("font-medium text-xs", color)}>
+                            {m.displayName}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground font-mono">
+                            {m.model}
+                          </p>
                         </div>
                       </div>
                     </td>
@@ -213,14 +243,18 @@ function ModelUsageTable({ models }: { models: ModelSummary[] }) {
                     </td>
                     <td className="py-2.5 px-3 text-right font-mono text-xs">
                       {m.inputTokens > 0 ? (
-                        <span className="text-blue-400">{formatNumber(m.inputTokens)}</span>
+                        <span className="text-blue-400">
+                          {formatNumber(m.inputTokens)}
+                        </span>
                       ) : (
                         <span className="text-muted-foreground/50">-</span>
                       )}
                     </td>
                     <td className="py-2.5 px-3 text-right font-mono text-xs">
                       {m.outputTokens > 0 ? (
-                        <span className="text-violet-400">{formatNumber(m.outputTokens)}</span>
+                        <span className="text-violet-400">
+                          {formatNumber(m.outputTokens)}
+                        </span>
                       ) : (
                         <span className="text-muted-foreground/50">-</span>
                       )}
@@ -234,23 +268,35 @@ function ModelUsageTable({ models }: { models: ModelSummary[] }) {
                     </td>
                     <td className="py-2.5 px-3 text-right">
                       {m.limits ? (
-                        <span className="text-xs text-muted-foreground">{m.limits.rpd}/ngày</span>
+                        <span className="text-xs text-muted-foreground">
+                          {m.limits.rpd}/ngày
+                        </span>
                       ) : (
-                        <span className="text-muted-foreground/50 text-xs">-</span>
+                        <span className="text-muted-foreground/50 text-xs">
+                          -
+                        </span>
                       )}
                     </td>
                     <td className="py-2.5 px-3 text-right">
                       {m.limits ? (
-                        <span className="text-xs text-muted-foreground">{m.limits.rpm}/phút</span>
+                        <span className="text-xs text-muted-foreground">
+                          {m.limits.rpm}/phút
+                        </span>
                       ) : (
-                        <span className="text-muted-foreground/50 text-xs">-</span>
+                        <span className="text-muted-foreground/50 text-xs">
+                          -
+                        </span>
                       )}
                     </td>
                     <td className="py-2.5 pl-3 text-right">
                       {m.limits ? (
-                        <span className="text-xs text-muted-foreground">{formatNumber(m.limits.tpm)}/phút</span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatNumber(m.limits.tpm)}/phút
+                        </span>
                       ) : (
-                        <span className="text-muted-foreground/50 text-xs">-</span>
+                        <span className="text-muted-foreground/50 text-xs">
+                          -
+                        </span>
                       )}
                     </td>
                   </tr>
@@ -266,7 +312,19 @@ function ModelUsageTable({ models }: { models: ModelSummary[] }) {
 
 // ─── Per-key model mini table ────────────────────────────────────────────────
 
-function KeyModelBreakdown({ modelUsage }: { modelUsage: Record<string, { requests: number; inputTokens: number; outputTokens: number; totalTokens: number }> }) {
+function KeyModelBreakdown({
+  modelUsage,
+}: {
+  modelUsage: Record<
+    string,
+    {
+      requests: number;
+      inputTokens: number;
+      outputTokens: number;
+      totalTokens: number;
+    }
+  >;
+}) {
   const entries = Object.entries(modelUsage).filter(([, s]) => s.requests > 0);
   if (entries.length === 0) return null;
 
@@ -277,14 +335,22 @@ function KeyModelBreakdown({ modelUsage }: { modelUsage: Record<string, { reques
         return (
           <div key={model} className="flex items-center gap-2 text-[10px]">
             <Cpu className={cn("size-2.5 shrink-0", color)} />
-            <span className={cn("font-medium min-w-[100px]", color)}>{model}</span>
+            <span className={cn("font-medium min-w-[100px]", color)}>
+              {model}
+            </span>
             <span className="text-muted-foreground">{stats.requests} req</span>
             <span className="text-muted-foreground">·</span>
-            <span className="text-blue-400">{formatNumber(stats.inputTokens)} in</span>
+            <span className="text-blue-400">
+              {formatNumber(stats.inputTokens)} in
+            </span>
             <span className="text-muted-foreground">·</span>
-            <span className="text-violet-400">{formatNumber(stats.outputTokens)} out</span>
+            <span className="text-violet-400">
+              {formatNumber(stats.outputTokens)} out
+            </span>
             <span className="text-muted-foreground">·</span>
-            <span className="font-semibold">{formatNumber(stats.totalTokens)}</span>
+            <span className="font-semibold">
+              {formatNumber(stats.totalTokens)}
+            </span>
           </div>
         );
       })}
@@ -350,14 +416,22 @@ function KeyCard({
                     }}
                     autoFocus
                   />
-                  <Button size="sm" variant="ghost" className="h-7 px-2" onClick={handleSaveLabel}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 px-2"
+                    onClick={handleSaveLabel}
+                  >
                     Lưu
                   </Button>
                 </div>
               ) : (
                 <button
                   className="flex items-center gap-1.5 text-sm font-semibold hover:text-primary transition-colors"
-                  onClick={() => { setLabelDraft(apiKey.label); setEditing(true); }}
+                  onClick={() => {
+                    setLabelDraft(apiKey.label);
+                    setEditing(true);
+                  }}
                 >
                   {apiKey.label || "Không có nhãn"}
                   <Pencil className="size-3 opacity-0 group-hover:opacity-50" />
@@ -367,22 +441,33 @@ function KeyCard({
             </div>
 
             {/* Masked key */}
-            <p className="font-mono text-xs text-muted-foreground truncate">{apiKey.key}</p>
+            <p className="font-mono text-xs text-muted-foreground truncate">
+              {apiKey.key}
+            </p>
 
             {/* Stats row */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Zap className="size-3 text-blue-400" />
-                <strong className="text-foreground">{formatNumber(totalTokens)}</strong> tokens
+                <strong className="text-foreground">
+                  {formatNumber(totalTokens)}
+                </strong>{" "}
+                tokens
               </span>
               <span className="flex items-center gap-1">
                 <Activity className="size-3 text-purple-400" />
-                <strong className="text-foreground">{apiKey.usageCount}</strong> requests
+                <strong className="text-foreground">
+                  {apiKey.usageCount}
+                </strong>{" "}
+                requests
               </span>
               {apiKey.errorCount > 0 && (
                 <span className="flex items-center gap-1">
                   <AlertTriangle className="size-3 text-red-400" />
-                  <strong className="text-red-400">{apiKey.errorCount}</strong> errors
+                  <strong className="text-red-400">
+                    {apiKey.errorCount}
+                  </strong>{" "}
+                  errors
                 </span>
               )}
               <span className="flex items-center gap-1">
@@ -399,8 +484,18 @@ function KeyCard({
                   <span>Output: {formatNumber(apiKey.totalOutputTokens)}</span>
                 </div>
                 <div className="flex h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div className="bg-blue-500 transition-all" style={{ width: `${(apiKey.totalInputTokens / totalTokens) * 100}%` }} />
-                  <div className="bg-violet-500 transition-all" style={{ width: `${(apiKey.totalOutputTokens / totalTokens) * 100}%` }} />
+                  <div
+                    className="bg-blue-500 transition-all"
+                    style={{
+                      width: `${(apiKey.totalInputTokens / totalTokens) * 100}%`,
+                    }}
+                  />
+                  <div
+                    className="bg-violet-500 transition-all"
+                    style={{
+                      width: `${(apiKey.totalOutputTokens / totalTokens) * 100}%`,
+                    }}
+                  />
                 </div>
               </div>
             )}
@@ -411,9 +506,23 @@ function KeyCard({
             {/* Success rate */}
             {apiKey.usageCount > 0 && (
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-muted-foreground">Tỷ lệ thành công</span>
-                <Progress value={successRate} className="h-1.5 flex-1 max-w-[120px]" />
-                <span className={cn("text-[10px] font-medium", successRate >= 90 ? "text-emerald-400" : successRate >= 70 ? "text-amber-400" : "text-red-400")}>
+                <span className="text-[10px] text-muted-foreground">
+                  Tỷ lệ thành công
+                </span>
+                <Progress
+                  value={successRate}
+                  className="h-1.5 flex-1 max-w-[120px]"
+                />
+                <span
+                  className={cn(
+                    "text-[10px] font-medium",
+                    successRate >= 90
+                      ? "text-emerald-400"
+                      : successRate >= 70
+                        ? "text-amber-400"
+                        : "text-red-400",
+                  )}
+                >
                   {successRate}%
                 </span>
               </div>
@@ -421,14 +530,26 @@ function KeyCard({
 
             {/* Last error */}
             {apiKey.lastError && (
-              <p className="text-[10px] text-red-400/80 truncate max-w-[400px]">Lỗi: {apiKey.lastError}</p>
+              <p className="text-[10px] text-red-400/80 truncate max-w-[400px]">
+                Lỗi: {apiKey.lastError}
+              </p>
             )}
           </div>
 
           {/* Right: Controls */}
           <div className="flex flex-col items-end gap-2 shrink-0">
-            <Switch checked={apiKey.status !== "disabled"} onCheckedChange={onToggle} aria-label="Toggle key" />
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-red-400" onClick={handleDelete} disabled={deleting}>
+            <Switch
+              checked={apiKey.status !== "disabled"}
+              onCheckedChange={onToggle}
+              aria-label="Toggle key"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-muted-foreground hover:text-red-400"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
               <Trash2 className="size-3.5" />
             </Button>
           </div>
@@ -440,8 +561,18 @@ function KeyCard({
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
-export function SettingsPage() {
-  const { keys, summary, loading, error, refresh, addKey, toggleKey, updateLabel, removeKey } = useApiKeys();
+export function SettingsContent() {
+  const {
+    keys,
+    summary,
+    loading,
+    error,
+    refresh,
+    addKey,
+    toggleKey,
+    updateLabel,
+    removeKey,
+  } = useApiKeys();
   const [refreshing, setRefreshing] = useState(false);
 
   async function handleRefresh() {
@@ -453,38 +584,44 @@ export function SettingsPage() {
   return (
     <ScrollArea className="h-full w-full">
       <div className="mx-auto max-w-4xl space-y-6 p-6">
-        {/* Page title */}
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Cài đặt API Keys</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Quản lý các Gemini API key dùng để tạo quiz. Hệ thống tự động xoay vòng key để tránh bị giới hạn rate limit.
-          </p>
-        </div>
-
         {/* Summary cards */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Card className="border-border/50 bg-card/50">
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-primary">{summary.totalKeys}</div>
+              <div className="text-2xl font-bold text-primary">
+                {summary.totalKeys}
+              </div>
               <p className="text-xs text-muted-foreground mt-0.5">Tổng key</p>
             </CardContent>
           </Card>
           <Card className="border-border/50 bg-card/50">
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-emerald-400">{summary.activeKeys}</div>
-              <p className="text-xs text-muted-foreground mt-0.5">Đang hoạt động</p>
+              <div className="text-2xl font-bold text-emerald-400">
+                {summary.activeKeys}
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Đang hoạt động
+              </p>
             </CardContent>
           </Card>
           <Card className="border-border/50 bg-card/50">
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-400">{formatNumber(summary.totalTokens)}</div>
-              <p className="text-xs text-muted-foreground mt-0.5">Tổng tokens</p>
+              <div className="text-2xl font-bold text-blue-400">
+                {formatNumber(summary.totalTokens)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Tổng tokens
+              </p>
             </CardContent>
           </Card>
           <Card className="border-border/50 bg-card/50">
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-400">{summary.totalUsage}</div>
-              <p className="text-xs text-muted-foreground mt-0.5">Tổng requests</p>
+              <div className="text-2xl font-bold text-purple-400">
+                {summary.totalUsage}
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Tổng requests
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -494,27 +631,45 @@ export function SettingsPage() {
           <Card className="border-border/50 bg-card/50">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium">Token Usage</CardTitle>
-              <CardDescription>Tổng tokens đã sử dụng trên tất cả key</CardDescription>
+              <CardDescription>
+                Tổng tokens đã sử dụng trên tất cả key
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex h-3 overflow-hidden rounded-full bg-muted">
-                <div className="bg-blue-500 transition-all" style={{ width: `${(summary.totalInputTokens / summary.totalTokens) * 100}%` }} />
-                <div className="bg-violet-500 transition-all" style={{ width: `${(summary.totalOutputTokens / summary.totalTokens) * 100}%` }} />
+                <div
+                  className="bg-blue-500 transition-all"
+                  style={{
+                    width: `${(summary.totalInputTokens / summary.totalTokens) * 100}%`,
+                  }}
+                />
+                <div
+                  className="bg-violet-500 transition-all"
+                  style={{
+                    width: `${(summary.totalOutputTokens / summary.totalTokens) * 100}%`,
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <div className="size-2.5 rounded-full bg-blue-500" />
                   <span className="text-muted-foreground">Input</span>
-                  <span className="font-medium">{formatNumber(summary.totalInputTokens)}</span>
+                  <span className="font-medium">
+                    {formatNumber(summary.totalInputTokens)}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="size-2.5 rounded-full bg-violet-500" />
                   <span className="text-muted-foreground">Output</span>
-                  <span className="font-medium">{formatNumber(summary.totalOutputTokens)}</span>
+                  <span className="font-medium">
+                    {formatNumber(summary.totalOutputTokens)}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">Tổng</span>
-                  <span className="font-bold">{formatNumber(summary.totalTokens)}</span>
+                  <span className="font-bold">
+                    {formatNumber(summary.totalTokens)}
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -533,17 +688,32 @@ export function SettingsPage() {
               <Key className="size-5 text-primary" />
               <h3 className="text-lg font-semibold">API Keys</h3>
               {summary.cooldownKeys > 0 && (
-                <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-xs">
+                <Badge
+                  variant="outline"
+                  className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-xs"
+                >
                   {summary.cooldownKeys} cooldown
                 </Badge>
               )}
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={handleRefresh} disabled={refreshing}>
-                <RefreshCw className={cn("size-3.5", refreshing && "animate-spin")} />
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={handleRefresh}
+                disabled={refreshing}
+              >
+                <RefreshCw
+                  className={cn("size-3.5", refreshing && "animate-spin")}
+                />
                 Refresh
               </Button>
-              <AddKeyDialog onAdd={async (key, label) => { await addKey(key, label); }} />
+              <AddKeyDialog
+                onAdd={async (key, label) => {
+                  await addKey(key, label);
+                }}
+              />
             </div>
           </div>
 
@@ -565,12 +735,19 @@ export function SettingsPage() {
             <Card className="border-dashed border-2 border-border/50 bg-transparent">
               <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                 <Key className="size-10 text-muted-foreground/30 mb-3" />
-                <p className="text-sm font-medium text-muted-foreground">Chưa có API key nào</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Chưa có API key nào
+                </p>
                 <p className="text-xs text-muted-foreground/70 mt-1 max-w-sm">
-                  Thêm Gemini API key để bắt đầu tạo quiz. Hệ thống sẽ tự động xoay vòng giữa các key khi gặp rate limit.
+                  Thêm Gemini API key để bắt đầu tạo quiz. Hệ thống sẽ tự động
+                  xoay vòng giữa các key khi gặp rate limit.
                 </p>
                 <div className="mt-4">
-                  <AddKeyDialog onAdd={async (key, label) => { await addKey(key, label); }} />
+                  <AddKeyDialog
+                    onAdd={async (key, label) => {
+                      await addKey(key, label);
+                    }}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -581,8 +758,14 @@ export function SettingsPage() {
                   key={k.id}
                   apiKey={k}
                   onToggle={() => toggleKey(k.id, k.status)}
-                  onDelete={() => { removeKey(k.id); toast.success("Đã xóa key"); }}
-                  onRename={(label) => { updateLabel(k.id, label); toast.success("Đã cập nhật nhãn"); }}
+                  onDelete={() => {
+                    removeKey(k.id);
+                    toast.success("Đã xóa key");
+                  }}
+                  onRename={(label) => {
+                    updateLabel(k.id, label);
+                    toast.success("Đã cập nhật nhãn");
+                  }}
                 />
               ))}
             </div>
@@ -596,27 +779,62 @@ export function SettingsPage() {
               <Gauge className="size-4 text-amber-400" />
               Giới hạn Free Tier (Gemini API)
             </CardTitle>
-            <CardDescription>Rate limit cho mỗi API key, mỗi model có quota riêng</CardDescription>
+            <CardDescription>
+              Rate limit cho mỗi API key, mỗi model có quota riêng
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-3">
               {[
-                { name: "gemini-2.5-flash", label: "2.5 Flash", rpd: 500, rpm: 15, tpm: "1M", desc: "Chất lượng tốt nhất", color: "border-blue-500/30 bg-blue-500/5" },
-                { name: "gemini-2.5-flash-lite", label: "2.5 Flash Lite", rpd: 500, rpm: 30, tpm: "1M", desc: "Nhanh nhất, rẻ nhất", color: "border-cyan-500/30 bg-cyan-500/5" },
-                { name: "gemini-2.0-flash", label: "2.0 Flash", rpd: 1500, rpm: 15, tpm: "4M", desc: "Quota cao nhất", color: "border-amber-500/30 bg-amber-500/5" },
+                {
+                  name: "gemini-2.5-flash",
+                  label: "2.5 Flash",
+                  rpd: 500,
+                  rpm: 15,
+                  tpm: "1M",
+                  desc: "Chất lượng tốt nhất",
+                  color: "border-blue-500/30 bg-blue-500/5",
+                },
+                {
+                  name: "gemini-2.5-flash-lite",
+                  label: "2.5 Flash Lite",
+                  rpd: 500,
+                  rpm: 30,
+                  tpm: "1M",
+                  desc: "Nhanh nhất, rẻ nhất",
+                  color: "border-cyan-500/30 bg-cyan-500/5",
+                },
+                {
+                  name: "gemini-2.0-flash",
+                  label: "2.0 Flash",
+                  rpd: 1500,
+                  rpm: 15,
+                  tpm: "4M",
+                  desc: "Quota cao nhất",
+                  color: "border-amber-500/30 bg-amber-500/5",
+                },
               ].map((m) => (
-                <div key={m.name} className={cn("rounded-lg border p-3 space-y-2", m.color)}>
+                <div
+                  key={m.name}
+                  className={cn("rounded-lg border p-3 space-y-2", m.color)}
+                >
                   <div>
                     <p className="text-xs font-semibold">{m.label}</p>
-                    <p className="text-[10px] text-muted-foreground">{m.desc}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {m.desc}
+                    </p>
                   </div>
                   <div className="space-y-1 text-[11px]">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Requests/ngày</span>
+                      <span className="text-muted-foreground">
+                        Requests/ngày
+                      </span>
                       <span className="font-mono font-semibold">{m.rpd}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Requests/phút</span>
+                      <span className="text-muted-foreground">
+                        Requests/phút
+                      </span>
                       <span className="font-mono font-semibold">{m.rpm}</span>
                     </div>
                     <div className="flex justify-between">
@@ -628,7 +846,9 @@ export function SettingsPage() {
               ))}
             </div>
             <p className="text-[10px] text-muted-foreground mt-3">
-              Mỗi model có quota riêng biệt. Khi model chính (2.5 Flash) hết quota, hệ thống tự động chuyển sang model tiếp theo trong chuỗi fallback.
+              Mỗi model có quota riêng biệt. Khi model chính (2.5 Flash) hết
+              quota, hệ thống tự động chuyển sang model tiếp theo trong chuỗi
+              fallback.
             </p>
           </CardContent>
         </Card>
@@ -642,8 +862,12 @@ export function SettingsPage() {
             </p>
             <ul className="list-disc list-inside space-y-1 text-xs">
               <li>Key ít dùng nhất sẽ được chọn trước (round-robin)</li>
-              <li>Khi gặp rate limit 429, key tự động chuyển sang cooldown 65s</li>
-              <li>Sau thời gian cooldown, key tự phục hồi và tiếp tục hoạt động</li>
+              <li>
+                Khi gặp rate limit 429, key tự động chuyển sang cooldown 65s
+              </li>
+              <li>
+                Sau thời gian cooldown, key tự phục hồi và tiếp tục hoạt động
+              </li>
               <li>Token usage được tính tự động mỗi lần gọi Gemini API</li>
               <li>Bắt buộc phải thêm ít nhất 1 key để tạo quiz</li>
               <li>Fallback chain: 2.5 Flash → 2.5 Flash Lite → 2.0 Flash</li>

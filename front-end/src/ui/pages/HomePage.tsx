@@ -368,6 +368,18 @@ export function HomePage() {
               transition={{ duration: 0.15 }}
             >
               <AnimatePresence mode="popLayout">
+                {activeTab === "all" && (
+                  <motion.div
+                    key="create-new"
+                    layout
+                    variants={gridItemVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    <CreateFolderCard onClick={() => setOpen(true)} />
+                  </motion.div>
+                )}
+
                 {filteredFolders.map((folder) => (
                   <motion.div
                     key={folder.id}
@@ -394,18 +406,6 @@ export function HomePage() {
                     />
                   </motion.div>
                 ))}
-
-                {activeTab === "all" && (
-                  <motion.div
-                    key="create-new"
-                    layout
-                    variants={gridItemVariants}
-                    initial="hidden"
-                    animate="visible"
-                  >
-                    <CreateFolderCard onClick={() => setOpen(true)} />
-                  </motion.div>
-                )}
               </AnimatePresence>
             </motion.div>
           </AnimatePresence>
@@ -419,6 +419,18 @@ export function HomePage() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
+              {activeTab === "all" && (
+                <button
+                  onClick={() => setOpen(true)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted/50 transition-colors border border-dashed border-border/40 text-muted-foreground/60 hover:text-muted-foreground mb-1"
+                >
+                  <div className="size-10 rounded-xl flex-shrink-0 flex items-center justify-center border border-dashed border-border/40">
+                    <FolderPlus className="size-4" />
+                  </div>
+                  <span className="text-sm font-medium">Tạo thư mục mới</span>
+                </button>
+              )}
+
               <AnimatePresence mode="popLayout">
                 {filteredFolders.map((folder) => (
                   <motion.div
@@ -447,18 +459,6 @@ export function HomePage() {
                   </motion.div>
                 ))}
               </AnimatePresence>
-
-              {activeTab === "all" && (
-                <button
-                  onClick={() => setOpen(true)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted/50 transition-colors border border-dashed border-border/40 text-muted-foreground/60 hover:text-muted-foreground mt-1"
-                >
-                  <div className="size-10 rounded-xl flex-shrink-0 flex items-center justify-center border border-dashed border-border/40">
-                    <FolderPlus className="size-4" />
-                  </div>
-                  <span className="text-sm font-medium">Tạo thư mục mới</span>
-                </button>
-              )}
             </motion.div>
           </AnimatePresence>
         )}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, type Transition } from "framer-motion";
 import { Trash2, Star, Folder } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -86,6 +86,236 @@ function formatDate(iso: string): string {
   });
 }
 
+// ─── Bee SVG ─────────────────────────────────────────────────────────────────
+
+function BeeSvg({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
+      {/* Wings - translucent, rounded, slightly overlapping body */}
+      <ellipse
+        cx="21"
+        cy="24"
+        rx="11"
+        ry="7"
+        fill="rgba(255,255,255,0.75)"
+        stroke="rgba(173,216,230,0.6)"
+        strokeWidth="0.8"
+        transform="rotate(-15 21 24)"
+      />
+      <ellipse
+        cx="43"
+        cy="24"
+        rx="11"
+        ry="7"
+        fill="rgba(255,255,255,0.75)"
+        stroke="rgba(173,216,230,0.6)"
+        strokeWidth="0.8"
+        transform="rotate(15 43 24)"
+      />
+
+      {/* Chubby body */}
+      <ellipse cx="32" cy="38" rx="14" ry="15" fill="#FFD54F" />
+
+      {/* Body stripes - gentle curves */}
+      <path
+        d="M20 33 Q32 31 44 33"
+        stroke="#5D4037"
+        strokeWidth="3"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <path
+        d="M19 40 Q32 38 45 40"
+        stroke="#5D4037"
+        strokeWidth="3"
+        strokeLinecap="round"
+        fill="none"
+      />
+
+      {/* Round head */}
+      <circle cx="32" cy="22" r="9" fill="#5D4037" />
+
+      {/* Big kawaii eyes - white */}
+      <ellipse cx="28" cy="21" rx="3.2" ry="3.5" fill="white" />
+      <ellipse cx="36" cy="21" rx="3.2" ry="3.5" fill="white" />
+
+      {/* Pupils */}
+      <circle cx="28.8" cy="21.5" r="1.8" fill="#1a1a2e" />
+      <circle cx="36.8" cy="21.5" r="1.8" fill="#1a1a2e" />
+
+      {/* Eye highlights */}
+      <circle cx="27.6" cy="20" r="0.9" fill="white" />
+      <circle cx="35.6" cy="20" r="0.9" fill="white" />
+
+      {/* Blush cheeks */}
+      <ellipse
+        cx="24"
+        cy="25"
+        rx="2.5"
+        ry="1.5"
+        fill="rgba(255,150,150,0.45)"
+      />
+      <ellipse
+        cx="40"
+        cy="25"
+        rx="2.5"
+        ry="1.5"
+        fill="rgba(255,150,150,0.45)"
+      />
+
+      {/* Cute smile */}
+      <path
+        d="M29.5 26 Q32 28.5 34.5 26"
+        stroke="#FFB74D"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        fill="none"
+      />
+
+      {/* Antennae - bouncy curves */}
+      <path
+        d="M28 14 Q25 6 21 4"
+        stroke="#5D4037"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <path
+        d="M36 14 Q39 6 43 4"
+        stroke="#5D4037"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        fill="none"
+      />
+
+      {/* Antenna tips - little hearts/circles */}
+      <circle cx="21" cy="4" r="2" fill="#FF8A80" />
+      <circle cx="43" cy="4" r="2" fill="#FF8A80" />
+
+      {/* Tiny stinger */}
+      <ellipse cx="32" cy="53" rx="2" ry="2.5" fill="#5D4037" />
+    </svg>
+  );
+}
+
+// ─── Bee flight configs ──────────────────────────────────────────────────────
+
+interface BeeConfig {
+  size: number;
+  delay: number;
+  startX: string;
+  startY: string;
+  xPath: number[];
+  yPath: number[];
+  rotatePath: number[];
+  xDuration: number;
+  yDuration: number;
+}
+
+const BEES: BeeConfig[] = [
+  {
+    size: 26,
+    delay: 0,
+    startX: "42%",
+    startY: "18%",
+    xPath: [0, 60, -30, 120, 50, 140, 80],
+    yPath: [0, -50, -100, -60, -140, -110, -160],
+    rotatePath: [0, 15, -10, 20, -15, 8, -5],
+    xDuration: 5,
+    yDuration: 4.2,
+  },
+  {
+    size: 20,
+    delay: 0.15,
+    startX: "35%",
+    startY: "22%",
+    xPath: [0, -50, -100, -40, -130, -80, -150],
+    yPath: [0, -40, -80, -130, -90, -160, -120],
+    rotatePath: [0, -12, 8, -18, 12, -6, 10],
+    xDuration: 4.5,
+    yDuration: 5,
+  },
+  {
+    size: 18,
+    delay: 0.35,
+    startX: "50%",
+    startY: "15%",
+    xPath: [0, 40, 100, 30, 80, 130, 110],
+    yPath: [0, -60, -30, -110, -80, -150, -130],
+    rotatePath: [0, 10, -14, 6, -10, 16, -8],
+    xDuration: 4.8,
+    yDuration: 4.6,
+  },
+];
+
+// ─── Folder Bees (3 bees fly out on hover for empty folders) ─────────────────
+
+function FolderBees({ isHovered }: { isHovered: boolean }) {
+  return (
+    <>
+      {BEES.map((bee, i) => (
+        <motion.div
+          key={i}
+          className="absolute pointer-events-none"
+          style={{ left: bee.startX, top: bee.startY, zIndex: 20 }}
+          initial={{ opacity: 0, x: 0, y: 0 }}
+          animate={
+            isHovered
+              ? {
+                  opacity: [0, 1, 1, 1, 1, 1, 1],
+                  x: bee.xPath,
+                  y: bee.yPath,
+                  rotate: bee.rotatePath,
+                }
+              : { opacity: 0, x: 0, y: 0, rotate: 0 }
+          }
+          transition={
+            isHovered
+              ? {
+                  opacity: { duration: 0.4, delay: bee.delay },
+                  x: {
+                    duration: bee.xDuration,
+                    repeat: Infinity,
+                    repeatType: "mirror",
+                    ease: "easeInOut",
+                    delay: bee.delay,
+                  },
+                  y: {
+                    duration: bee.yDuration,
+                    repeat: Infinity,
+                    repeatType: "mirror",
+                    ease: "easeInOut",
+                    delay: bee.delay,
+                  },
+                  rotate: {
+                    duration: 3.2,
+                    repeat: Infinity,
+                    repeatType: "mirror",
+                    ease: "easeInOut",
+                    delay: bee.delay,
+                  },
+                }
+              : { duration: 0.25 }
+          }
+        >
+          {/* Wing flutter */}
+          <motion.div
+            animate={isHovered ? { scaleY: [1, 0.5, 1] } : { scaleY: 1 }}
+            transition={
+              isHovered
+                ? { duration: 0.1, repeat: Infinity, repeatType: "mirror" }
+                : {}
+            }
+            style={{ originY: 1 }}
+          >
+            <BeeSvg size={bee.size} />
+          </motion.div>
+        </motion.div>
+      ))}
+    </>
+  );
+}
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export function InteractiveFolder({
@@ -168,6 +398,9 @@ export function InteractiveFolder({
               </div>
             </motion.div>
           ))}
+
+        {/* ── BEES (empty folders) ── */}
+        {quizCount === 0 && <FolderBees isHovered={isHovered} />}
 
         {/* ── FRONT PIECE ── */}
         <div
@@ -336,8 +569,46 @@ export function FolderListItem({
 // ─── Create Folder Card ──────────────────────────────────────────────────────
 
 export function CreateFolderCard({ onClick }: { onClick: () => void }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [displayedText, setDisplayedText] = useState("");
+  const [isTypingComplete, setIsTypingComplete] = useState(false);
+  const fullText = "Click to start...";
+
+  useEffect(() => {
+    if (isHovered) {
+      setDisplayedText("");
+      setIsTypingComplete(false);
+      let currentIndex = 0;
+      const interval = setInterval(() => {
+        if (currentIndex <= fullText.length) {
+          setDisplayedText(fullText.slice(0, currentIndex));
+          currentIndex++;
+        } else {
+          clearInterval(interval);
+          setIsTypingComplete(true);
+        }
+      }, 60);
+      return () => clearInterval(interval);
+    } else {
+      setDisplayedText("");
+      setIsTypingComplete(false);
+    }
+  }, [isHovered]);
+
   return (
-    <div className="relative cursor-pointer select-none" onClick={onClick}>
+    <div
+      className="relative cursor-pointer select-none"
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <style>{`
+        @keyframes folder-cursor-blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+      `}</style>
+
       <div className="relative w-full" style={{ aspectRatio: "1 / 0.82" }}>
         {/* ── BACK (folder shape, dashed) ── */}
         <div className="absolute inset-0 z-[1]">
@@ -359,11 +630,11 @@ export function CreateFolderCard({ onClick }: { onClick: () => void }) {
 
         {/* ── Content ── */}
         <div
-          className="absolute z-[10] flex flex-col items-center justify-center gap-3 text-muted-foreground/50"
+          className="absolute z-[10] flex items-center justify-center text-muted-foreground/50"
           style={{ top: "38%", left: 0, right: 0, bottom: 0 }}
         >
           <motion.div
-            whileHover={{ rotate: 90 }}
+            animate={{ rotate: isHovered ? 90 : 0 }}
             transition={springGentle}
             className="flex size-12 items-center justify-center rounded-2xl bg-muted/20"
           >
@@ -380,7 +651,24 @@ export function CreateFolderCard({ onClick }: { onClick: () => void }) {
               <path d="M12 5v14M5 12h14" />
             </svg>
           </motion.div>
-          <span className="text-sm font-medium">Tạo thư mục mới</span>
+
+          <p
+            className="absolute bottom-4 left-0 right-0 text-xs text-muted-foreground/60 text-center"
+            style={{ opacity: isHovered ? 1 : 0, transition: "opacity 0.2s" }}
+          >
+            {displayedText}
+            {isHovered && (
+              <span
+                className="inline-block w-[2px] h-[12px] bg-current ml-0.5"
+                style={{
+                  verticalAlign: "text-bottom",
+                  animation: isTypingComplete
+                    ? "folder-cursor-blink 1s step-end infinite"
+                    : "none",
+                }}
+              />
+            )}
+          </p>
         </div>
       </div>
     </div>
