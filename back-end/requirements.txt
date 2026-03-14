@@ -1,0 +1,28 @@
+# Core
+flask
+flask-cors
+flask-sqlalchemy
+python-dotenv
+
+# OCR
+paddlepaddle==3.3.0
+paddleocr
+opencv-python
+pillow
+numpy
+
+# PDF processing
+pdfplumber
+pdf2image
+PyMuPDF  # text block bounding boxes for heatmap overlay
+
+# LLM
+requests
+google-generativeai  # optional: only if using Gemini provider
+google-genai
+
+# Vector database
+chromadb
+
+# YouTube transcript
+youtube-transcript-api>=0.6

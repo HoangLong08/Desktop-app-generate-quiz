@@ -1,0 +1,310 @@
+# Generated: 2026-03-02T14:50:44.359048
+# num_questions=5, type=multiple-choice, difficulty=medium, lang=vi
+# Total chars: 20439
+================================================================================
+Generate exactly 5 multiple-choice (4 options: a/b/c/d) quiz questions in Vietnamese, difficulty=medium, based solely on the text below.
+Output ONLY a raw JSON array (no markdown, no code fences). Each element: {"type": "multiple-choice", "questionText": "string", "options": [{"id": "string", "text": "string"}], "correctAnswerId": "string", "explanation": "at most 8 words"}}.
+QUALITY RULES (strictly enforced):
+1. Prioritize questions that test TECHNICAL knowledge, code understanding, core concepts, algorithms, APIs, error handling, or comparisons between approaches.
+2. AVOID trivial metadata questions such as 'what is the name of the course', 'how many videos does it have', 'what form is the content provided in' — UNLESS the entire text is solely about that topic.
+3. Each question must be grounded in DETAILED teaching content: specific code examples, common mistakes, method comparisons, syntax rules, or concept definitions.
+4. Cover diverse topics spread across the WHOLE text, not just the introduction.
+5. Do NOT invent information not present in the text.
+6. Each question must have EXACTLY ONE unambiguously correct answer. Distractors must be clearly wrong. NEVER create options that are aliases, shortcuts, or equivalent forms of the same answer (e.g. do NOT put both 'node --version' AND 'node -v' as separate options; do NOT put both 'npm install' AND 'npm i'; do NOT put both 'git status' AND 'git -s').
+Text:
+RAG (Retrieval Augmented Generation) và MCP (Model Context Protocol)
+I. Giới thiệu về RAG
+    A. Mục tiêu khóa học: Xây dựng hệ thống AI tích hợp, không chỉ công cụ độc lập.
+    B. Các chủ đề chính:
+        1. Retrieval Augmented Generation (RAG): Kết nối mô hình với dữ liệu riêng để có câu trả lời chính xác, nhận biết ngữ cảnh.
+        2. Model Context Protocol (MCP): Điều phối giao tiếp và hành động giữa nhiều thành phần phần mềm.
+    C. Lợi ích: Tạo ứng dụng phức tạp, đa thành phần bằng RAG và MCP.
+    D. Đối tượng: Mọi người quan tâm đến RAG, không yêu cầu kiến thức nền về AI, mô hình AI, lập trình.
+    E. Phương pháp giảng dạy: Giải thích đơn giản, trực quan, có hands-on labs.
+II. RAG: Giải thích đơn giản nhất
+    A. Vấn đề: LLM (như ChatGPT) không có quyền truy cập vào tài liệu nội bộ, dẫn đến câu trả lời sai hoặc chung chung (hallucination).
+    B. Giải pháp thủ công:
+        1. Người dùng tự tìm kiếm tài liệu nội bộ.
+        2. Trích xuất thông tin liên quan.
+        3. Thêm thông tin đó vào prompt gửi cho LLM.
+    C. Giải thích RAG:
+        1. Retrieval (Truy xuất): Tìm kiếm và lấy thông tin liên quan từ nguồn dữ liệu.
+        2. Augmentation (Bổ sung): Cải thiện hoặc bổ sung prompt với thông tin đã truy xuất.
+        3. Generation (Tạo sinh): LLM tạo phản hồi dựa trên prompt đã được bổ sung.
+    D. Ứng dụng thực tế: Người dùng đã thực hiện RAG một cách vô thức nhiều lần.
+III. RAG trong hệ thống thực tế
+    A. Mục tiêu: Người dùng chỉ cần đặt câu hỏi, hệ thống RAG tự động thực hiện truy xuất, bổ sung prompt và tạo sinh phản hồi.
+    B. Các câu hỏi cần giải quyết:
+        1. Làm thế nào để truy xuất thông tin liên quan?
+        2. Làm thế nào để bổ sung prompt?
+        3. Làm thế nào để tạo sinh phản hồi?
+IV. Khi nào sử dụng RAG?
+    A. RAG không phải là giải pháp cho mọi vấn đề.
+    B. Các phương pháp khác để cải thiện phản hồi AI:
+        1. Prompt Engineering: Tối ưu hóa prompt.
+        2. Fine-tuning: Tinh chỉnh mô hình.
+        3. RAG: Truy xuất thông tin động.
+    C. Use case: Policy Copilot
+        1. Vấn đề: Nhân viên copy-paste chính sách công ty vào ChatGPT để tìm câu trả lời.
+        2. Giải pháp: Xây dựng chatbot nội bộ (Policy Copilot).
+        3. Chức năng: Trả lời câu hỏi về chính sách công ty bằng cách truy xuất thông tin từ tài liệu nội bộ.
+    D. Các yêu cầu bổ sung cho Policy Copilot:
+        1. Hạn chế và bảo mật:
+            - Không trả lời mọi câu hỏi (ví dụ: phúc lợi, lương).
+            - Chuyển hướng người dùng đến HR cho các chủ đề nhạy cảm.
+            - Prompt engineering là giải pháp tốt cho việc này.
+        2. Giọng điệu và phong cách:
+            - Âm sắc, từ ngữ, giọng điệu giống CEO (ví dụ: giọng Scotland ấm áp).
+            - Fine-tuning là giải pháp tốt cho việc này (đào tạo mô hình với các mẫu câu hỏi và trả lời).
+    E. Tại sao Fine-tuning không giải quyết được vấn đề thông tin động?
+        1. Chính sách thay đổi liên tục, cần đào tạo lại mô hình thường xuyên.
+        2. Đào tạo lại tốn kém, chậm, tốn tài nguyên tính toán.
+        3. Người dùng không xác minh được nguồn gốc câu trả lời (không có trích dẫn).
+        4. Độ chính xác giảm khi dữ liệu đào tạo lớn.
+        5. Knowledge cutoff: Mô hình chỉ biết dữ liệu trong tập đào tạo.
+        6. Fine-tuning phù hợp cho các mẫu không đổi (ví dụ: phong cách giao tiếp), nhưng không phù hợp cho thông tin thực tế động.
+    F. RAG là giải pháp tốt nhất cho thông tin động:
+        1. Truy xuất thông tin động tại thời điểm truy vấn.
+        2. Lấy thông tin liên quan nhất cho truy vấn của người dùng theo thời gian thực.
+V. Chi tiết về RAG: Truy xuất (Retrieval)
+    A. Mục tiêu: Tìm kiếm thông tin liên quan từ hàng trăm tài liệu chính sách.
+    B. Phương pháp truyền thống:
+        1. Keyword Search (Tìm kiếm từ khóa):
+            - Xác định từ khóa từ câu hỏi người dùng (ví dụ: "reimbursement", "home office").
+            - Tìm kiếm các tệp chứa các từ khóa này.
+            - Xếp hạng tài liệu dựa trên tần suất xuất hiện của từ khóa.
+        2. Hạn chế: Chỉ trả về nội dung khớp chính xác với từ khóa, độ chính xác thấp.
+        3. Các kỹ thuật phổ biến: TF (Term Frequency), BM25 (Best Match 25).
+    C. TF (Term Frequency):
+        1. Khái niệm: Đo lường tầm quan trọng của từ trong một tài liệu.
+        2. Ví dụ code (scikit-learn):
+            - Import `TfidfVectorizer`.
+            - Định nghĩa các tài liệu mẫu.
+            - Tạo và sử dụng `TfidfVectorizer`.
+            - Tính toán `word_scores` (ma trận thể hiện tầm quan trọng của từ trong từng tài liệu).
+            - Thực hiện truy vấn (query) và nhận điểm tương đồng.
+        3. Kết quả: Xác định tài liệu liên quan dựa trên điểm số.
+    D. BM25:
+        1. Khái niệm: Thuật toán xếp hạng tài liệu phổ biến, cải tiến hơn TF.
+        2. Ví dụ code (rank_bm25):
+            - Import `BM25Okapi` từ `rank_bm25`.
+            - Tạo BM25 index.
+            - Lấy `word_scores`.
+            - Thực hiện truy vấn và nhận điểm số.
+        3. Lưu ý: BM25 có thể nghiêm ngặt hơn trong việc gán điểm, loại bỏ các từ quá phổ biến.
+    E. Hands-on Lab 1:
+        1. Khám phá bộ sưu tập tài liệu.
+        2. Thực hiện tìm kiếm GREP cơ bản.
+        3. Thiết lập môi trường Python ảo và cài đặt dependencies.
+        4. Khám phá script TF (TF vectorizer, cosine similarity).
+        5. Phân tích điểm số TF và xác định kết quả hàng đầu.
+        6. Xem xét và thực thi script BM25.
+        7. Khám phá phương pháp kết hợp (hybrid approach).
+VI. Chi tiết về RAG: Tìm kiếm ngữ nghĩa (Semantic Search)
+    A. Hạn chế của Keyword Search:
+        1. Không tìm thấy kết quả nếu từ khóa không khớp chính xác (ví dụ: "allowance" thay vì "reimbursement", "work from home" thay vì "home office").
+        2. Không hiểu được ý nghĩa hoặc ngữ cảnh của từ.
+    B. Semantic Search (Tìm kiếm ngữ nghĩa):
+        1. Khái niệm: Tìm kiếm dựa trên ý nghĩa của từ, không chỉ từ khớp.
+        2. Lợi ích: Tăng khả năng tìm thấy tài liệu phù hợp ngay cả khi không có từ khóa chính xác.
+        3. Cơ chế: Sử dụng Embeddings.
+            - Chuyển đổi câu truy vấn và tài liệu thành các vector toán học (tọa độ trong không gian nhiều chiều).
+            - Các tài liệu có ý nghĩa tương tự sẽ nằm gần nhau trong không gian này.
+            - Đo lường sự tương đồng bằng khoảng cách giữa các vector.
+    C. Embedding Models (Mô hình nhúng):
+        1. Vai trò: Chuyển đổi văn bản thành vector số biểu thị ý nghĩa.
+        2. Ví dụ: Sentence Transformers (ví dụ: `all-MiniLM-L6-v2`).
+            - Mô hình NLP, ánh xạ câu và đoạn văn thành không gian vector dày đặc 384 chiều.
+            - Phù hợp cho clustering và semantic search.
+            - Số lượng tham số (22 triệu) nhỏ hơn nhiều so với GPT-3.5 (175 tỷ) hoặc GPT-4 (1.8 nghìn tỷ).
+            - Kích thước nhỏ (90MB), có thể chạy cục bộ.
+        3. So sánh với GPT models:
+            - Embedding models: Nhỏ, chạy cục bộ, dùng cho tạo embeddings.
+            - GPT models: Lớn, chạy trên server, dùng cho tạo sinh văn bản và suy luận.
+    D. Embeddings là gì?
+        1. Đầu vào: Văn bản.
+        2. Đầu ra: Mảng số (vector) biểu thị ý nghĩa.
+        3. Cách hoạt động: Mô hình hiểu ý nghĩa ngữ cảnh, không chỉ từ đơn lẻ.
+        4. Biểu diễn trên đồ thị: Các vector được đặt trong không gian nhiều chiều, các ý nghĩa tương tự gần nhau.
+    E. Đo lường sự tương đồng:
+        1. Dot Product: Phương pháp toán học để đo khoảng cách giữa các vector trong không gian nhiều chiều.
+        2. Quy trình (đơn giản hóa): Nhân các giá trị tương ứng trong vector, cộng lại, chuẩn hóa.
+        3. Kết quả: Điểm số từ 0 đến 1, gần 1 là tương đồng cao.
+    F. Ví dụ code (Sentence Transformers & NumPy):
+        1. Import `SentenceTransformer` và `numpy`.
+        2. Load mô hình `all-MiniLM-L6-v2`.
+        3. Mã hóa các câu thành embeddings.
+        4. Tính toán độ tương đồng bằng `np.dot`.
+        5. Kết quả: Tỷ lệ phần trăm tương đồng giữa các cặp câu.
+    G. Các loại Embedding Models:
+        1. Local models: Chạy trên máy cục bộ (ví dụ: Sentence Transformers). Miễn phí, không cần internet.
+        2. API models: Chạy trên server bên ngoài (ví dụ: OpenAI Embeddings). Trả phí, cần internet.
+    H. Hands-on Lab 2:
+        1. Hạn chế của tìm kiếm từ khóa.
+        2. Cài đặt dependencies cho embedding models.
+        3. Chạy script tìm kiếm ngữ nghĩa cục bộ.
+        4. Phân tích điểm số tương đồng.
+        5. So sánh tìm kiếm ngữ nghĩa và tìm kiếm từ khóa.
+VII. Chi tiết về RAG: Vector Databases (Cơ sở dữ liệu vector)
+    A. Vấn đề: So sánh embedding của truy vấn với hàng nghìn embedding tài liệu một cách thủ công là không hiệu quả.
+    B. Vector Databases:
+        1. Khái niệm: Cơ sở dữ liệu được tối ưu hóa để lưu trữ và truy vấn các vector nhúng.
+        2. Lợi ích: Truy xuất kết quả liên quan ngay lập tức, sử dụng tài nguyên hiệu quả, có khả năng mở rộng.
+        3. Cơ chế: Sử dụng thuật toán indexing thông minh để tổ chức các vector.
+    C. Indexing:
+        1. Khái niệm: Sắp xếp trước các vector thành các "khu vực" (neighborhoods) dựa trên sự tương đồng.
+        2. Lợi ích: Khi truy vấn, chỉ cần tìm kiếm trong khu vực liên quan, không cần quét toàn bộ không gian.
+    D. Các thuật toán indexing phổ biến:
+        1. HNSW (Hierarchical Navigable Small World): Phổ biến nhất, tạo cấu trúc đồ thị, tìm kiếm nhanh và chính xác.
+        2. IVF (Inverted File Index).
+        3. LSH (Locally Sensitive Hashing).
+    E. Các triển khai Vector DB phổ biến:
+        1. Chroma: Miễn phí, mã nguồn mở, thân thiện với Python, phù hợp cho học tập và thử nghiệm.
+        2. Pinecone: Dịch vụ quản lý, xử lý hạ tầng, trả phí theo sử dụng, phù hợp cho sản xuất.
+        3. VV8 (với GraphQL API).
+    F. Ví dụ code (ChromaDB):
+        1. Cài đặt ChromaDB.
+        2. Kết nối client.
+        3. Tạo collection (ví dụ: "policies").
+        4. Thêm tài liệu (văn bản) vào collection: Chroma tự động tạo embedding và lưu trữ.
+        5. Truy vấn collection: Chroma tìm kiếm các vector tương đồng.
+    G. Các khái niệm quan trọng của ChromaDB:
+        1. Persistence: ChromaDB mặc định lưu trữ trong bộ nhớ (không bền vững). Sử dụng `chromadb.PersistentClient` để lưu trữ dữ liệu lâu dài.
+        2. Embedding Function: Có thể tùy chỉnh mô hình embedding (mặc định là `all-MiniLM-L6-v2`, có thể dùng OpenAI Embeddings hoặc custom).
+    H. Hands-on Lab 3:
+        1. Hiểu khái niệm Vector Database.
+        2. Cài đặt ChromaDB.
+        3. Khởi tạo Chroma Vector Database.
+        4. Lưu trữ tài liệu vào database.
+        5. Thực hiện tìm kiếm vector.
+VIII. Chi tiết về RAG: Chunking (Phân đoạn văn bản)
+    A. Vấn đề: Xử lý các tài liệu lớn (ví dụ: 50 trang handbook) làm một mục duy nhất trong Vector DB dẫn đến kết quả không chính xác và quá tải thông tin cho người dùng.
+    B. Chunking:
+        1. Khái niệm: Chia nhỏ tài liệu lớn thành các đoạn nhỏ hơn, có ý nghĩa.
+        2. Lợi ích:
+            - Tăng độ chính xác: Trả về các phần cụ thể, liên quan.
+            - Giảm quá tải thông tin: Người dùng nhận được thông tin họ cần.
+    C. Các chiến lược Chunking:
+        1. Fixed Size Chunks (Phân đoạn kích thước cố định):
+            - Chia tài liệu thành các đoạn có độ dài cố định (ví dụ: 500 ký tự).
+            - Đơn giản, dễ thực hiện.
+            - Hạn chế: Có thể cắt ngang câu, làm mất ngữ cảnh.
+        2. Overlap (Chồng lấn):
+            - Thêm một phần chồng lấn giữa các đoạn (ví dụ: 50 ký tự).
+            - Giúp bảo toàn ngữ cảnh khi câu bị cắt.
+        3. Sentence-based Chunking (Phân đoạn theo câu): Mỗi câu là một đoạn riêng.
+        4. Paragraph-based Chunking (Phân đoạn theo đoạn văn): Mỗi đoạn văn là một đoạn riêng.
+    D. Thách thức của Chunking:
+        1. Tìm sự cân bằng:
+            - Đoạn quá nhỏ: Mất ngữ cảnh, thông tin phân mảnh.
+            - Đoạn quá lớn: Giảm độ chính xác, kết quả tìm kiếm kém hiệu quả.
+    E. Nguyên tắc Chunking hiệu quả:
+        1. Kích thước: 200-500 ký tự là cân bằng tốt.
+        2. Chồng lấn: 50-100 ký tự để duy trì tính liên tục.
+        3. Ranh giới: Ưu tiên chia theo câu, tránh cắt giữa từ.
+        4. Kiểm tra: Luôn kiểm tra với các truy vấn thực tế.
+    F. Tích hợp Chunking với Vector Database:
+        1. Quy trình: Chunking tài liệu -> Thêm từng chunk vào Vector DB -> Truy vấn sẽ tìm kiếm các chunk liên quan.
+    G. Hands-on Lab 4:
+        1. Demo vấn đề Chunking (trả về toàn bộ tài liệu).
+        2. Cài đặt thư viện (LangChain, spaCy).
+        3. Chunking cơ bản (RecursiveCharacterTextSplitter của LangChain).
+        4. Chunking theo câu (spaCy text splitter).
+        5. Tìm kiếm với tài liệu đã được chunking và so sánh.
+IX. Xây dựng hệ thống RAG hoàn chỉnh
+    A. RAG Pipeline:
+        1. Giai đoạn chuẩn bị (trước khi người dùng truy vấn):
+            - Load tài liệu.
+            - Chunking tài liệu.
+            - Tạo embeddings.
+            - Lưu trữ vào Vector DB.
+        2. Giai đoạn xử lý truy vấn:
+            - Truy vấn Vector DB để lấy các chunk liên quan.
+            - Bổ sung prompt với các chunk đã truy xuất.
+            - Gửi prompt đã bổ sung đến LLM để tạo sinh phản hồi.
+    B. Hands-on Lab 5: Xây dựng pipeline RAG hoàn chỉnh.
+        1. Kết hợp Document Loading, Chunking, Vector Search, Query Processing, Context Augmentation, Response Generation.
+X. Các vấn đề sản xuất trong RAG
+    A. Caching (Bộ nhớ đệm):
+        1. Vấn đề: Hệ thống RAG chậm do nhiều thao tác tốn kém (embeddings, vector search, LLM calls).
+        2. Giải pháp: Lưu trữ kết quả của các thao tác tốn kém để tái sử dụng.
+        3. Lợi ích: Tăng tốc độ phản hồi đáng kể.
+        4. Các loại Caching:
+            - Query Cache: Lưu cặp câu hỏi-trả lời.
+            - Embedding Cache: Lưu trữ vector embeddings đã tính toán.
+            - Vector Search Cache: Lưu trữ kết quả truy vấn Vector DB.
+            - LLM Response Cache: Lưu trữ phản hồi đã tạo bởi LLM.
+        5. Triển khai: Sử dụng Redis, thiết lập cache key, thời gian hết hạn (TTL).
+    B. Monitoring (Giám sát):
+        1. Tầm quan trọng: Hiểu hiệu suất hệ thống, phát hiện sự cố.
+        2. Các chỉ số chính:
+            - Response Time (Thời gian phản hồi).
+            - Throughput (Thông lượng).
+            - Error Rate (Tỷ lệ lỗi).
+            - Retrieval Quality (Chất lượng truy xuất).
+            - Embedding Performance (Hiệu suất tạo embedding).
+            - Chunking Efficiency (Hiệu quả chunking).
+        3. Alerting: Thiết lập ngưỡng cảnh báo để phát hiện vấn đề kịp thời.
+    C. Error Handling (Xử lý lỗi):
+        1. Mục tiêu: Giảm thiểu tác động khi hệ thống gặp sự cố (graceful degradation).
+        2. Chiến lược Fallback:
+            - Nếu RAG pipeline lỗi -> Thử Keyword Search.
+            - Nếu Keyword Search lỗi -> Trả về các chunk đã truy xuất.
+            - Nếu vẫn lỗi -> Sử dụng Text Matching đơn giản.
+            - Cuối cùng: Trả về thông báo lỗi hữu ích.
+        3. Half-open State: Kiểm tra định kỳ để khôi phục hoạt động bình thường.
+    D. Kiến trúc hệ thống RAG trong sản xuất:
+        1. Layered Architecture: Data Layer, RAG Pipeline Layer (microservices), Application Layer, Monitoring Stack.
+        2. Công nghệ: Kubernetes, ChromaDB, Redis, PostgreSQL, Prometheus, Grafana, Jaeger, ELK stack.
+        3. Lợi ích: Khả năng mở rộng, tính sẵn sàng cao, hiệu suất.
+XI. Model Context Protocol (MCP)
+    A. Vấn đề: LLM chỉ có thể tạo sinh văn bản/nội dung, không thể thực hiện hành động hoặc tương tác với các hệ thống bên ngoài.
+    B. AI Agents:
+        1. Khái niệm: Hệ thống có khả năng tương tác với các nền tảng bên thứ ba, thu thập thông tin, sử dụng bộ nhớ và tương tác với LLM để đưa ra quyết định và thực hiện hành động.
+        2. So sánh với Automation Scripts cũ: AI Agents "có thể suy nghĩ" nhờ LLM.
+        3. Quy trình làm việc điển hình: Yêu cầu người dùng -> Tương tác với LLM để trích xuất chi tiết -> Tương tác với LLM để xác định công cụ cần dùng -> Tương tác với công cụ (API bên thứ ba) -> Tương tác với LLM để ra quyết định -> Thực hiện hành động.
+    C. Tools (Công cụ):
+        1. Khái niệm: Cho phép AI Agent tương tác với các nền tảng khác.
+        2. Vấn đề: Mỗi API bên thứ ba có định dạng và cách thức tương tác khác nhau, đòi hỏi viết code riêng cho từng API.
+    D. MCP (Model Context Protocol):
+        1. Khái niệm: Một bộ tiêu chuẩn định nghĩa cách các ứng dụng AI có thể làm việc với nhau, cung cấp ngữ cảnh cho AI Agent để tương tác với các nền tảng bên thứ ba.
+        2. Mục tiêu: Giúp AI Agent khám phá và sử dụng các API một cách chuẩn hóa.
+        3. Kiến trúc Client-Server:
+            - MCP Client: Thường được nhúng trong IDEs (Cursor, VS Code extensions) hoặc các ứng dụng AI.
+            - MCP Server: Cung cấp các khả năng (resources, prompts, tools) cho Client.
+        4. Ai xây dựng MCP Server? Chủ sở hữu ứng dụng/dịch vụ hoặc cộng đồng.
+    E. Các thành phần của MCP:
+        1. Specification: Bộ quy tắc định nghĩa giao tiếp (JSON RPC, stateful connection).
+        2. Resources: Dữ liệu mà Server cung cấp (ví dụ: danh sách sân bay, chính sách hoàn tiền). Có URI, tên, mô tả.
+        3. Tools: Các hành động mà Server có thể thực hiện (ví dụ: tìm chuyến bay, đặt vé). Có mô tả, schema đầu vào/đầu ra.
+        4. Prompts: Các mẫu prompt được định nghĩa sẵn để hướng dẫn LLM. Có tên, mô tả, tham số.
+    F. Giao tiếp Client-Server:
+        1. JSON RPC: Giao thức gọi thủ tục từ xa, định nghĩa cách Client gọi phương thức trên Server và nhận phản hồi.
+        2. Transport Mechanisms: HTTP, Standard IO (cho kết nối cục bộ).
+    G. Hands-on Lab 6: Sử dụng MCP Server có sẵn (Root Code AI assistant).
+        1. Cấu hình API keys.
+        2. Kết nối với MCP Server (flight booking server).
+        3. Kiểm tra các Tools và Resources.
+        4. Sử dụng Root Code để tương tác với MCP Server.
+    H. Xây dựng MCP Server:
+        1. Sử dụng SDKs (ví dụ: Python SDK).
+        2. Định nghĩa Resources, Tools, Prompts dưới dạng hàm Python với decorator `@mcp.resource`, `@mcp.tool`, `@mcp.prompt`.
+        3. Chạy Server với các tùy chọn transport (Standard IO, HTTP).
+    I. Hands-on Lab 7: Xây dựng MCP Server.
+        1. Thiết lập dự án Python.
+        2. Thêm decorator cho Resources, Tools, Prompts.
+        3. Cấu hình MCP Server cho Root Code Agent.
+    J. Xây dựng MCP Client:
+        1. Các tính năng Client:
+            - Roots: Thư mục mà Server được phép truy cập trên máy Client.
+            - Sampling: Client kiểm soát việc LLM được Server gọi (chọn mô hình, giới hạn token).
+            - Elicitation: Client lấy thông tin từ người dùng cuối để Server sử dụng.
+            - Context: Server gửi cập nhật tiến trình/thông tin về Client.
+        2. Sử dụng thư viện `fast_mcp_client`.
+    K. Hands-on Lab 8: Xây dựng MCP Client.
+        1. Khám phá các khái niệm Client (Roots, Sampling, Elicitation, Context).
+        2. Thực hành xây dựng Client.
+XII. Tổng kết
+    A. RAG: Truy xuất thông tin động để cải thiện chất lượng phản hồi của LLM.
+    B. MCP: Chuẩn hóa cách AI Agent tương tác với các hệ thống bên ngoài.
+    C. Kết hợp RAG và MCP: Xây dựng các hệ thống AI phức tạp, thông minh và có khả năng hành động.

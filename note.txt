@@ -1,0 +1,18 @@
+tôi đang có ý tưởng làm web upload file image hoặc pdf để genarate ra quizz theo từng mức độ từ dễ đến khó, 
+có thể có tiếng anh hoặc tiếng việt, có nhiều option câu hỏi ( nhiều lựa chọn, điền chỗ trống, true false, .... ). 
+Ở dưới là pipeline của tôi. Tôi đang muốn sử dụng . Chia ra từng cell. tôi đang sử dụng kaggle
+
+https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5. 
+Tôi muốn code chia ra từng cell để chạy kaggle test OCR
+
+Upload (PDF/Image)
+   ↓
+OCR / PDF Parser
+   ↓
+Text Cleaning & Chunking
+   ↓
+LLM Question Generator
+   ↓
+Post-process & Validate
+   ↓
+Save / Export

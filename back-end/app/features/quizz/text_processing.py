@@ -1,0 +1,329 @@
+"""
+Text Processing - Clean and chunk extracted text for LLM consumption
+"""
+
+import re
+import logging
+from collections import Counter
+
+logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Boilerplate / non-knowledge content filtering
+# ---------------------------------------------------------------------------
+
+# Section headings that mark non-knowledge content (case-insensitive).
+# When one of these is detected as a section heading, everything from that
+# heading until the next heading of equal or higher importance is removed.
+_BOILERPLATE_SECTION_PATTERNS: list[re.Pattern] = [
+    re.compile(p, re.IGNORECASE) for p in [
+        # English
+        r"^(?:table\s+of\s+contents|contents)$",
+        r"^(?:list\s+of\s+(?:figures|tables|abbreviations|symbols))$",
+        r"^(?:acknowledgements?|acknowledgments?)$",
+        r"^(?:references?|bibliography|works?\s+cited)$",
+        r"^(?:index)$",
+        r"^(?:appendi(?:x|ces)\s*[A-Z]?)$",
+        r"^(?:foreword|preface)$",
+        r"^(?:about\s+the\s+authors?|author\s+biograph(?:y|ies))$",
+        r"^(?:glossary)$",
+        r"^(?:copyright|colophon|disclaimer)$",
+        # Vietnamese
+        r"^(?:mục\s+lục|bảng\s+mục\s+lục)$",
+        r"^(?:danh\s+mục\s+(?:bảng|hình|từ\s+viết\s+tắt|ký\s+hiệu|tài\s+liệu))$",
+        r"^(?:lời\s+(?:nói\s+đầu|cảm\s+ơn|cam\s+đoan|mở\s+đầu))$",
+        r"^(?:tài\s+liệu\s+tham\s+khảo)$",
+        r"^(?:phụ\s+lục\s*[A-Z0-9]?)$",
+        r"^(?:chú\s+thích|chú\s+giải)$",
+    ]
+]
+
+# Lines that look like TOC entries: "Chapter 1 ......... 12" or "1.2 Something ... 45"
+_TOC_LINE_RE = re.compile(
+    r"^.{3,80}\s*[.·…]{3,}\s*\d{1,4}\s*$"  # text followed by dots and page number
+)
+
+# Standalone page numbers
+_PAGE_NUMBER_RE = re.compile(
+    r"^\s*(?:"
+    r"\d{1,4}"                           # plain "42"
+    r"|page\s+\d{1,4}(?:\s+of\s+\d+)?"  # "Page 42" or "Page 42 of 100"
+    r"|trang\s+\d{1,4}"                  # "Trang 42"
+    r"|[-–—]\s*\d{1,4}\s*[-–—]"          # "– 42 –"
+    r")\s*$",
+    re.IGNORECASE,
+)
+
+# Lines that look like index entries: "term, 105" or "term  105, 190"
+_INDEX_ENTRY_RE = re.compile(
+    r"^[A-Za-zÀ-ỹ*].{1,60},?\s+\d{1,4}(?:[,\s]+\d{1,4})*\s*$"
+)
+
+# Very short lines that are likely headers/footers when they repeat
+_SHORT_LINE_MAX = 80
+
+
+def _is_heading_line(line: str) -> bool:
+    """Heuristic: line looks like a section heading (short, no trailing period)."""
+    stripped = line.strip()
+    if not stripped or len(stripped) > 120:
+        return False
+    # Skip lines that look like index entries
+    if _INDEX_ENTRY_RE.match(stripped):
+        return False
+    # All-caps line or numbered heading like "Chapter 1", "1.2 Something"
+    if stripped.isupper() and len(stripped) > 3:
+        return True
+    if re.match(r"^(?:chapter|chương|phần|bài|section)\s+\d", stripped, re.IGNORECASE):
+        return True
+    if re.match(r"^\d{1,2}(?:\.\d{1,2}){0,3}\s+\S", stripped):
+        return True
+    # Title-case short line without trailing punctuation — require multiple words
+    # and at least one capitalized word to avoid matching arbitrary short lines
+    if len(stripped) < 80 and not stripped.endswith(('.', ',', ';', '!', '?')):
+        words = stripped.split()
+        if 2 <= len(words) <= 10:
+            has_cap = any(w[0].isupper() for w in words if w and w[0].isalpha())
+            if has_cap:
+                return True
+    return False
+
+
+def _is_boilerplate_heading(line: str) -> bool:
+    """Check if a heading line matches a known boilerplate section title."""
+    stripped = line.strip()
+    # Remove leading numbering: "1.2" or "Chapter 3:" etc.
+    cleaned = re.sub(r"^[\d.]+\s*", "", stripped)
+    cleaned = re.sub(r"^(?:chapter|chương|phần|bài|section)\s+\d+[.:)]*\s*", "", cleaned, flags=re.IGNORECASE)
+    cleaned = cleaned.strip(" .:;-–—")
+    if not cleaned:
+        return False
+    for pat in _BOILERPLATE_SECTION_PATTERNS:
+        if pat.match(cleaned):
+            return True
+    return False
+
+
+def filter_boilerplate(text: str) -> str:
+    """
+    Remove non-knowledge content from extracted document text:
+      1. Page numbers (standalone lines)
+      2. TOC-style lines (text followed by dots and page number)
+      3. Repeated short lines (headers/footers that appear on every page)
+      4. Entire boilerplate sections (TOC, References, Index, etc.)
+
+    Returns the filtered text.
+    """
+    if not text:
+        return text
+
+    lines = text.split("\n")
+
+    # --- Pass 1: Remove standalone page numbers & TOC dot-lines ---
+    filtered_lines: list[str] = []
+    for line in lines:
+        if _PAGE_NUMBER_RE.match(line):
+            continue
+        if _TOC_LINE_RE.match(line):
+            continue
+        filtered_lines.append(line)
+
+    # --- Pass 2: Detect & remove repeated headers/footers ---
+    # Short lines that appear 3+ times are likely page headers/footers
+    short_lines = [l.strip() for l in filtered_lines if 0 < len(l.strip()) <= _SHORT_LINE_MAX]
+    counts = Counter(short_lines)
+    repeated = {line for line, cnt in counts.items() if cnt >= 3}
+    if repeated:
+        filtered_lines = [
+            l for l in filtered_lines
+            if l.strip() not in repeated or len(l.strip()) == 0
+        ]
+
+    # --- Pass 3: Remove boilerplate sections ---
+    # Walk through lines; when a boilerplate heading is found, skip until the
+    # next non-boilerplate heading.
+    result_lines: list[str] = []
+    skipping = False
+    for line in filtered_lines:
+        stripped = line.strip()
+
+        if _is_heading_line(stripped):
+            if _is_boilerplate_heading(stripped):
+                skipping = True
+                logger.debug("Filtering boilerplate section: %s", stripped)
+                continue
+            else:
+                skipping = False
+
+        if not skipping:
+            result_lines.append(line)
+
+    removed_chars = len(text) - len("\n".join(result_lines))
+    if removed_chars > 0:
+        logger.info(
+            "Boilerplate filter removed ~%d chars (%.1f%% of %d)",
+            removed_chars, removed_chars / len(text) * 100, len(text),
+        )
+
+    return "\n".join(result_lines)
+
+
+def clean_text(text: str) -> str:
+    """
+    Clean OCR/PDF extracted text:
+    - Remove excessive whitespace
+    - Fix common OCR artifacts
+    - Normalize line breaks
+    """
+    if not text:
+        return ""
+
+    # Normalize whitespace
+    text = re.sub(r'\r\n', '\n', text)
+    text = re.sub(r'\t', ' ', text)
+
+    # Remove excessive blank lines (more than 2 consecutive)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+
+    # Remove excessive spaces
+    text = re.sub(r' {3,}', ' ', text)
+
+    # Remove isolated single characters that are likely OCR noise
+    # (but keep things like "a", "I", etc. in context)
+    text = re.sub(r'(?<=\s)[^\w\s](?=\s)', '', text)
+
+    return text.strip()
+
+
+def chunk_text(text: str, max_chunk_size: int = 4000, overlap: int = 200) -> list[str]:
+    """
+    Split text into chunks suitable for LLM processing.
+    Tries to split at paragraph boundaries.
+
+    Args:
+        text: The full text to chunk
+        max_chunk_size: Maximum characters per chunk
+        overlap: Number of overlapping characters between chunks
+    
+    Returns:
+        List of text chunks
+    """
+    if len(text) <= max_chunk_size:
+        return [text]
+
+    # Split by paragraphs first
+    paragraphs = text.split('\n\n')
+    chunks = []
+    current_chunk = ""
+
+    for para in paragraphs:
+        # If single paragraph exceeds max size, split by sentences
+        if len(para) > max_chunk_size:
+            if current_chunk:
+                chunks.append(current_chunk.strip())
+                current_chunk = ""
+            sentence_chunks = _split_by_sentences(para, max_chunk_size, overlap)
+            chunks.extend(sentence_chunks)
+            continue
+
+        # If adding this paragraph exceeds limit, start new chunk
+        if len(current_chunk) + len(para) + 2 > max_chunk_size:
+            chunks.append(current_chunk.strip())
+            # Keep some overlap
+            if overlap > 0 and len(current_chunk) > overlap:
+                current_chunk = current_chunk[-overlap:] + "\n\n" + para
+            else:
+                current_chunk = para
+        else:
+            if current_chunk:
+                current_chunk += "\n\n" + para
+            else:
+                current_chunk = para
+
+    if current_chunk.strip():
+        chunks.append(current_chunk.strip())
+
+    logger.info(f"Split text ({len(text)} chars) into {len(chunks)} chunks")
+    return chunks
+
+
+def _split_by_sentences(text: str, max_size: int, overlap: int) -> list[str]:
+    """Split a large paragraph by sentence boundaries"""
+    # Simple sentence splitting for Vietnamese/English
+    sentences = re.split(r'(?<=[.!?。])\s+', text)
+    chunks = []
+    current = ""
+
+    for sentence in sentences:
+        if len(current) + len(sentence) + 1 > max_size:
+            if current:
+                chunks.append(current.strip())
+            current = sentence
+        else:
+            current = (current + " " + sentence).strip() if current else sentence
+
+    if current.strip():
+        chunks.append(current.strip())
+
+    return chunks
+
+
+def chunk_importance(chunk: str) -> float:
+    """
+    Score a chunk by its density of technical content.
+    Higher score = more likely to contain teachable knowledge.
+
+    Heuristics:
+    - English technical words (camelCase, PascalCase, snake_case, abbreviations)
+    - Code-like punctuation (., (), [], {}, =, ->, =>)
+    - Short all-caps tokens (API, SQL, HTTP, etc.)
+    """
+    words = chunk.split()
+    if not words:
+        return 0.0
+
+    technical = 0
+    for word in words:
+        # CamelCase / PascalCase (e.g. useState, MyClass)
+        if re.match(r'[a-z][a-zA-Z0-9]*[A-Z]|[A-Z][a-z]+[A-Z]', word):
+            technical += 2
+        # snake_case (e.g. get_user, my_func)
+        elif re.match(r'[a-z_]+_[a-z_]+', word):
+            technical += 2
+        # ALL_CAPS abbreviation ≥ 2 chars (API, SQL, HTTP)
+        elif re.match(r'^[A-Z]{2,}$', word.strip('.,;:()[]{}')):
+            technical += 2
+        # English-like technical word starting with upper (useState, React, async)
+        elif re.match(r'^[A-Za-z][a-zA-Z0-9]+$', word) and any(c.isupper() for c in word[1:]):
+            technical += 1
+        # Code punctuation patterns
+        elif re.search(r'[()\[\]{}=<>\->/]', word):
+            technical += 1
+
+    return technical / len(words)
+
+
+def select_important_chunks(chunks: list[str], n: int = 5) -> list[str]:
+    """
+    Select the N most technically dense chunks from a list.
+    Also always includes the first chunk (often contains key definitions)
+    and the last chunk (often contains summary/conclusions).
+
+    Returns chunks in their original order.
+    """
+    if len(chunks) <= n:
+        return chunks
+
+    # Score all chunks
+    scored = sorted(enumerate(chunks), key=lambda x: chunk_importance(x[1]), reverse=True)
+
+    # Collect top-N indices, always include first and last
+    selected_indices = {0, len(chunks) - 1}
+    for idx, _ in scored:
+        if len(selected_indices) >= n:
+            break
+        selected_indices.add(idx)
+
+    # Return in original order
+    return [chunks[i] for i in sorted(selected_indices)]

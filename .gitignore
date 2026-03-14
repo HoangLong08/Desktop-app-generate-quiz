@@ -1,0 +1,53 @@
+# ─── Root-level files (PDFs, images, temp) ─────────────────────────────────
+*.pdf
+*.png
+*.jpg
+*.jpeg
+
+# ─── OS ────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── IDE / Editor ──────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── Environment ───────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ─── Node (front-end & welcome) ────────────────────────────────────────────
+node_modules/
+dist/
+dist-react/
+dist-electron/
+dist-ssr/
+.next/
+*.local
+
+# ─── Python (back-end) ─────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+venv/
+env/
+back-end/packages/
+back-end/instance/
+back-end/uploads/
+back-end/app/features/quizz/debug/
+.paddleocr/
+
+# ─── Logs ──────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

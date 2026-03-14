@@ -1,0 +1,106 @@
+"""
+API Keys feature - SQLAlchemy models for managing multiple Gemini API keys.
+"""
+import json
+import uuid
+from datetime import datetime, timezone
+from app.db import db
+
+
+# Gemini free-tier rate limits per model (as of 2026)
+MODEL_LIMITS = {
+    "gemini-2.5-flash": {
+        "displayName": "Gemini 2.5 Flash",
+        "rpd": 500,
+        "rpm": 15,
+        "tpm": 1_000_000,
+        "tier": "free",
+    },
+    "gemini-2.5-flash-lite": {
+        "displayName": "Gemini 2.5 Flash Lite",
+        "rpd": 500,
+        "rpm": 30,
+        "tpm": 1_000_000,
+        "tier": "free",
+    },
+    "gemini-2.0-flash": {
+        "displayName": "Gemini 2.0 Flash",
+        "rpd": 1500,
+        "rpm": 15,
+        "tpm": 4_000_000,
+        "tier": "free",
+    },
+}
+
+
+class GeminiApiKey(db.Model):
+    __tablename__ = "gemini_api_keys"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    label = db.Column(db.String(255), default="")
+    key = db.Column(db.String(512), nullable=False, unique=True)
+
+    status = db.Column(db.String(20), default="active")  # active | cooldown | disabled
+    usage_count = db.Column(db.Integer, default=0)
+    error_count = db.Column(db.Integer, default=0)
+    total_input_tokens = db.Column(db.Integer, default=0)
+    total_output_tokens = db.Column(db.Integer, default=0)
+
+    # Per-model usage: JSON dict {model_name: {requests, input_tokens, output_tokens}}
+    _model_usage = db.Column("model_usage", db.Text, default="{}")
+
+    last_used_at = db.Column(db.DateTime, nullable=True)
+    last_error = db.Column(db.Text, default="")
+    cooldown_until = db.Column(db.DateTime, nullable=True)
+
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    def get_model_usage(self) -> dict:
+        try:
+            return json.loads(self._model_usage or "{}")
+        except (json.JSONDecodeError, TypeError):
+            return {}
+
+    def set_model_usage(self, data: dict) -> None:
+        self._model_usage = json.dumps(data, ensure_ascii=False)
+
+    def add_model_usage(self, model_name: str, input_tokens: int, output_tokens: int) -> None:
+        usage = self.get_model_usage()
+        if model_name not in usage:
+            usage[model_name] = {"requests": 0, "input_tokens": 0, "output_tokens": 0}
+        usage[model_name]["requests"] += 1
+        usage[model_name]["input_tokens"] += input_tokens
+        usage[model_name]["output_tokens"] += output_tokens
+        self.set_model_usage(usage)
+
+    def masked_key(self) -> str:
+        k = self.key or ""
+        if len(k) <= 8:
+            return "***"
+        return k[:4] + "•" * (len(k) - 8) + k[-4:]
+
+    def to_dict(self, include_full_key: bool = False) -> dict:
+        model_usage = self.get_model_usage()
+        return {
+            "id": self.id,
+            "label": self.label or "",
+            "key": self.key if include_full_key else self.masked_key(),
+            "status": self.status,
+            "usageCount": self.usage_count,
+            "errorCount": self.error_count,
+            "totalInputTokens": self.total_input_tokens,
+            "totalOutputTokens": self.total_output_tokens,
+            "totalTokens": self.total_input_tokens + self.total_output_tokens,
+            "modelUsage": {
+                name: {
+                    "requests": stats.get("requests", 0),
+                    "inputTokens": stats.get("input_tokens", 0),
+                    "outputTokens": stats.get("output_tokens", 0),
+                    "totalTokens": stats.get("input_tokens", 0) + stats.get("output_tokens", 0),
+                }
+                for name, stats in model_usage.items()
+            },
+            "lastUsedAt": self.last_used_at.isoformat().replace("+00:00", "Z") if self.last_used_at else None,
+            "lastError": self.last_error or "",
+            "createdAt": self.created_at.isoformat().replace("+00:00", "Z") if self.created_at else None,
+        }

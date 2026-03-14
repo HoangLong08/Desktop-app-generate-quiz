@@ -1,0 +1,9 @@
+{
+  "appId": "com.n-ziermann.front-end",
+  "files": ["dist-electron", "dist-react"],
+  "icon": "./desktopIcon.png",
+  "extraResources": ["dist-electron/preload.cjs", "src/assets/**", "backend"],
+  "mac": { "target": "dmg" },
+  "linux": { "target": "AppImage", "category": "Utility" },
+  "win": { "target": ["portable", "msi"] }
+}

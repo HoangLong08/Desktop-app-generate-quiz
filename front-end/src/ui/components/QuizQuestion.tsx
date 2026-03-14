@@ -1,0 +1,305 @@
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Copy, Check } from "lucide-react";
+import type { QuizQuestion as QuizQuestionType } from "@/features/quizz";
+
+interface QuizQuestionProps {
+  question: QuizQuestionType;
+  selectedAnswer: string | undefined;
+  onAnswerChange: (questionId: string, answerId: string) => void;
+  showResult?: boolean;
+  className?: string;
+}
+
+export function QuizQuestion({
+  question,
+  selectedAnswer,
+  onAnswerChange,
+  showResult = false,
+  className,
+}: QuizQuestionProps) {
+  const [copied, setCopied] = useState(false);
+
+  // For multiple-answer: selectedAnswer is comma-separated sorted ids e.g. "a,c"
+  const selectedIds = new Set(
+    question.type === "multiple-answer"
+      ? (selectedAnswer || "").split(",").filter(Boolean)
+      : [],
+  );
+  const correctIds = new Set(question.correctAnswerIds ?? []);
+
+  const handleMultiToggle = (optId: string) => {
+    if (showResult) return;
+    const next = new Set(selectedIds);
+    if (next.has(optId)) next.delete(optId);
+    else next.add(optId);
+    onAnswerChange(question.id, [...next].sort().join(","));
+  };
+
+  const handleCopy = () => {
+    const lines: string[] = [];
+
+    // Question text
+    lines.push(`Câu ${question.questionNumber}: ${question.questionText}`);
+    lines.push("");
+
+    // Options
+    if (question.type === "fill-blank") {
+      const correctOpt = question.options.find(
+        (o) => o.id === question.correctAnswerId,
+      );
+      lines.push(`Đáp án: ${correctOpt?.text ?? question.correctAnswerId}`);
+    } else if (question.type === "multiple-answer") {
+      question.options.forEach((opt, i) => {
+        const letter = String.fromCharCode(65 + i);
+        const marker = correctIds.has(opt.id) ? " ✓" : "";
+        lines.push(`${letter}. ${opt.text}${marker}`);
+      });
+      lines.push("");
+      const correctLetters = question.options
+        .filter((o) => correctIds.has(o.id))
+        .map((o, _i) => {
+          const idx = question.options.findIndex((x) => x.id === o.id);
+          return String.fromCharCode(65 + idx);
+        })
+        .join(", ");
+      lines.push(`Đáp án đúng: ${correctLetters}`);
+    } else {
+      question.options.forEach((opt, i) => {
+        const letter = String.fromCharCode(65 + i);
+        const marker = opt.id === question.correctAnswerId ? " ✓" : "";
+        lines.push(`${letter}. ${opt.text}${marker}`);
+      });
+      lines.push("");
+      const correctOpt = question.options.find(
+        (o) => o.id === question.correctAnswerId,
+      );
+      const correctLetter = String.fromCharCode(
+        65 +
+          question.options.findIndex((o) => o.id === question.correctAnswerId),
+      );
+      lines.push(`Đáp án đúng: ${correctLetter}. ${correctOpt?.text ?? ""}`);
+    }
+
+    if (question.explanation) {
+      lines.push(`Giải thích: ${question.explanation}`);
+    }
+
+    navigator.clipboard.writeText(lines.join("\n")).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const getOptionStyle = (optionId: string) => {
+    if (question.type === "multiple-answer") {
+      if (!showResult) {
+        return selectedIds.has(optionId)
+          ? "border-primary bg-primary/5"
+          : "border-border hover:border-muted-foreground/50 hover:bg-muted/30";
+      }
+      if (correctIds.has(optionId) && selectedIds.has(optionId)) {
+        return "border-green-500 bg-green-500/10";
+      }
+      if (correctIds.has(optionId)) {
+        return "border-green-500 bg-green-500/5";
+      }
+      if (selectedIds.has(optionId) && !correctIds.has(optionId)) {
+        return "border-red-500 bg-red-500/10";
+      }
+      return "border-border opacity-50";
+    }
+    if (!showResult) {
+      return selectedAnswer === optionId
+        ? "border-primary bg-primary/5"
+        : "border-border hover:border-muted-foreground/50 hover:bg-muted/30";
+    }
+
+    // Show result mode
+    if (optionId === question.correctAnswerId) {
+      return "border-green-500 bg-green-500/10";
+    }
+    if (selectedAnswer === optionId && optionId !== question.correctAnswerId) {
+      return "border-red-500 bg-red-500/10";
+    }
+    return "border-border opacity-50";
+  };
+
+  const getTypeBadge = () => {
+    switch (question.type) {
+      case "multiple-choice":
+        return <Badge variant="secondary">Trắc nghiệm (1 đáp án)</Badge>;
+      case "multiple-answer":
+        return <Badge variant="secondary">Chọn nhiều đáp án</Badge>;
+      case "true-false":
+        return <Badge variant="secondary">Đúng / Sai</Badge>;
+      case "fill-blank":
+        return <Badge variant="secondary">Điền vào chỗ trống</Badge>;
+    }
+  };
+
+  return (
+    <div className={cn("space-y-4", className)}>
+      {/* Question header */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="flex size-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+              {question.questionNumber}
+            </span>
+            {getTypeBadge()}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 shrink-0 text-muted-foreground hover:text-foreground"
+            onClick={handleCopy}
+            title="Sao chép câu hỏi"
+          >
+            {copied ? (
+              <Check className="size-3.5 text-green-500" />
+            ) : (
+              <Copy className="size-3.5" />
+            )}
+          </Button>
+        </div>
+        <p className="text-base font-medium leading-relaxed">
+          {question.questionText}
+        </p>
+      </div>
+
+      {/* Options */}
+      {question.type === "fill-blank" ? (
+        <Input
+          placeholder="Nhập câu trả lời..."
+          value={selectedAnswer ?? ""}
+          onChange={(e) => onAnswerChange(question.id, e.target.value)}
+          disabled={showResult}
+          className={cn(
+            showResult &&
+              selectedAnswer === question.correctAnswerId &&
+              "border-green-500",
+            showResult &&
+              selectedAnswer !== question.correctAnswerId &&
+              "border-red-500",
+          )}
+        />
+      ) : question.type === "multiple-answer" ? (
+        <div className="space-y-2">
+          {showResult && (
+            <p className="text-xs text-muted-foreground mb-1">
+              Chọn tất cả đáp án đúng (có thể nhiều hơn 1)
+            </p>
+          )}
+          {question.options.map((option, index) => {
+            const isSelected = selectedIds.has(option.id);
+            const isCorrectOpt = correctIds.has(option.id);
+            return (
+              <Label
+                key={option.id}
+                className={cn(
+                  "flex cursor-pointer items-center gap-3 rounded-lg border p-3.5 transition-all",
+                  showResult ? "cursor-default" : "",
+                  getOptionStyle(option.id),
+                )}
+                onClick={() => handleMultiToggle(option.id)}
+              >
+                {/* Custom checkbox indicator */}
+                <div
+                  className={cn(
+                    "flex size-4 shrink-0 items-center justify-center rounded border-2 transition-colors",
+                    isSelected && !showResult
+                      ? "border-primary bg-primary"
+                      : showResult && isCorrectOpt
+                        ? "border-green-500 bg-green-500"
+                        : showResult && isSelected && !isCorrectOpt
+                          ? "border-red-500 bg-red-500"
+                          : "border-muted-foreground",
+                  )}
+                >
+                  {(isSelected || (showResult && isCorrectOpt)) && (
+                    <Check className="size-3 text-white" />
+                  )}
+                </div>
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-semibold">
+                  {String.fromCharCode(65 + index)}
+                </span>
+                <span className="flex-1 text-sm">{option.text}</span>
+                {showResult && isCorrectOpt && (
+                  <Badge
+                    variant="default"
+                    className="bg-green-600 text-white text-[10px]"
+                  >
+                    Đúng
+                  </Badge>
+                )}
+                {showResult && isSelected && !isCorrectOpt && (
+                  <Badge variant="destructive" className="text-[10px]">
+                    Sai
+                  </Badge>
+                )}
+              </Label>
+            );
+          })}
+        </div>
+      ) : (
+        <RadioGroup
+          value={selectedAnswer ?? ""}
+          onValueChange={(value) => onAnswerChange(question.id, value)}
+          disabled={showResult}
+          className="space-y-2"
+        >
+          {question.options.map((option, index) => (
+            <Label
+              key={option.id}
+              htmlFor={`${question.id}-${option.id}`}
+              className={cn(
+                "flex cursor-pointer items-center gap-3 rounded-lg border p-3.5 transition-all",
+                getOptionStyle(option.id),
+              )}
+            >
+              <RadioGroupItem
+                value={option.id}
+                id={`${question.id}-${option.id}`}
+              />
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-semibold">
+                {String.fromCharCode(65 + index)}
+              </span>
+              <span className="flex-1 text-sm">{option.text}</span>
+              {showResult && option.id === question.correctAnswerId && (
+                <Badge
+                  variant="default"
+                  className="bg-green-600 text-white text-[10px]"
+                >
+                  Đáp án đúng
+                </Badge>
+              )}
+              {showResult &&
+                selectedAnswer === option.id &&
+                option.id !== question.correctAnswerId && (
+                  <Badge variant="destructive" className="text-[10px]">
+                    Sai
+                  </Badge>
+                )}
+            </Label>
+          ))}
+        </RadioGroup>
+      )}
+
+      {/* Explanation */}
+      {showResult && question.explanation && (
+        <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-3">
+          <p className="text-xs font-medium text-blue-400 mb-1">Giải thích:</p>
+          <p className="text-sm text-muted-foreground">
+            {question.explanation}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}

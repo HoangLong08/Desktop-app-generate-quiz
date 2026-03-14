@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+*.manifest
+*.spec
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Local packages
+packages/
+
+# PaddleOCR cache
+.paddleocr/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Debug output (prompt + Gemini response files)
+app/features/quizz/debug/
+
+# Output files
+output*.jpg
+output*.png
+result*.jpg
+result*.png
+
+# Test images (tùy chọn, bỏ comment nếu không muốn commit ảnh test)
+# *.jpg
+# *.png
+# *.jpeg
