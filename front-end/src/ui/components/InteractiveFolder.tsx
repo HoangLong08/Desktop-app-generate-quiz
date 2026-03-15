@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, type Transition } from "framer-motion";
-import { Trash2, Star, Folder } from "lucide-react";
+import { Trash2, Star, Folder, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
@@ -17,6 +17,7 @@ interface InteractiveFolderProps {
   onClick: () => void;
   onDelete: () => void;
   onToggleFavorite?: () => void;
+  onEdit?: () => void;
 }
 
 interface PaperConfig {
@@ -321,14 +322,15 @@ function FolderBees({ isHovered }: { isHovered: boolean }) {
 export function InteractiveFolder({
   id,
   name,
-  description,
+  description: _description,
   color,
   quizCount,
-  createdAt,
+  createdAt: _createdAt,
   isFavorite = false,
   onClick,
   onDelete,
   onToggleFavorite,
+  onEdit,
 }: InteractiveFolderProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -463,18 +465,33 @@ export function InteractiveFolder({
             </motion.button>
           )}
 
-          {/* ── Delete ── */}
-          <motion.button
-            className="absolute right-2 top-2 size-6 flex items-center justify-center rounded-md bg-black/20 backdrop-blur-sm text-white/50 hover:text-white hover:bg-red-500/50 transition-colors"
+          {/* ── Actions (top-right) ── */}
+          <motion.div
+            className="absolute right-2 top-2 flex items-center gap-1"
             animate={{ opacity: isHovered ? 1 : 0 }}
             transition={{ duration: 0.2 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
           >
-            <Trash2 className="size-3" />
-          </motion.button>
+            {onEdit && (
+              <button
+                className="size-6 flex items-center justify-center rounded-md bg-black/20 backdrop-blur-sm text-white/50 hover:text-white hover:bg-white/20 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+              >
+                <Pencil className="size-3" />
+              </button>
+            )}
+            <button
+              className="size-6 flex items-center justify-center rounded-md bg-black/20 backdrop-blur-sm text-white/50 hover:text-white hover:bg-red-500/50 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+            >
+              <Trash2 className="size-3" />
+            </button>
+          </motion.div>
         </div>
       </div>
     </motion.div>
@@ -494,6 +511,7 @@ export function FolderListItem({
   onClick,
   onDelete,
   onToggleFavorite,
+  onEdit,
 }: InteractiveFolderProps) {
   return (
     <motion.div
@@ -550,6 +568,17 @@ export function FolderListItem({
             }}
           >
             <Star className={cn("size-3.5", isFavorite && "fill-current")} />
+          </button>
+        )}
+        {onEdit && (
+          <button
+            className="size-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+          >
+            <Pencil className="size-3.5" />
           </button>
         )}
         <button

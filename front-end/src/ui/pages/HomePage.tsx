@@ -62,6 +62,7 @@ export function HomePage() {
     error,
     createFolder,
     deleteFolder,
+    updateFolder,
     toggleFavorite,
     recordAccess,
   } = useFolders();
@@ -70,6 +71,18 @@ export function HomePage() {
   const [folderDesc, setFolderDesc] = useState("");
   const [selectedColor, setSelectedColor] = useState(FOLDER_COLORS[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Edit folder state
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingFolder, setEditingFolder] = useState<{
+    id: string;
+    name: string;
+    description: string;
+    color: string;
+  } | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+  const [editColor, setEditColor] = useState(FOLDER_COLORS[0]);
 
   const [viewMode, setViewMode] = useState<"grid" | "list">(
     () =>
@@ -115,6 +128,43 @@ export function HomePage() {
       navigate(`/folder/${newFolder.id}`);
     } catch (err) {
       console.error("Failed to create folder:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditOpen = (folder: {
+    id: string;
+    name: string;
+    description?: string;
+    color: string;
+  }) => {
+    setEditingFolder({
+      id: folder.id,
+      name: folder.name,
+      description: folder.description || "",
+      color: folder.color,
+    });
+    setEditName(folder.name);
+    setEditDesc(folder.description || "");
+    setEditColor(folder.color);
+    setEditOpen(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!editingFolder || !editName.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await updateFolder(editingFolder.id, {
+        name: editName,
+        description: editDesc,
+        color: editColor,
+      });
+      setEditOpen(false);
+      setEditingFolder(null);
+    } catch (err) {
+      console.error("Failed to update folder:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -403,6 +453,7 @@ export function HomePage() {
                       }}
                       onDelete={() => deleteFolder(folder.id)}
                       onToggleFavorite={() => toggleFavorite(folder.id)}
+                      onEdit={() => handleEditOpen(folder)}
                     />
                   </motion.div>
                 ))}
@@ -455,6 +506,7 @@ export function HomePage() {
                       }}
                       onDelete={() => deleteFolder(folder.id)}
                       onToggleFavorite={() => toggleFavorite(folder.id)}
+                      onEdit={() => handleEditOpen(folder)}
                     />
                   </motion.div>
                 ))}
@@ -463,6 +515,74 @@ export function HomePage() {
           </AnimatePresence>
         )}
       </div>
+
+      {/* ── Edit Folder Dialog ── */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>Chỉnh sửa thư mục</DialogTitle>
+            <DialogDescription>
+              Cập nhật thông tin thư mục của bạn.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="edit-folder-name">Tên thư mục</Label>
+              <Input
+                id="edit-folder-name"
+                placeholder="Ví dụ: Toán học, Lịch sử..."
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleUpdate()}
+                autoFocus
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="edit-folder-desc">Mô tả (tuỳ chọn)</Label>
+              <Input
+                id="edit-folder-desc"
+                placeholder="Mô tả ngắn về thư mục..."
+                value={editDesc}
+                onChange={(e) => setEditDesc(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>Màu thư mục</Label>
+              <div className="flex gap-2">
+                {FOLDER_COLORS.map((color) => (
+                  <motion.button
+                    key={color}
+                    type="button"
+                    whileHover={{ scale: 1.2 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="size-7 rounded-full"
+                    style={{
+                      backgroundColor: color,
+                      outline:
+                        editColor === color
+                          ? `3px solid ${color}`
+                          : "3px solid transparent",
+                      outlineOffset: "2px",
+                    }}
+                    onClick={() => setEditColor(color)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>
+              Huỷ
+            </Button>
+            <Button
+              onClick={handleUpdate}
+              disabled={!editName.trim() || isSubmitting}
+            >
+              Lưu thay đổi
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ScrollArea>
   );
 }

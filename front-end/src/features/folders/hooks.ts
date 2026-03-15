@@ -54,15 +54,24 @@ export function useFolders() {
     }
   }, []);
 
-  const renameFolder = useCallback(async (id: string, name: string) => {
-    try {
-      const updatedFolder = await updateFolderApi(id, { name });
-      setFolders((prev) => prev.map((f) => (f.id === id ? updatedFolder : f)));
-    } catch (err) {
-      console.error("Failed to rename folder", err);
-      throw err;
-    }
-  }, []);
+  const updateFolder = useCallback(
+    async (
+      id: string,
+      data: Partial<Pick<Folder, "name" | "description" | "color">>,
+    ) => {
+      try {
+        const updatedFolder = await updateFolderApi(id, data);
+        setFolders((prev) =>
+          prev.map((f) => (f.id === id ? updatedFolder : f)),
+        );
+        return updatedFolder;
+      } catch (err) {
+        console.error("Failed to update folder", err);
+        throw err;
+      }
+    },
+    [],
+  );
 
   const toggleFavorite = useCallback(async (id: string) => {
     try {
@@ -89,7 +98,7 @@ export function useFolders() {
     error,
     createFolder,
     deleteFolder,
-    renameFolder,
+    updateFolder,
     toggleFavorite,
     recordAccess,
   };

@@ -39,7 +39,7 @@ class Config:
     OCR_USE_GPU = os.getenv("OCR_USE_GPU", "false").lower() == "true"
 
     # CORS (when USER_DATA_PATH is set, allow file:// / null for Electron loadFile)
-    _cors_default = "http://localhost:5123,http://localhost:5173,http://localhost:3000"
+    _cors_default = "http://localhost:5123,http://localhost:5173,http://localhost:3000,http://localhost:4173"
     _cors_env = os.getenv("CORS_ORIGINS", _cors_default)
     CORS_ORIGINS = _cors_env.split(",") if _cors_env else _cors_default.split(",")
     if _user_data_path:
