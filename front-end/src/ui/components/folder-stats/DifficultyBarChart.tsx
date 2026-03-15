@@ -8,8 +8,9 @@ import {
   Tooltip,
 } from "recharts";
 import { BarChart3 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { CategoryAnalysis } from "@/features/stats";
-import { DIFFICULTY_LABELS } from "./helpers";
+import { getDifficultyLabels } from "./helpers";
 import { BentoCell, CellHeader } from "./BentoCell";
 
 export function DifficultyBarChart({
@@ -18,7 +19,7 @@ export function DifficultyBarChart({
   analysis: CategoryAnalysis;
 }) {
   const data = Object.entries(analysis.byDifficulty).map(([key, stat]) => ({
-    name: DIFFICULTY_LABELS[key] ?? key,
+    name: getDifficultyLabels()[key] ?? key,
     avgScore: stat.avgScore,
     accuracy: stat.accuracy,
     attempts: stat.attempts,
@@ -26,9 +27,11 @@ export function DifficultyBarChart({
 
   if (data.length === 0) return null;
 
+  const { t } = useTranslation();
+
   return (
     <BentoCell glowColor="hsl(270 50% 60%)">
-      <CellHeader icon={BarChart3} title="Theo mức độ khó" />
+      <CellHeader icon={BarChart3} title={t("folderStats.difficultyChart.title")} />
       <ResponsiveContainer
         width="100%"
         height={Math.max(100, data.length * 52)}
@@ -74,8 +77,8 @@ export function DifficultyBarChart({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             formatter={(v: any, name: any) => {
               const labels: Record<string, string> = {
-                avgScore: "Điểm TB",
-                accuracy: "Chính xác",
+                avgScore: t("folderStats.difficultyChart.avgScore"),
+                accuracy: t("folderStats.difficultyChart.accuracy"),
               };
               return [`${v}%`, labels[name] ?? name];
             }}
@@ -102,14 +105,14 @@ export function DifficultyBarChart({
             className="size-2 rounded-full"
             style={{ backgroundColor: "hsl(270 50% 60%)" }}
           />
-          Điểm TB
+          {t("folderStats.difficultyChart.avgScore")}
         </div>
         <div className="flex items-center gap-1.5">
           <div
             className="size-2 rounded-full"
             style={{ backgroundColor: "hsl(45 80% 58%)" }}
           />
-          Chính xác
+          {t("folderStats.difficultyChart.accuracy")}
         </div>
       </div>
     </BentoCell>

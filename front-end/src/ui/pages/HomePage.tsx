@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -56,6 +57,7 @@ const gridItemVariants = {
 
 export function HomePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const {
     folders,
     loading,
@@ -178,7 +180,7 @@ export function HomePage() {
           animate={{ opacity: 1 }}
           className="text-muted-foreground"
         >
-          Đang tải thư mục...
+          {t("home.loading")}
         </motion.div>
       </div>
     );
@@ -187,9 +189,11 @@ export function HomePage() {
   if (error) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-2">
-        <p className="text-destructive font-medium">Lỗi: {error}</p>
+        <p className="text-destructive font-medium">
+          {t("home.errorPrefix", { error })}
+        </p>
         <Button variant="outline" onClick={() => window.location.reload()}>
-          Thử lại
+          {t("common.retry")}
         </Button>
       </div>
     );
@@ -206,9 +210,11 @@ export function HomePage() {
           className="flex items-center justify-between shrink-0"
         >
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Thư mục Quiz</h1>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {t("home.title")}
+            </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Quản lý và tổ chức các bộ Quiz của bạn
+              {t("home.subtitle")}
             </p>
           </div>
 
@@ -216,22 +222,24 @@ export function HomePage() {
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <FolderPlus className="size-4" />
-                Tạo thư mục
+                {t("home.createFolder")}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[420px]">
               <DialogHeader>
-                <DialogTitle>Tạo thư mục mới</DialogTitle>
+                <DialogTitle>{t("home.createDialog.title")}</DialogTitle>
                 <DialogDescription>
-                  Nhập tên và chọn màu cho thư mục của bạn.
+                  {t("home.createDialog.description")}
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col gap-4 py-2">
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="folder-name">Tên thư mục</Label>
+                  <Label htmlFor="folder-name">
+                    {t("home.createDialog.nameLabel")}
+                  </Label>
                   <Input
                     id="folder-name"
-                    placeholder="Ví dụ: Toán học, Lịch sử..."
+                    placeholder={t("home.createDialog.namePlaceholder")}
                     value={folderName}
                     onChange={(e) => setFolderName(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleCreate()}
@@ -239,16 +247,18 @@ export function HomePage() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="folder-desc">Mô tả (tuỳ chọn)</Label>
+                  <Label htmlFor="folder-desc">
+                    {t("home.createDialog.descLabel")}
+                  </Label>
                   <Input
                     id="folder-desc"
-                    placeholder="Mô tả ngắn về thư mục..."
+                    placeholder={t("home.createDialog.descPlaceholder")}
                     value={folderDesc}
                     onChange={(e) => setFolderDesc(e.target.value)}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label>Màu thư mục</Label>
+                  <Label>{t("home.createDialog.colorLabel")}</Label>
                   <div className="flex gap-2">
                     {FOLDER_COLORS.map((color) => (
                       <motion.button
@@ -273,10 +283,10 @@ export function HomePage() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpen(false)}>
-                  Huỷ
+                  {t("common.cancel")}
                 </Button>
                 <Button onClick={handleCreate} disabled={!folderName.trim()}>
-                  Tạo thư mục
+                  {t("home.createFolder")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -288,9 +298,13 @@ export function HomePage() {
           <div className="flex items-center gap-1 bg-muted/40 rounded-xl p-1">
             {(
               [
-                { key: "all", label: "Tất cả", icon: Folder },
-                { key: "recent", label: "Gần đây", icon: Clock },
-                { key: "favorites", label: "Yêu thích", icon: Star },
+                { key: "all", label: t("home.tabs.all"), icon: Folder },
+                { key: "recent", label: t("home.tabs.recent"), icon: Clock },
+                {
+                  key: "favorites",
+                  label: t("home.tabs.favorites"),
+                  icon: Star,
+                },
               ] as const
             ).map(({ key, label, icon: Icon }) => {
               const count =
@@ -371,9 +385,11 @@ export function HomePage() {
               <Folder className="size-8 text-muted-foreground" />
             </motion.div>
             <div>
-              <p className="font-medium text-foreground">Chưa có thư mục nào</p>
+              <p className="font-medium text-foreground">
+                {t("home.empty.title")}
+              </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Tạo thư mục đầu tiên để bắt đầu tổ chức Quiz của bạn.
+                {t("home.empty.description")}
               </p>
             </div>
             <Button
@@ -382,7 +398,7 @@ export function HomePage() {
               onClick={() => setOpen(true)}
             >
               <FolderPlus className="size-4" />
-              Tạo thư mục mới
+              {t("home.createFolderNew")}
             </Button>
           </motion.div>
         ) : filteredFolders.length === 0 ? (
@@ -395,14 +411,14 @@ export function HomePage() {
               <>
                 <Star className="size-10 text-muted-foreground/30" />
                 <p className="text-sm text-muted-foreground">
-                  Chưa có thư mục yêu thích nào.
+                  {t("home.emptyFavorites")}
                 </p>
               </>
             ) : (
               <>
                 <Clock className="size-10 text-muted-foreground/30" />
                 <p className="text-sm text-muted-foreground">
-                  Chưa có thư mục nào được mở gần đây.
+                  {t("home.emptyRecent")}
                 </p>
               </>
             )}
@@ -478,7 +494,9 @@ export function HomePage() {
                   <div className="size-10 rounded-xl flex-shrink-0 flex items-center justify-center border border-dashed border-border/40">
                     <FolderPlus className="size-4" />
                   </div>
-                  <span className="text-sm font-medium">Tạo thư mục mới</span>
+                  <span className="text-sm font-medium">
+                    {t("home.createFolderNew")}
+                  </span>
                 </button>
               )}
 
@@ -520,17 +538,19 @@ export function HomePage() {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="sm:max-w-[420px]">
           <DialogHeader>
-            <DialogTitle>Chỉnh sửa thư mục</DialogTitle>
+            <DialogTitle>{t("home.editDialog.title")}</DialogTitle>
             <DialogDescription>
-              Cập nhật thông tin thư mục của bạn.
+              {t("home.editDialog.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-folder-name">Tên thư mục</Label>
+              <Label htmlFor="edit-folder-name">
+                {t("home.createDialog.nameLabel")}
+              </Label>
               <Input
                 id="edit-folder-name"
-                placeholder="Ví dụ: Toán học, Lịch sử..."
+                placeholder={t("home.createDialog.namePlaceholder")}
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleUpdate()}
@@ -538,16 +558,18 @@ export function HomePage() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-folder-desc">Mô tả (tuỳ chọn)</Label>
+              <Label htmlFor="edit-folder-desc">
+                {t("home.createDialog.descLabel")}
+              </Label>
               <Input
                 id="edit-folder-desc"
-                placeholder="Mô tả ngắn về thư mục..."
+                placeholder={t("home.createDialog.descPlaceholder")}
                 value={editDesc}
                 onChange={(e) => setEditDesc(e.target.value)}
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Màu thư mục</Label>
+              <Label>{t("home.createDialog.colorLabel")}</Label>
               <div className="flex gap-2">
                 {FOLDER_COLORS.map((color) => (
                   <motion.button
@@ -572,13 +594,13 @@ export function HomePage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditOpen(false)}>
-              Huỷ
+              {t("common.cancel")}
             </Button>
             <Button
               onClick={handleUpdate}
               disabled={!editName.trim() || isSubmitting}
             >
-              Lưu thay đổi
+              {t("home.editDialog.saveChanges")}
             </Button>
           </DialogFooter>
         </DialogContent>

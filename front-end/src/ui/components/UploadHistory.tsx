@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import i18n from "@/config/i18n";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -63,7 +65,7 @@ function getInputModeBadge(mode: string) {
   > = {
     files: { label: "File", variant: "secondary" },
     youtube: { label: "YouTube", variant: "default" },
-    text: { label: "Văn bản", variant: "outline" },
+    text: { label: i18n.t("uploadHistory.textMode"), variant: "outline" },
   };
   const m = map[mode] ?? { label: mode, variant: "outline" as const };
   return (
@@ -80,17 +82,22 @@ interface UploadHistoryProps {
 }
 
 export function UploadHistory({ folderId }: UploadHistoryProps) {
+  const { t } = useTranslation();
   const { data: records, isLoading } = useUploadRecords(folderId);
   const deleteRecord = useDeleteUploadRecord();
 
   const handleDelete = (record: UploadRecord) => {
     deleteRecord.mutate(record.id, {
       onSuccess: () =>
-        toast.success("Đã xóa", {
-          description: `"${record.originalName}" đã được xóa khỏi lịch sử.`,
+        toast.success(t("uploadHistory.deleteSuccess"), {
+          description: t("uploadHistory.deleteSuccessDesc", {
+            name: record.originalName,
+          }),
         }),
       onError: () =>
-        toast.error("Xóa thất bại", { description: "Vui lòng thử lại." }),
+        toast.error(t("uploadHistory.deleteFailed"), {
+          description: t("uploadHistory.deleteFailedDesc"),
+        }),
     });
   };
 
@@ -99,11 +106,9 @@ export function UploadHistory({ folderId }: UploadHistoryProps) {
       <CardHeader className="shrink-0 pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Upload className="size-4" />
-          File đã tải lên
+          {t("uploadHistory.title")}
         </CardTitle>
-        <CardDescription>
-          Các file và nguồn nội dung đã sử dụng để tạo quiz
-        </CardDescription>
+        <CardDescription>{t("uploadHistory.description")}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 min-h-0 p-0">
         <ScrollArea className="h-full">
@@ -119,9 +124,9 @@ export function UploadHistory({ folderId }: UploadHistoryProps) {
           ) : !records || records.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
               <Upload className="size-8 opacity-40" />
-              <p className="text-sm">Chưa có file nào được tải lên</p>
+              <p className="text-sm">{t("uploadHistory.empty")}</p>
               <p className="text-xs text-muted-foreground/70">
-                Tạo quiz để bắt đầu lưu lịch sử file
+                {t("uploadHistory.emptyHint")}
               </p>
             </div>
           ) : (

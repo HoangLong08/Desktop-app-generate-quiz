@@ -1,37 +1,39 @@
 import { Target, Clock, Award, CheckCircle2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { FolderStatsSummary } from "@/features/stats";
 import { getScoreColor, getScoreLabel, formatTime } from "./helpers";
 import { BentoCell } from "./BentoCell";
 
 export function MetricCards({ summary }: { summary: FolderStatsSummary }) {
+  const { t } = useTranslation();
   const metrics = [
     {
-      label: "Điểm trung bình",
+      label: t("folderStats.metrics.avgScore"),
       value: `${summary.avgScore}%`,
       icon: Target,
       color: getScoreColor(summary.avgScore),
       sub: getScoreLabel(summary.avgScore),
     },
     {
-      label: "Điểm cao nhất",
+      label: t("folderStats.metrics.bestScore"),
       value: `${summary.bestScore}%`,
       icon: Award,
       color: "hsl(152 60% 52%)",
-      sub: `Thấp nhất: ${summary.worstScore}%`,
+      sub: t("folderStats.metrics.lowestScore", { score: summary.worstScore }),
     },
     {
-      label: "Chính xác",
+      label: t("folderStats.metrics.accuracy"),
       value: `${summary.accuracy}%`,
       icon: CheckCircle2,
       color: getScoreColor(summary.accuracy),
-      sub: `${summary.totalCorrect} / ${summary.totalQuestions} câu`,
+      sub: t("folderStats.metrics.accuracyDetail", { correct: summary.totalCorrect, total: summary.totalQuestions }),
     },
     {
-      label: "Thời gian TB",
+      label: t("folderStats.metrics.avgTime"),
       value: formatTime(summary.avgTimeTaken),
       icon: Clock,
       color: "hsl(217 70% 60%)",
-      sub: `${summary.totalAttempts} lần làm bài`,
+      sub: t("folderStats.metrics.totalAttempts", { count: summary.totalAttempts }),
     },
   ];
 

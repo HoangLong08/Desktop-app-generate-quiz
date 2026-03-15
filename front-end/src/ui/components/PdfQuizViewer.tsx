@@ -11,6 +11,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -67,6 +68,7 @@ function QuestionRow({
   active: boolean;
   onClick: () => void;
 }) {
+  const { t } = useTranslation();
   const pages = question.sourcePages ?? [];
   return (
     <button
@@ -100,7 +102,9 @@ function QuestionRow({
           </p>
           {pages.length > 0 && (
             <div className="flex flex-wrap items-center gap-1">
-              <span className="text-[10px] text-muted-foreground">Trang:</span>
+              <span className="text-[10px] text-muted-foreground">
+                {t("pdfViewer.pageLabel")}
+              </span>
               {pages.map((p) => (
                 <Badge
                   key={p}
@@ -114,7 +118,7 @@ function QuestionRow({
           )}
           {pages.length === 0 && (
             <span className="text-[10px] text-muted-foreground/50">
-              Không có thông tin trang
+              {t("pdfViewer.noPageInfo")}
             </span>
           )}
           {question.sourceKeyword && question.sourceKeyword.length > 0 && (
@@ -251,6 +255,7 @@ export function PdfQuizViewer({
   quizTitle,
   quizSetId,
 }: PdfQuizViewerProps) {
+  const { t } = useTranslation();
   const [numPages, setNumPages] = useState<number>(0);
   const [scale, setScale] = useState(1.0);
   const [activeQuestionIdx, setActiveQuestionIdx] = useState<number | null>(
@@ -462,7 +467,7 @@ export function PdfQuizViewer({
               variant="ghost"
               className="h-7 w-7"
               onClick={() => setScale((s) => Math.max(0.5, s - 0.15))}
-              title="Thu nhỏ"
+              title={t("pdfViewer.zoomOut")}
             >
               <ZoomOut className="size-3.5" />
             </Button>
@@ -474,7 +479,7 @@ export function PdfQuizViewer({
               variant="ghost"
               className="h-7 w-7"
               onClick={() => setScale((s) => Math.min(2.5, s + 0.15))}
-              title="Phóng to"
+              title={t("pdfViewer.zoomIn")}
             >
               <ZoomIn className="size-3.5" />
             </Button>
@@ -483,7 +488,7 @@ export function PdfQuizViewer({
               variant="ghost"
               className="h-7 w-7"
               onClick={() => setScale(1.0)}
-              title="Đặt lại zoom"
+              title={t("pdfViewer.resetZoom")}
             >
               <RotateCcw className="size-3.5" />
             </Button>
@@ -494,7 +499,9 @@ export function PdfQuizViewer({
               className="h-7 w-7"
               onClick={() => setShowHeatmap((v) => !v)}
               title={
-                showHeatmap ? "Tắt heatmap" : "Hiển thị heatmap nhiệt trên PDF"
+                showHeatmap
+                  ? t("pdfViewer.heatmapOff")
+                  : t("pdfViewer.heatmapOn")
               }
             >
               <Flame className="size-3.5" />
@@ -518,7 +525,7 @@ export function PdfQuizViewer({
             <div className="border-b px-3 py-2">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  {questions.length} câu hỏi
+                  {t("pdfViewer.questionCount", { count: questions.length })}
                 </p>
                 <button
                   onClick={() => setShowAllKeywords((v) => !v)}
@@ -530,37 +537,37 @@ export function PdfQuizViewer({
                   )}
                   title={
                     showAllKeywords
-                      ? "Tắt highlight tất cả"
-                      : "Highlight tất cả từ khóa trong PDF"
+                      ? t("pdfViewer.highlightAllOff")
+                      : t("pdfViewer.highlightAllOn")
                   }
                 >
                   <Layers className="size-3" />
-                  Tất cả
+                  {t("pdfViewer.all")}
                 </button>
               </div>
               {showAllKeywords ? (
                 <p className="mt-0.5 text-[10px] text-primary/80">
-                  Đang highlight tất cả từ khóa •{" "}
+                  {t("pdfViewer.highlightingAll")} •{" "}
                   <button
                     className="underline hover:text-foreground"
                     onClick={() => setShowAllKeywords(false)}
                   >
-                    Tắt
+                    {t("pdfViewer.turnOff")}
                   </button>
                 </p>
               ) : activeQuestionIdx !== null ? (
                 <p className="mt-0.5 text-[10px] text-muted-foreground">
-                  Đang xem nguồn câu {activeQuestionIdx + 1} •{" "}
+                  {t("pdfViewer.viewingSource", { n: activeQuestionIdx + 1 })} •{" "}
                   <button
                     className="underline hover:text-foreground"
                     onClick={() => setActiveQuestionIdx(null)}
                   >
-                    Bỏ chọn
+                    {t("pdfViewer.deselect")}
                   </button>
                 </p>
               ) : (
                 <p className="mt-0.5 text-[10px] text-muted-foreground">
-                  Click câu hỏi để xem trang nguồn
+                  {t("pdfViewer.clickToView")}
                 </p>
               )}
             </div>
@@ -585,7 +592,9 @@ export function PdfQuizViewer({
             {pdfError ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
                 <BookOpen className="size-12 opacity-30" />
-                <p className="text-sm font-medium">Không tải được PDF</p>
+                <p className="text-sm font-medium">
+                  {t("pdfViewer.pdfLoadError")}
+                </p>
                 <p className="text-xs">{pdfError}</p>
               </div>
             ) : (
@@ -598,12 +607,12 @@ export function PdfQuizViewer({
                       pageRefs.current = new Array(n).fill(null);
                     }}
                     onLoadError={(err) =>
-                      setPdfError(err.message || "Lỗi không xác định")
+                      setPdfError(err.message || t("pdfViewer.unknownError"))
                     }
                     loading={
                       <div className="flex flex-col items-center gap-3 py-16 text-muted-foreground">
                         <Loader2 className="size-8 animate-spin" />
-                        <p className="text-sm">Đang tải PDF...</p>
+                        <p className="text-sm">{t("pdfViewer.loadingPdf")}</p>
                       </div>
                     }
                   >
@@ -623,7 +632,7 @@ export function PdfQuizViewer({
                         >
                           {/* Page number label */}
                           <div className="absolute -top-5 left-0 z-20 text-[10px] text-muted-foreground select-none">
-                            Trang {pageNum}
+                            {t("pdfViewer.page")} {pageNum}
                           </div>
 
                           <Page
@@ -715,10 +724,11 @@ export function PdfQuizViewer({
                                       }}
                                     >
                                       <Flame className="size-3" />
-                                      {heatCount} câu
+                                      {heatCount} {t("pdfViewer.questions")}
                                       {hasBlocks && (
                                         <span className="text-[9px] opacity-80 ml-0.5">
-                                          · {pageBlocks.length} vùng
+                                          · {pageBlocks.length}{" "}
+                                          {t("pdfViewer.zones")}
                                         </span>
                                       )}
                                     </div>
@@ -754,23 +764,23 @@ export function PdfQuizViewer({
               Heatmap
             </span>
             <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-              <span>Ít</span>
+              <span>{t("pdfViewer.low")}</span>
               <div
                 className="h-2.5 w-24 rounded-sm"
                 style={{ background: HEAT_LEGEND_PDF }}
               />
-              <span>Nhiều</span>
+              <span>{t("pdfViewer.high")}</span>
             </div>
             <span className="text-[10px] text-muted-foreground">
               {
                 Array.from(pageDistribution.values()).filter((c) => c > 0)
                   .length
               }
-              /{numPages} trang có câu hỏi
+              /{numPages} {t("pdfViewer.pagesWithQuestions")}
             </span>
             {heatmapBlocks.length > 0 && (
               <span className="text-[10px] text-orange-500/80">
-                · {heatmapBlocks.length} vùng nhiệt
+                · {heatmapBlocks.length} {t("pdfViewer.heatZones")}
               </span>
             )}
           </div>
@@ -779,7 +789,9 @@ export function PdfQuizViewer({
         {/* Footer status */}
         {numPages > 0 && (
           <div className="flex shrink-0 items-center justify-between border-t px-4 py-2 text-xs text-muted-foreground">
-            <span>{numPages} trang</span>
+            <span>
+              {numPages} {t("pdfViewer.page")}
+            </span>
             {showHeatmap ? (
               <span className="text-orange-500">
                 <Flame className="inline size-3 mr-0.5" />
@@ -788,17 +800,17 @@ export function PdfQuizViewer({
                   Array.from(pageDistribution.values()).filter((c) => c > 0)
                     .length
                 }{" "}
-                trang bao phủ
+                {t("pdfViewer.pagesLabel")}
                 {" · "}
                 {Array.from(pageDistribution.values()).reduce(
                   (a, b) => a + b,
                   0,
                 )}{" "}
-                câu phân bố
+                {t("pdfViewer.questions")}
                 {heatmapBlocks.length > 0 && (
                   <>
                     {" · "}
-                    {heatmapBlocks.length} vùng nhiệt
+                    {heatmapBlocks.length} {t("pdfViewer.heatZones")}
                   </>
                 )}
               </span>
@@ -808,20 +820,20 @@ export function PdfQuizViewer({
                   Array.from(pageDistribution.values()).filter((c) => c > 0)
                     .length
                 }
-                /{numPages} trang bao phủ
-                {" · "}
+                /{numPages} {t("pdfViewer.pagesLabel")}
+                {" \u00b7 "}
                 {
                   questions.filter((q) => (q.sourceKeyword ?? []).length > 0)
                     .length
                 }
-                /{questions.length} câu có từ khóa
+                /{questions.length} {t("pdfViewer.questionsWithKeywords")}
               </span>
             ) : activeQuestionIdx !== null ? (
               <span className="text-primary">
-                Câu {activeQuestionIdx + 1} →{" "}
+                {t("pdfViewer.questionN", { n: activeQuestionIdx + 1 })} \u2192{" "}
                 {(questions[activeQuestionIdx]?.sourcePages ?? []).length > 0
-                  ? `trang ${(questions[activeQuestionIdx]?.sourcePages ?? []).join(", ")}`
-                  : "không có trang nguồn"}
+                  ? `${t("pdfViewer.page")} ${(questions[activeQuestionIdx]?.sourcePages ?? []).join(", ")}`
+                  : t("pdfViewer.noSourcePage")}
               </span>
             ) : null}
           </div>

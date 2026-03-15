@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import mammoth from "mammoth";
 import { Loader2 } from "lucide-react";
 
@@ -7,6 +8,7 @@ interface DocxPreviewProps {
 }
 
 export function DocxPreview({ url }: DocxPreviewProps) {
+  const { t } = useTranslation();
   const [html, setHtml] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +31,7 @@ export function DocxPreview({ url }: DocxPreviewProps) {
       })
       .catch((err) => {
         if (isMounted) {
-          setError("Không thể hiển thị tài liệu này.");
+          setError(t("docxPreview.error"));
           setLoading(false);
           console.error("Error rendering docx:", err);
         }
@@ -44,7 +46,7 @@ export function DocxPreview({ url }: DocxPreviewProps) {
     return (
       <div className="flex w-full items-center justify-center p-12 text-muted-foreground border rounded-lg bg-muted/10 h-[65vh]">
         <Loader2 className="mr-2 size-5 animate-spin" />
-        Đang tải bản xem trước tài liệu...
+        {t("docxPreview.loading")}
       </div>
     );
   }

@@ -8,6 +8,7 @@ import {
   Tooltip,
 } from "recharts";
 import { TrendingUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { BentoCell, CellHeader } from "./BentoCell";
 
 export function ScoreTrendArea({
@@ -24,6 +25,8 @@ export function ScoreTrendArea({
 }) {
   if (attempts.length < 2) return null;
 
+  const { t } = useTranslation();
+
   const trendData = [...attempts].reverse().map((a, i) => ({
     index: i + 1,
     score: Math.round(a.score),
@@ -32,7 +35,7 @@ export function ScoreTrendArea({
 
   return (
     <BentoCell glowColor="hsl(217 70% 60%)">
-      <CellHeader icon={TrendingUp} title="Xu hướng điểm số" />
+      <CellHeader icon={TrendingUp} title={t("folderStats.scoreTrend.title")} />
       <ResponsiveContainer width="100%" height={180}>
         <AreaChart
           data={trendData}
@@ -81,8 +84,8 @@ export function ScoreTrendArea({
               color: "hsl(var(--foreground))",
             }}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            formatter={(v: any) => [`${v}%`, "Điểm"]}
-            labelFormatter={(l) => `Lần ${l}`}
+            formatter={(v: any) => [`${v}%`, t("folderStats.scoreTrend.score")]}
+            labelFormatter={(l) => t("folderStats.scoreTrend.attempt", { n: l })}
           />
           <Area
             type="monotone"

@@ -1,9 +1,10 @@
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 import type { QuizQuestion } from "@/features/quizz";
+import i18n from "@/config/i18n";
 
 export async function exportQuizToDocx(
   questions: QuizQuestion[],
-  title = "Bài Kiểm Tra",
+  title = i18n.t("export.defaultTitle"),
 ) {
   const children: any[] = [
     new Paragraph({
@@ -19,7 +20,7 @@ export async function exportQuizToDocx(
       new Paragraph({
         children: [
           new TextRun({
-            text: `Câu ${i + 1}: `,
+            text: i18n.t("export.questionPrefix", { n: i + 1 }),
             bold: true,
           }),
           new TextRun(q.questionText),
@@ -48,7 +49,7 @@ export async function exportQuizToDocx(
   // Answer Key Page
   children.push(
     new Paragraph({
-      text: "ĐÁP ÁN",
+      text: i18n.t("export.answerKey"),
       heading: HeadingLevel.HEADING_2,
       pageBreakBefore: true,
       spacing: { after: 400 },
@@ -77,7 +78,7 @@ export async function exportQuizToDocx(
     children.push(
       new Paragraph({
         children: [
-          new TextRun({ text: `Câu ${i + 1}: `, bold: true }),
+          new TextRun({ text: i18n.t("export.questionPrefix", { n: i + 1 }), bold: true }),
           new TextRun({ text: letter, bold: true, color: "00aa00" }),
         ],
         spacing: { after: 120 },
@@ -88,7 +89,7 @@ export async function exportQuizToDocx(
       children.push(
         new Paragraph({
           children: [
-            new TextRun({ text: "Giải thích: ", italics: true }),
+            new TextRun({ text: i18n.t("export.explanation"), italics: true }),
             new TextRun(q.explanation),
           ],
           indent: { left: 720 },

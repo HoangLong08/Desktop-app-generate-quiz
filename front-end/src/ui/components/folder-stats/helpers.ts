@@ -1,3 +1,5 @@
+import i18n from "@/config/i18n";
+
 export function getScoreColor(score: number): string {
   if (score >= 80) return "hsl(152 60% 52%)";
   if (score >= 60) return "hsl(45 80% 58%)";
@@ -6,10 +8,10 @@ export function getScoreColor(score: number): string {
 }
 
 export function getScoreLabel(score: number): string {
-  if (score >= 80) return "Xuất sắc";
-  if (score >= 60) return "Khá";
-  if (score >= 40) return "Trung bình";
-  return "Cần cải thiện";
+  if (score >= 80) return i18n.t("folderStats.score.excellent");
+  if (score >= 60) return i18n.t("folderStats.score.good");
+  if (score >= 40) return i18n.t("folderStats.score.average");
+  return i18n.t("folderStats.score.needsImprovement");
 }
 
 export function getScoreBadgeClass(score: number): string {
@@ -25,12 +27,14 @@ export function formatTime(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
-  return s > 0 ? `${m}p ${s}s` : `${m}p`;
+  const min = i18n.t("folderStats.timeMin");
+  return s > 0 ? `${m}${min} ${s}s` : `${m}${min}`;
 }
 
 export function formatDate(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleString("vi-VN", {
+  const locale = i18n.language === "vi" ? "vi-VN" : "en-US";
+  return d.toLocaleString(locale, {
     day: "2-digit",
     month: "2-digit",
     hour: "2-digit",
@@ -38,16 +42,20 @@ export function formatDate(iso: string): string {
   });
 }
 
-export const DIFFICULTY_LABELS: Record<string, string> = {
-  easy: "Dễ",
-  medium: "Trung bình",
-  hard: "Khó",
-  mixed: "Hỗn hợp",
-};
+export function getDifficultyLabels(): Record<string, string> {
+  return {
+    easy: i18n.t("folderStats.difficulty.easy"),
+    medium: i18n.t("folderStats.difficulty.medium"),
+    hard: i18n.t("folderStats.difficulty.hard"),
+    mixed: i18n.t("folderStats.difficulty.mixed"),
+  };
+}
 
-export const QTYPE_LABELS: Record<string, string> = {
-  "multiple-choice": "Trắc nghiệm",
-  "true-false": "Đúng / Sai",
-  "fill-blank": "Điền trống",
-  mixed: "Hỗn hợp",
-};
+export function getQtypeLabels(): Record<string, string> {
+  return {
+    "multiple-choice": i18n.t("folderStats.qtype.multiple-choice"),
+    "true-false": i18n.t("folderStats.qtype.true-false"),
+    "fill-blank": i18n.t("folderStats.qtype.fill-blank"),
+    mixed: i18n.t("folderStats.qtype.mixed"),
+  };
+}

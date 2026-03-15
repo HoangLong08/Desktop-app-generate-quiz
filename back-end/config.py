@@ -34,10 +34,6 @@ class Config:
     # API keys are managed via the UI (Settings > API Keys), stored in the DB.
     GEMINI_FALLBACK_CHAIN = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"]
 
-    # OCR settings
-    OCR_LANG = os.getenv("OCR_LANG", "vi")  # 'vi', 'en', 'ch'
-    OCR_USE_GPU = os.getenv("OCR_USE_GPU", "false").lower() == "true"
-
     # CORS (when USER_DATA_PATH is set, allow file:// / null for Electron loadFile)
     _cors_default = "http://localhost:5123,http://localhost:5173,http://localhost:3000,http://localhost:4173"
     _cors_env = os.getenv("CORS_ORIGINS", _cors_default)

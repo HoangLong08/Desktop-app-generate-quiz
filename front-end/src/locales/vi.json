@@ -1,0 +1,571 @@
+{
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "retry": "Thử lại",
+    "cancel": "Huỷ",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "close": "Đóng",
+    "back": "Quay lại",
+    "confirm": "Xác nhận",
+    "create": "Tạo",
+    "questions": "câu",
+    "attempts": "lần làm"
+  },
+  "theme": {
+    "light": "Sáng",
+    "dark": "Tối",
+    "system": "Hệ thống"
+  },
+  "header": {
+    "settingsTitle": "Cài đặt API Keys",
+    "settingsDescription": "Quản lý các Gemini API key dùng để tạo quiz."
+  },
+  "home": {
+    "loading": "Đang tải thư mục...",
+    "errorPrefix": "Lỗi: {{error}}",
+    "title": "Thư mục Quiz",
+    "subtitle": "Quản lý và tổ chức các bộ Quiz của bạn",
+    "createFolder": "Tạo thư mục",
+    "createFolderNew": "Tạo thư mục mới",
+    "createDialog": {
+      "title": "Tạo thư mục mới",
+      "description": "Nhập tên và chọn màu cho thư mục của bạn.",
+      "nameLabel": "Tên thư mục",
+      "namePlaceholder": "Ví dụ: Toán học, Lịch sử...",
+      "descLabel": "Mô tả (tuỳ chọn)",
+      "descPlaceholder": "Mô tả ngắn về thư mục...",
+      "colorLabel": "Màu thư mục"
+    },
+    "editDialog": {
+      "title": "Chỉnh sửa thư mục",
+      "description": "Cập nhật thông tin thư mục của bạn.",
+      "saveChanges": "Lưu thay đổi"
+    },
+    "tabs": {
+      "all": "Tất cả",
+      "recent": "Gần đây",
+      "favorites": "Yêu thích"
+    },
+    "empty": {
+      "title": "Chưa có thư mục nào",
+      "description": "Tạo thư mục đầu tiên để bắt đầu tổ chức Quiz của bạn."
+    },
+    "emptyFavorites": "Chưa có thư mục yêu thích nào.",
+    "emptyRecent": "Chưa có thư mục nào được mở gần đây."
+  },
+  "folder": {
+    "title": "Thư mục",
+    "tabs": {
+      "materials": "Tài liệu",
+      "createQuiz": "Tạo Quiz",
+      "history": "Lịch sử",
+      "stats": "Thống kê"
+    },
+    "quizConfig": {
+      "title": "Cấu hình Quiz",
+      "subtitle": "Tùy chỉnh quiz theo nhu cầu của bạn"
+    },
+    "generating": "Đang tạo quiz...",
+    "generatingWait": "Vui lòng chờ, không đóng cửa sổ này.",
+    "createQuizBtn": "Tạo Quiz",
+    "noMaterialSelected": "Chưa chọn tài liệu",
+    "noMaterialSelectedDesc": "Vui lòng chọn ít nhất một tài liệu đã tải lên để tạo quiz.",
+    "noMaterialSelectedPdf": "Không có file PDF",
+    "noMaterialSelectedPdfDesc": "Quiz này không có file PDF nguồn để hiển thị. Chỉ hỗ trợ xem nguồn cho quiz được tạo từ file PDF.",
+    "steps": {
+      "upload": "Tải file lên server",
+      "uploadDesc": "Đang nhận dữ liệu...",
+      "extract": "Trích xuất văn bản",
+      "extractDesc": "OCR / PDF / DOCX đang được xử lý...",
+      "analyze": "Phân tích nội dung",
+      "analyzeDesc": "Làm sạch và chọn đoạn văn quan trọng...",
+      "aiGenerate": "AI tạo câu hỏi",
+      "aiGenerateDesc": "Gemini đang soạn câu hỏi...",
+      "ytTranscript": "Tải transcript YouTube",
+      "ytTranscriptDesc": "Đang lấy phụ đề...",
+      "ytSummarize": "AI tóm tắt transcript",
+      "ytSummarizeDesc": "Gemini đang xử lý...",
+      "ytQuiz": "Soạn câu hỏi từ nội dung video...",
+      "textAnalyze": "Phân tích văn bản",
+      "textAnalyzeDesc": "Đang làm sạch...",
+      "textQuiz": "Gemini đang soạn câu hỏi..."
+    }
+  },
+  "errors": {
+    "allModelsExhausted": {
+      "title": "Tất cả models đều hết quota",
+      "description": "Đã thử gemini-2.5-flash → gemini-2.5-flash-lite → gemini-2.0-flash, tất cả đều hết quota miễn phí hôm nay. Quota reset lúc 00:00 giờ Mỹ (khoảng 12:00-15:00 giờ Việt Nam). Thử lại sau!"
+    },
+    "quotaExceeded": {
+      "title": "Vượt giới hạn Gemini API",
+      "description": "Tài khoản đã hết quota miễn phí cho model Gemini.",
+      "retryIn": "Vui lòng thử lại sau {{seconds}} giây.",
+      "retryLater": "Vui lòng thử lại sau ít phút.",
+      "checkBilling": "Kiểm tra billing tại ai.google.dev."
+    },
+    "noApiKey": {
+      "title": "Chưa có API Key",
+      "description": "Vào trang API Keys (nút trên header) để thêm Gemini API key."
+    },
+    "invalidApiKey": {
+      "title": "API Key không hợp lệ",
+      "description": "Gemini API key sai hoặc đã hết hạn. Kiểm tra lại key trong trang API Keys."
+    },
+    "noTextExtracted": {
+      "title": "Không trích xuất được văn bản",
+      "description": "File tải lên không có nội dung văn bản có thể đọc được. Thử file khác hoặc nhập văn bản trực tiếp."
+    },
+    "noTranscript": {
+      "title": "Video không có phụ đề",
+      "description": "Video YouTube này không có subtitle/captions. Hãy chọn video khác hoặc chuyển sang nhập văn bản."
+    },
+    "invalidYoutubeUrl": {
+      "title": "Link YouTube không hợp lệ",
+      "description": "URL không đúng định dạng YouTube. Kiểm tra lại đường dẫn."
+    },
+    "networkError": {
+      "title": "Không kết nối được server",
+      "description": "Kiểm tra backend đang chạy tại http://localhost:5000."
+    },
+    "quizFailed": {
+      "title": "Tạo quiz thất bại",
+      "unknownError": "Lỗi không xác định."
+    },
+    "loadQuizFailed": "Không tải được quiz",
+    "tryAgain": "Vui lòng thử lại.",
+    "deleteFailed": "Xóa thất bại",
+    "deleted": "Đã xóa"
+  },
+  "quizHistory": {
+    "title": "Lịch sử Quiz",
+    "description": "Các quiz đã tạo trong thư mục này",
+    "empty": "Chưa có quiz nào được tạo",
+    "viewSource": "Xem nguồn",
+    "start": "Bắt đầu"
+  },
+  "quiz": {
+    "back": "Quay lại",
+    "viewDoc": "Xem tài liệu",
+    "docTitle": "Tài liệu gốc",
+    "noPreview": "Không có bản xem trước.",
+    "title": "Bài Kiểm Tra Trắc Nghiệm",
+    "downloadDocx": "Tải DOCX",
+    "downloadPdf": "Tải PDF",
+    "answered": "đã trả lời",
+    "complete": "hoàn thành",
+    "prevQuestion": "Câu trước",
+    "questionOf": "Câu {{current}} / {{total}}",
+    "nextQuestion": "Câu tiếp",
+    "submit": "Nộp bài",
+    "submitCount": "Nộp bài ({{count}}/{{total}})",
+    "shortcuts": {
+      "navigate": "điều hướng",
+      "selectAnswer": "chọn đáp án",
+      "nextOrSubmit": "tiếp theo / nộp bài"
+    },
+    "results": {
+      "title": "Kết quả",
+      "excellent": "Xuất sắc! 🎉",
+      "good": "Khá tốt! 👍",
+      "needsWork": "Cần cố gắng thêm 💪",
+      "correct": "Đúng",
+      "wrong": "Sai",
+      "skipped": "Bỏ qua",
+      "time": "Thời gian",
+      "retake": "Làm lại",
+      "newQuiz": "Tạo quiz mới"
+    },
+    "questionList": "Danh sách câu hỏi",
+    "viewing": "Đang xem",
+    "answeredStatus": "Đã trả lời",
+    "unanswered": "Chưa trả lời"
+  },
+  "quizQuestion": {
+    "questionN": "Câu {{n}}: ",
+    "answer": "Đáp án: ",
+    "correctAnswer": "Đáp án đúng: ",
+    "explanation": "Giải thích: ",
+    "typeMultipleChoice": "Trắc nghiệm (1 đáp án)",
+    "typeMultipleAnswer": "Chọn nhiều đáp án",
+    "typeTrueFalse": "Đúng / Sai",
+    "typeFillBlank": "Điền vào chỗ trống",
+    "copyQuestion": "Sao chép câu hỏi",
+    "fillPlaceholder": "Nhập câu trả lời...",
+    "selectAllCorrect": "Chọn tất cả đáp án đúng (có thể nhiều hơn 1)",
+    "true": "Đúng",
+    "false": "Sai",
+    "correctLabel": "Đáp án đúng",
+    "wrongLabel": "Sai",
+    "explanationLabel": "Giải thích:"
+  },
+  "quizConfig": {
+    "questionCount": "Số lượng câu hỏi",
+    "questionCountUnit": "{{n}} câu",
+    "questionType": "Loại câu hỏi",
+    "types": {
+      "multiple-choice": "Trắc nghiệm (1 đáp án)",
+      "multiple-answer": "Chọn nhiều đáp án",
+      "true-false": "Đúng / Sai",
+      "fill-blank": "Điền vào chỗ trống",
+      "mixed": "Hỗn hợp"
+    },
+    "difficulty": "Độ khó",
+    "difficulties": {
+      "easy": "Dễ",
+      "medium": "Trung bình",
+      "hard": "Khó",
+      "mixed": "Hỗn hợp"
+    },
+    "language": "Ngôn ngữ",
+    "languages": {
+      "vi": "🇻🇳 Tiếng Việt",
+      "en": "🇬🇧 English"
+    },
+    "timePerQuestion": "Thời gian mỗi câu",
+    "timeOptions": {
+      "0": "Không giới hạn",
+      "15": "15 giây",
+      "30": "30 giây",
+      "60": "1 phút",
+      "120": "2 phút"
+    }
+  },
+  "inputSource": {
+    "tabs": {
+      "files": "Tập tin",
+      "youtube": "YouTube",
+      "text": "Văn bản"
+    },
+    "fileNotOnServer": "File không còn trên máy chủ",
+    "dropHere": "Thả file vào đây...",
+    "dragOrClick": "Kéo thả file vào đây hoặc click để chọn",
+    "supportedFormats": "Hỗ trợ PDF, DOCX, PNG, JPG, WEBP, BMP",
+    "chooseFile": "Chọn file",
+    "selectedFiles": "Đã chọn {{count}} file",
+    "removeAll": "Xóa tất cả",
+    "previousFiles": "File đã tải trước",
+    "selected": "đã chọn",
+    "collapse": "Thu gọn",
+    "showMore": "Xem thêm {{count}} file khác",
+    "deselectAll": "Bỏ chọn tất cả",
+    "previousYoutubeLinks": "Link YouTube đã dùng",
+    "youtubeTitle": "Trích xuất phụ đề YouTube",
+    "youtubeDescription": "Ứng dụng sẽ tìm và trích xuất phụ đề (CC) từ video YouTube để tạo quiz.",
+    "youtubeLabel": "Link YouTube",
+    "youtubeInvalid": "URL không hợp lệ. Vui lòng nhập link YouTube hợp lệ.",
+    "subtitleLanguage": "Ngôn ngữ phụ đề ưu tiên",
+    "subtitlePlaceholder": "Chọn ngôn ngữ...",
+    "subtitleNote": "Nếu không tìm thấy phụ đề ngôn ngữ này, ứng dụng sẽ tự động dùng phụ đề có sẵn.",
+    "previousTexts": "Văn bản đã dùng trước",
+    "textInputTitle": "Văn bản nhập trực tiếp",
+    "textRestored": "Đã khôi phục văn bản",
+    "textLoadError": "Không thể tải nội dung văn bản",
+    "textDirectInput": "Nhập văn bản trực tiếp",
+    "textDirectDescription": "Dán hoặc nhập nội dung bài học, tài liệu mà bạn muốn tạo quiz.",
+    "textPlaceholder": "Dán nội dung tài liệu vào đây...",
+    "textOverLimit": "Vượt quá {{count}} ký tự — hãy rút gọn nội dung",
+    "characters": "ký tự",
+    "images": "ảnh"
+  },
+  "materials": {
+    "processing": "Đang xử lý",
+    "processingError": "Lỗi xử lý",
+    "pending": "Chờ xử lý",
+    "uploadSuccess": "Tải lên thành công",
+    "uploadSuccessDesc": "Đã thêm {{count}} tài liệu vào thư mục.",
+    "uploadFailed": "Tải lên thất bại",
+    "modeFiles": "Tập tin",
+    "modeText": "Văn bản",
+    "addMaterial": "Thêm tài liệu",
+    "addMaterialDesc": "Tải file, nhập link YouTube hoặc dán văn bản",
+    "dropFilesHere": "Thả file vào đây...",
+    "dragOrClickFiles": "Kéo thả file hoặc click để chọn",
+    "chooseFile": "Chọn file",
+    "filesSelected": "{{count}} file đã chọn",
+    "youtubeTitle": "Trích xuất phụ đề YouTube",
+    "youtubeDescription": "Lưu link YouTube để sử dụng khi tạo quiz. Phụ đề sẽ tự động trích xuất khi bạn tạo quiz.",
+    "youtubeLabel": "Link YouTube",
+    "textDirectInput": "Nhập văn bản trực tiếp",
+    "textPlaceholder": "Dán nội dung tài liệu vào đây...",
+    "textInfoDescription": "Tối đa {{max}} ký tự",
+    "characters": "ký tự",
+    "uploading": "Đang tải lên...",
+    "upload": "Tải lên",
+    "deleteSuccess": "Đã xóa",
+    "deleteSuccessDesc": "\"{{name}}\" đã được xóa.",
+    "deleteFailed": "Xóa thất bại",
+    "deleteFailedDesc": "Vui lòng thử lại.",
+    "noMaterials": "Chưa có tài liệu nào",
+    "noMaterialsHint": "Nhấn 'Thêm tài liệu' để bắt đầu tải lên",
+    "fileNotOnServer": "File không còn trên server",
+    "reprocess": "Thử xử lý lại",
+    "uploadedMaterials": "Tài liệu đã tải lên",
+    "chooseForQuiz": "Chọn tài liệu ở tab 'Tạo Quiz' để tạo câu hỏi",
+    "text": "Văn bản"
+  },
+  "materialSelect": {
+    "title": "Chọn 1 tài liệu",
+    "selected": "Đã chọn",
+    "description": "Chỉ được chọn một tài liệu đã tải lên để tạo quiz",
+    "deselect": "Bỏ chọn",
+    "empty": "Chưa có tài liệu nào",
+    "emptyHint": "Vào tab 'Tài liệu' để tải lên tài liệu trước",
+    "processingCount": "Đang xử lý ({{count}})",
+    "processingStatus": "Đang xử lý...",
+    "pendingStatus": "Chờ xử lý"
+  },
+  "uploadHistory": {
+    "deleteSuccess": "Đã xóa",
+    "deleteSuccessDesc": "\"{{name}}\" đã được xóa khỏi lịch sử.",
+    "deleteFailed": "Xóa thất bại",
+    "deleteFailedDesc": "Vui lòng thử lại.",
+    "title": "File đã tải lên",
+    "description": "Các file và nguồn nội dung đã sử dụng để tạo quiz",
+    "empty": "Chưa có file nào được tải lên",
+    "emptyHint": "Tạo quiz để bắt đầu lưu lịch sử file",
+    "textMode": "Văn bản"
+  },
+  "docxPreview": {
+    "error": "Không thể hiển thị tài liệu này.",
+    "loading": "Đang tải bản xem trước tài liệu..."
+  },
+  "fileUpload": {
+    "dropHere": "Thả file vào đây...",
+    "dragOrClick": "Kéo thả file vào đây hoặc click để chọn",
+    "supportedFormats": "Hỗ trợ PDF, DOCX, PNG, JPG, WEBP, BMP",
+    "chooseFile": "Chọn file",
+    "selectedFiles": "Đã chọn {{count}} file",
+    "removeAll": "Xóa tất cả",
+    "image": "Ảnh"
+  },
+  "export": {
+    "defaultTitle": "Bài Kiểm Tra",
+    "questionPrefix": "Câu {{n}}: ",
+    "answerKey": "ĐÁP ÁN",
+    "explanation": "Giải thích: "
+  },
+  "pdfViewer": {
+    "pageLabel": "Trang:",
+    "noPageInfo": "Không có thông tin trang",
+    "zoomOut": "Thu nhỏ",
+    "zoomIn": "Phóng to",
+    "resetZoom": "Đặt lại zoom",
+    "heatmapOff": "Tắt heatmap",
+    "heatmapOn": "Hiển thị heatmap nhiệt trên PDF",
+    "questionCount": "{{count}} câu hỏi",
+    "all": "Tất cả",
+    "highlightAllOff": "Tắt highlight tất cả",
+    "highlightAllOn": "Highlight tất cả từ khóa trong PDF",
+    "highlightingAll": "Đang highlight tất cả từ khóa",
+    "turnOff": "Tắt",
+    "viewingSource": "Đang xem nguồn câu {{n}}",
+    "deselect": "Bỏ chọn",
+    "clickToView": "Click câu hỏi để xem trang nguồn",
+    "pdfLoadError": "Không tải được PDF",
+    "unknownError": "Lỗi không xác định",
+    "loadingPdf": "Đang tải PDF...",
+    "page": "Trang",
+    "pageN": "Trang {{n}}",
+    "questions": "câu",
+    "zones": "vùng",
+    "low": "Ít",
+    "high": "Nhiều",
+    "pagesWithQuestions": "trang có câu hỏi",
+    "heatZones": "vùng nhiệt",
+    "pagesLabel": "trang bao phủ",
+    "questionsWithKeywords": "câu có từ khóa",
+    "noSourcePage": "không có trang nguồn",
+    "questionN": "Câu {{n}}"
+  },
+  "pageHeatmap": {
+    "pageN": "Trang {{n}}",
+    "questionsCount": "câu",
+    "noQuestions": "Không có câu quiz",
+    "loadingKeywords": "Đang tải từ khóa…",
+    "hoverToLoad": "Hover để tải từ khóa",
+    "page": "trang",
+    "questions": "câu",
+    "hotspot": "Hotspot:",
+    "low": "Ít",
+    "high": "Nhiều"
+  },
+  "interactiveFolder": {
+    "paper1": "Bài tập",
+    "paper2": "Ôn tập"
+  },
+  "settings": {
+    "timeAgo": {
+      "never": "Chưa sử dụng",
+      "justNow": "Vừa xong",
+      "minutesAgo": "{{n}} phút trước",
+      "hoursAgo": "{{n}} giờ trước",
+      "daysAgo": "{{n}} ngày trước"
+    },
+    "addKeySuccess": "Đã thêm API key",
+    "addKeyError": "Lỗi khi thêm key",
+    "keyAlreadyExists": "Key đã tồn tại",
+    "addKeyButton": "Thêm Key",
+    "addKeyDialog": {
+      "title": "Thêm Gemini API Key",
+      "description": "Nhập API key từ Google AI Studio. Key sẽ được lưu và dùng xoay vòng khi tạo quiz.",
+      "labelField": "Nhãn (tùy chọn)",
+      "labelPlaceholder": "VD: Account chính, Account phụ...",
+      "cancelButton": "Hủy",
+      "addingButton": "Đang thêm...",
+      "addButton": "Thêm key"
+    },
+    "modelUsage": {
+      "title": "Token theo Model",
+      "description": "Chi tiết sử dụng và giới hạn từng model Gemini",
+      "totalTokens": "Tổng tokens",
+      "successRate": "Tỷ lệ thành công",
+      "errorPrefix": "Lỗi:"
+    },
+    "keyCard": {
+      "save": "Lưu",
+      "noLabel": "Không có nhãn"
+    },
+    "summary": {
+      "totalKeys": "Tổng key",
+      "activeKeys": "Đang hoạt động",
+      "totalTokens": "Tổng tokens",
+      "totalRequests": "Tổng requests"
+    },
+    "tokenUsage": {
+      "title": "Token Usage",
+      "description": "Tổng tokens đã sử dụng trên tất cả key",
+      "total": "Tổng"
+    },
+    "loading": "Đang tải...",
+    "emptyState": {
+      "title": "Chưa có API key nào",
+      "description": "Thêm Gemini API key để bắt đầu tạo quiz. Hệ thống sẽ tự động xoay vòng giữa các key khi gặp rate limit."
+    },
+    "deletedKey": "Đã xóa key",
+    "updatedLabel": "Đã cập nhật nhãn",
+    "freeTier": {
+      "title": "Giới hạn Free Tier (Gemini API)",
+      "description": "Rate limit cho mỗi API key, mỗi model có quota riêng",
+      "bestQuality": "Chất lượng tốt nhất",
+      "fastest": "Nhanh nhất, rẻ nhất",
+      "highestQuota": "Quota cao nhất",
+      "requestsPerDay": "Requests/ngày",
+      "requestsPerMin": "Requests/phút",
+      "tokensPerMin": "Tokens/phút",
+      "note": "Mỗi model có quota riêng biệt — hệ thống sẽ tự động fallback sang model khác khi hết quota."
+    },
+    "keyRotation": {
+      "title": "Cách hoạt động Key Rotation",
+      "rules": [
+        "Hệ thống chọn key có ít request nhất (round-robin)",
+        "Nếu gặp lỗi 429 (rate limit), tự động chuyển sang key tiếp theo",
+        "Nếu gặp lỗi 429 trên một model, tự động fallback: gemini-2.5-flash → gemini-2.5-flash-lite → gemini-2.0-flash",
+        "Key bị lỗi 401/403 sẽ bị đánh dấu inactive",
+        "Tất cả key share cùng pool — thêm nhiều key = tăng throughput"
+      ]
+    },
+    "rateLimit": {
+      "perDay": "/ngày",
+      "perMinute": "/phút"
+    }
+  },
+  "folderStats": {
+    "loading": "Đang tải thống kê...",
+    "loadError": "Không tải được thống kê",
+    "noData": "Chưa có dữ liệu thống kê",
+    "hasQuizSets": "Bạn có {{count}} quiz sẵn sàng — hãy làm quiz để xem thống kê!",
+    "createFirst": "Tạo và hoàn thành quiz đầu tiên để xem thống kê chi tiết tại đây.",
+    "timeMin": "p",
+    "score": {
+      "excellent": "Xuất sắc",
+      "good": "Khá",
+      "average": "Trung bình",
+      "needsImprovement": "Cần cải thiện"
+    },
+    "metrics": {
+      "avgScore": "Điểm trung bình",
+      "bestScore": "Điểm cao nhất",
+      "lowestScore": "Thấp nhất: {{score}}%",
+      "accuracy": "Chính xác",
+      "accuracyDetail": "{{correct}} / {{total}} câu",
+      "avgTime": "Thời gian TB",
+      "totalAttempts": "{{count}} lần làm bài"
+    },
+    "scoreTrend": {
+      "title": "Xu hướng điểm số",
+      "score": "Điểm",
+      "attempt": "Lần {{n}}"
+    },
+    "recentAttempts": {
+      "title": "Lần làm gần đây",
+      "questions": "câu"
+    },
+    "completionDonut": {
+      "completed": "Hoàn thành",
+      "notAttempted": "Chưa thử",
+      "improvement": "+{{rate}}% so với trước",
+      "title": "Tiến độ hoàn thành",
+      "quizCount": "{{done}}/{{total}} quiz",
+      "remaining": "Còn {{count}} quiz chưa thử",
+      "allDone": "Đã hoàn thành tất cả!"
+    },
+    "difficultyChart": {
+      "title": "Theo mức độ khó",
+      "avgScore": "Điểm TB",
+      "accuracy": "Chính xác"
+    },
+    "categoryRadar": {
+      "title": "Phân tích theo loại",
+      "avgScore": "Điểm TB",
+      "accuracy": "Chính xác"
+    },
+    "difficulty": {
+      "easy": "Dễ",
+      "medium": "Trung bình",
+      "hard": "Khó",
+      "mixed": "Hỗn hợp"
+    },
+    "qtype": {
+      "multiple-choice": "Trắc nghiệm",
+      "true-false": "Đúng / Sai",
+      "fill-blank": "Điền trống",
+      "mixed": "Hỗn hợp"
+    },
+    "quizTreemap": {
+      "title": "So sánh Quiz",
+      "modeScore": "Điểm số",
+      "legendScore": "size = số lần làm · màu = điểm số",
+      "modeActivity": "Hoạt động",
+      "legendActivity": "size = số câu hỏi · màu = mức hoạt động",
+      "modeDifficulty": "Độ khó",
+      "legendDifficulty": "size = số lần làm · màu = độ khó",
+      "veryActive": "Rất tích cực",
+      "active": "Tích cực",
+      "moderate": "Trung bình",
+      "inactive": "Ít hoạt động",
+      "diffEasy": "Dễ",
+      "diffMedium": "Vừa",
+      "diffHard": "Khó",
+      "diffVeryHard": "Rất khó",
+      "attempted": "đã làm",
+      "notAttempted": "chưa thử",
+      "times": "lần",
+      "questionsUnit": "câu",
+      "bestScore": "điểm cao nhất",
+      "timesLabel": "lần làm",
+      "avgScore": "điểm TB",
+      "avg": "TB",
+      "last": "Cuối",
+      "highest": "Cao nhất",
+      "activity": "Hoạt động",
+      "difficulty": "Độ khó",
+      "average": "Trung bình",
+      "lastAttempt": "Lần cuối",
+      "attemptCount": "Số lần làm",
+      "questionCount": "Số câu",
+      "notAttemptedLabel": "Chưa thử"
+    }
+  }
+}

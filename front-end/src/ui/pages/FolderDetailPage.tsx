@@ -1,6 +1,8 @@
 import { useState, useEffect, type ElementType } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import i18n from "@/config/i18n";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -79,115 +81,107 @@ function parseQuizError(err: Error): {
 
   // Quota / rate limit (HTTP 429)
   if (/429|quota exceeded|rate.?limit|free.?tier/i.test(msg)) {
-    // All models exhausted in the fallback chain
     if (/all gemini models exhausted/i.test(msg)) {
       return {
-        title: "Tất cả models đều hết quota",
-        description:
-          "Đã thử gemini-2.5-flash → gemini-2.5-flash-lite → gemini-2.0-flash, tất cả đều hết quota miễn phí hôm nay. Quota reset lúc 00:00 giờ Mỹ (khoảng 12:00-15:00 giờ Việt Nam). Thử lại sau!",
+        title: i18n.t("errors.allModelsExhausted.title"),
+        description: i18n.t("errors.allModelsExhausted.description"),
         duration: 12000,
       };
     }
-    // Try to extract "retry in XX s" from the message
     const retryMatch =
       msg.match(/retry(?: in)? (\d+(?:\.\d+)?)\s*s/i) ??
       msg.match(/seconds: (\d+)/i);
     const retrySec = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) : null;
     const retryNote = retrySec
-      ? ` Vui lòng thử lại sau ${retrySec} giây.`
-      : " Vui lòng thử lại sau ít phút.";
+      ? ` ${i18n.t("errors.quotaExceeded.retryIn", { seconds: retrySec })}`
+      : ` ${i18n.t("errors.quotaExceeded.retryLater")}`;
     return {
-      title: "Vượt giới hạn Gemini API",
+      title: i18n.t("errors.quotaExceeded.title"),
       description:
-        "Tài khoản đã hết quota miễn phí cho model Gemini." +
+        i18n.t("errors.quotaExceeded.description") +
         retryNote +
-        " Kiểm tra billing tại ai.google.dev.",
+        ` ${i18n.t("errors.quotaExceeded.checkBilling")}`,
       duration: 10000,
     };
   }
 
-  // Gemini key missing
   if (/api key not configured|GEMINI_API_KEY|chưa có gemini/i.test(msg)) {
     return {
-      title: "Chưa có API Key",
-      description:
-        "Vào trang API Keys (nút trên header) để thêm Gemini API key.",
+      title: i18n.t("errors.noApiKey.title"),
+      description: i18n.t("errors.noApiKey.description"),
       duration: 8000,
     };
   }
 
-  // Invalid / wrong API key
   if (/401|invalid.?api.?key|api_key_invalid/i.test(msg)) {
     return {
-      title: "API Key không hợp lệ",
-      description:
-        "Gemini API key sai hoặc đã hết hạn. Kiểm tra lại key trong trang API Keys.",
+      title: i18n.t("errors.invalidApiKey.title"),
+      description: i18n.t("errors.invalidApiKey.description"),
       duration: 8000,
     };
   }
 
-  // No text extracted from files
   if (/could not extract any text|no text content/i.test(msg)) {
     return {
-      title: "Không trích xuất được văn bản",
-      description:
-        "File tải lên không có nội dung văn bản có thể đọc được. Thử file khác hoặc nhập văn bản trực tiếp.",
+      title: i18n.t("errors.noTextExtracted.title"),
+      description: i18n.t("errors.noTextExtracted.description"),
       duration: 8000,
     };
   }
 
-  // YouTube no transcript
   if (/no transcripts|transcripts disabled|captions disabled/i.test(msg)) {
     return {
-      title: "Video không có phụ đề",
-      description:
-        "Video YouTube này không có subtitle/captions. Hãy chọn video khác hoặc chuyển sang nhập văn bản.",
+      title: i18n.t("errors.noTranscript.title"),
+      description: i18n.t("errors.noTranscript.description"),
       duration: 8000,
     };
   }
 
-  // YouTube invalid URL
   if (/invalid youtube url/i.test(msg)) {
     return {
-      title: "Link YouTube không hợp lệ",
-      description: "URL không đúng định dạng YouTube. Kiểm tra lại đường dẫn.",
+      title: i18n.t("errors.invalidYoutubeUrl.title"),
+      description: i18n.t("errors.invalidYoutubeUrl.description"),
       duration: 6000,
     };
   }
 
-  // Network / fetch errors
   if (/network|fetch|ECONNREFUSED|failed to fetch/i.test(msg)) {
     return {
-      title: "Không kết nối được server",
-      description: "Kiểm tra backend đang chạy tại http://localhost:5000.",
+      title: i18n.t("errors.networkError.title"),
+      description: i18n.t("errors.networkError.description"),
       duration: 8000,
     };
   }
 
-  // Generic fallback
   return {
-    title: "Tạo quiz thất bại",
+    title: i18n.t("errors.quizFailed.title"),
     description:
-      msg.length > 200 ? msg.slice(0, 200) + "…" : msg || "Lỗi không xác định.",
+      msg.length > 200 ? msg.slice(0, 200) + "…" : msg || i18n.t("errors.quizFailed.unknownError"),
     duration: 8000,
   };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-const QUESTION_TYPE_LABELS: Record<string, string> = {
-  "multiple-choice": "Trắc nghiệm",
-  "true-false": "Đúng / Sai",
-  "fill-blank": "Điền trống",
-  mixed: "Hỗn hợp",
-};
+function getQuestionTypeLabel(key: string): string {
+  const map: Record<string, string> = {
+    "multiple-choice": i18n.t("folderStats.qtype.multiple-choice"),
+    "true-false": i18n.t("folderStats.qtype.true-false"),
+    "fill-blank": i18n.t("folderStats.qtype.fill-blank"),
+    mixed: i18n.t("folderStats.qtype.mixed"),
+  };
+  return map[key] ?? key;
+}
 
-const DIFFICULTY_LABELS: Record<string, string> = {
-  easy: "Dễ",
-  medium: "Trung bình",
-  hard: "Khó",
-  mixed: "Hỗn hợp",
-};
+function getDifficultyLabel(key: string): string {
+  const map: Record<string, string> = {
+    easy: i18n.t("folderStats.difficulty.easy"),
+    medium: i18n.t("folderStats.difficulty.medium"),
+    hard: i18n.t("folderStats.difficulty.hard"),
+    mixed: i18n.t("folderStats.difficulty.mixed"),
+  };
+  return map[key] ?? key;
+}
 
 const DIFFICULTY_VARIANT: Record<
   string,
@@ -309,8 +303,8 @@ function QuizHistorySection({ folderId }: QuizHistorySectionProps) {
         },
       });
     } catch {
-      toast.error("Không tải được quiz", {
-        description: "Vui lòng thử lại.",
+      toast.error(i18n.t("errors.loadQuizFailed"), {
+        description: i18n.t("errors.tryAgain"),
       });
     } finally {
       setLoadingId(null);
@@ -320,9 +314,9 @@ function QuizHistorySection({ folderId }: QuizHistorySectionProps) {
   const handleDelete = (set: QuizSetSummary) => {
     deleteQuizSet.mutate(set.id, {
       onSuccess: () =>
-        toast.success("Đã xóa", { description: `"${set.title}" đã được xóa.` }),
+        toast.success(i18n.t("errors.deleted"), { description: `"${set.title}"` }),
       onError: () =>
-        toast.error("Xóa thất bại", { description: "Vui lòng thử lại." }),
+        toast.error(i18n.t("errors.deleteFailed"), { description: i18n.t("errors.tryAgain") }),
     });
   };
 
@@ -332,9 +326,9 @@ function QuizHistorySection({ folderId }: QuizHistorySectionProps) {
         <CardHeader className="shrink-0 pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <History className="size-4" />
-            Lịch sử Quiz
+            {i18n.t("quizHistory.title")}
           </CardTitle>
-          <CardDescription>Các quiz đã tạo trong thư mục này</CardDescription>
+          <CardDescription>{i18n.t("quizHistory.description")}</CardDescription>
         </CardHeader>
         <CardContent className="flex-1 min-h-0 p-0">
           <ScrollArea className="h-full">
@@ -350,7 +344,7 @@ function QuizHistorySection({ folderId }: QuizHistorySectionProps) {
             ) : !quizSets || quizSets.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
                 <BookOpen className="size-8 opacity-40" />
-                <p className="text-sm">Chưa có quiz nào được tạo</p>
+                <p className="text-sm">{i18n.t("quizHistory.empty")}</p>
               </div>
             ) : (
               <div className="divide-y">
@@ -372,10 +366,10 @@ function QuizHistorySection({ folderId }: QuizHistorySectionProps) {
                             variant="ghost"
                             className="h-7 gap-1 text-xs text-muted-foreground hover:text-foreground"
                             onClick={() => setViewerQuizSetId(set.id)}
-                            title="Xem tài liệu nguồn của quiz"
+                            title={i18n.t("quizHistory.viewSource")}
                           >
                             <BookOpenCheck className="size-3.5" />
-                            <span className="hidden sm:inline">Xem nguồn</span>
+                            <span className="hidden sm:inline">{i18n.t("quizHistory.viewSource")}</span>
                           </Button>
                           <Button
                             size="sm"
@@ -389,7 +383,7 @@ function QuizHistorySection({ folderId }: QuizHistorySectionProps) {
                             ) : (
                               <Play className="size-3" />
                             )}
-                            Bắt đầu
+                            {i18n.t("quizHistory.start")}
                           </Button>
                           <Button
                             size="sm"
@@ -406,17 +400,16 @@ function QuizHistorySection({ folderId }: QuizHistorySectionProps) {
                       {/* Row 2: Meta + badges + score */}
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs text-muted-foreground">
-                          {formatDate(set.createdAt)} · {set.questionCount} câu
+                          {formatDate(set.createdAt)} · {set.questionCount} {i18n.t("common.questions")}
                           {qStats && qStats.attemptCount > 0 && (
-                            <> · {qStats.attemptCount} lần làm</>
+                            <> · {qStats.attemptCount} {i18n.t("common.attempts")}</>
                           )}
                         </span>
                         <Badge
                           variant="outline"
                           className="text-[10px] px-1.5 py-0 h-4"
                         >
-                          {QUESTION_TYPE_LABELS[set.config?.questionType] ??
-                            set.config?.questionType}
+                          {getQuestionTypeLabel(set.config?.questionType)}
                         </Badge>
                         <Badge
                           variant={
@@ -425,8 +418,7 @@ function QuizHistorySection({ folderId }: QuizHistorySectionProps) {
                           }
                           className="text-[10px] px-1.5 py-0 h-4"
                         >
-                          {DIFFICULTY_LABELS[set.config?.difficulty] ??
-                            set.config?.difficulty}
+                          {getDifficultyLabel(set.config?.difficulty)}
                         </Badge>
                         {qStats && qStats.lastScore !== null && (
                           <span
@@ -511,14 +503,13 @@ function QuizPdfViewerDialog({
         <Dialog open onOpenChange={(v) => !v && onClose()}>
           <DialogContent className="max-w-sm">
             <DialogHeader>
-              <DialogTitle>Không có file PDF</DialogTitle>
+              <DialogTitle>{i18n.t("folder.noMaterialSelectedPdf")}</DialogTitle>
             </DialogHeader>
             <p className="text-sm text-muted-foreground">
-              Quiz này không có file PDF nguồn được lưu trên server (có thể đã
-              tạo từ YouTube hoặc văn bản trực tiếp).
+              {i18n.t("folder.noMaterialSelectedPdfDesc")}
             </p>
             <Button variant="outline" onClick={onClose}>
-              Đóng
+              {i18n.t("common.close")}
             </Button>
           </DialogContent>
         </Dialog>
@@ -537,59 +528,61 @@ interface GeneratingStage {
   detail: string;
 }
 
-const GENERATING_STAGES: Record<InputMode, GeneratingStage[]> = {
-  files: [
-    {
-      icon: Upload,
-      label: "Tải file lên server",
-      detail: "Đang nhận dữ liệu từ trình duyệt...",
-    },
-    {
-      icon: ScanText,
-      label: "Trích xuất văn bản",
-      detail: "OCR / PDF / DOCX đang được xử lý...",
-    },
-    {
-      icon: Brain,
-      label: "Phân tích nội dung",
-      detail: "Làm sạch và chọn đoạn văn quan trọng...",
-    },
-    {
-      icon: Sparkles,
-      label: "AI tạo câu hỏi",
-      detail: "Gemini đang soạn câu hỏi từ nội dung...",
-    },
-  ],
-  youtube: [
-    {
-      icon: Play,
-      label: "Tải transcript YouTube",
-      detail: "Đang lấy phụ đề từ video...",
-    },
-    {
-      icon: Brain,
-      label: "AI tóm tắt transcript",
-      detail: "Gemini đang xử lý và rút gọn nội dung...",
-    },
-    {
-      icon: Sparkles,
-      label: "AI tạo câu hỏi",
-      detail: "Soạn câu hỏi từ nội dung video...",
-    },
-  ],
-  text: [
-    {
-      icon: FileUp,
-      label: "Phân tích văn bản",
-      detail: "Đang làm sạch và phân đoạn nội dung...",
-    },
-    {
-      icon: Sparkles,
-      label: "AI tạo câu hỏi",
-      detail: "Gemini đang soạn câu hỏi...",
-    },
-  ],
-};
+function getGeneratingStages(): Record<InputMode, GeneratingStage[]> {
+  return {
+    files: [
+      {
+        icon: Upload,
+        label: i18n.t("folder.steps.upload"),
+        detail: i18n.t("folder.steps.uploadDesc"),
+      },
+      {
+        icon: ScanText,
+        label: i18n.t("folder.steps.extract"),
+        detail: i18n.t("folder.steps.extractDesc"),
+      },
+      {
+        icon: Brain,
+        label: i18n.t("folder.steps.analyze"),
+        detail: i18n.t("folder.steps.analyzeDesc"),
+      },
+      {
+        icon: Sparkles,
+        label: i18n.t("folder.steps.aiGenerate"),
+        detail: i18n.t("folder.steps.aiGenerateDesc"),
+      },
+    ],
+    youtube: [
+      {
+        icon: Play,
+        label: i18n.t("folder.steps.ytTranscript"),
+        detail: i18n.t("folder.steps.ytTranscriptDesc"),
+      },
+      {
+        icon: Brain,
+        label: i18n.t("folder.steps.ytSummarize"),
+        detail: i18n.t("folder.steps.ytSummarizeDesc"),
+      },
+      {
+        icon: Sparkles,
+        label: i18n.t("folder.steps.aiGenerate"),
+        detail: i18n.t("folder.steps.ytQuiz"),
+      },
+    ],
+    text: [
+      {
+        icon: FileUp,
+        label: i18n.t("folder.steps.textAnalyze"),
+        detail: i18n.t("folder.steps.textAnalyzeDesc"),
+      },
+      {
+        icon: Sparkles,
+        label: i18n.t("folder.steps.aiGenerate"),
+        detail: i18n.t("folder.steps.textQuiz"),
+      },
+    ],
+  };
+}
 
 // Cumulative delay (ms) before advancing to each subsequent stage
 const STAGE_DELAYS: Record<InputMode, number[]> = {
@@ -605,7 +598,7 @@ function GeneratingModal({
   open: boolean;
   inputMode: InputMode;
 }) {
-  const stages = GENERATING_STAGES[inputMode];
+  const stages = getGeneratingStages()[inputMode];
   const [currentStage, setCurrentStage] = useState(0);
 
   useEffect(() => {
@@ -636,10 +629,10 @@ function GeneratingModal({
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle className="flex items-center gap-2 text-base">
             <Loader2 className="size-4 animate-spin text-primary" />
-            Đang tạo quiz...
+            {i18n.t("folder.generating")}
           </DialogTitle>
           <DialogDescription>
-            Vui lòng chờ, không đóng cửa sổ này.
+            {i18n.t("folder.generatingWait")}
           </DialogDescription>
         </DialogHeader>
 
@@ -718,6 +711,7 @@ export function FolderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { folders } = useFolders();
   const folder = folders.find((f) => f.id === id);
 
@@ -730,9 +724,8 @@ export function FolderDetailPage() {
 
   const handleGenerate = () => {
     if (!inputReady) {
-      toast.warning("Chưa chọn tài liệu", {
-        description:
-          "Vui lòng chọn ít nhất một tài liệu đã tải lên để tạo quiz.",
+      toast.warning(t("folder.noMaterialSelected"), {
+        description: t("folder.noMaterialSelectedDesc"),
       });
       return;
     }
@@ -757,7 +750,7 @@ export function FolderDetailPage() {
           if (data.tokenUsage && data.tokenUsage.total_tokens > 0) {
             const t = data.tokenUsage;
             toast.info("Token usage", {
-              description: `Input: ${t.input_tokens.toLocaleString()} · Output: ${t.output_tokens.toLocaleString()} · Tổng: ${t.total_tokens.toLocaleString()} tokens`,
+              description: `Input: ${t.input_tokens.toLocaleString()} · Output: ${t.output_tokens.toLocaleString()} · Total: ${t.total_tokens.toLocaleString()} tokens`,
               duration: 6000,
             });
           }
@@ -826,7 +819,7 @@ export function FolderDetailPage() {
           onClick={() => navigate("/")}
         >
           <ArrowLeft className="size-4" />
-          Thư mục
+          {t("folder.title")}
         </Button>
         <span className="text-muted-foreground">/</span>
         <div className="flex items-center gap-2">
@@ -835,7 +828,7 @@ export function FolderDetailPage() {
             style={{ color: folder?.color ?? "hsl(var(--primary))" }}
           />
           <span className="font-medium text-sm">
-            {folder?.name ?? "Thư mục"}
+            {folder?.name ?? t("folder.title")}
           </span>
         </div>
       </div>
@@ -845,21 +838,21 @@ export function FolderDetailPage() {
         <TabsList className="shrink-0 w-fit">
           <TabsTrigger value="materials" className="gap-1.5">
             <FileUp className="size-3.5" />
-            Tài liệu
+            {t("folder.tabs.materials")}
             {id && <UploadCountBadge folderId={id} />}
           </TabsTrigger>
           <TabsTrigger value="create" className="gap-1.5">
             <Sparkles className="size-3.5" />
-            Tạo Quiz
+            {t("folder.tabs.createQuiz")}
           </TabsTrigger>
           <TabsTrigger value="history" className="gap-1.5">
             <History className="size-3.5" />
-            Lịch sử
+            {t("folder.tabs.history")}
             {id && <QuizCountBadge folderId={id} />}
           </TabsTrigger>
           <TabsTrigger value="stats" className="gap-1.5">
             <BarChart3 className="size-3.5" />
-            Thống kê
+            {t("folder.tabs.stats")}
             {id && <StatsCountBadge folderId={id} />}
           </TabsTrigger>
         </TabsList>
@@ -893,10 +886,10 @@ export function FolderDetailPage() {
                 <CardHeader className="shrink-0 pb-3">
                   <CardTitle className="flex items-center gap-2">
                     <Settings2 className="size-5" />
-                    Cấu hình Quiz
+                    {t("folder.quizConfig.title")}
                   </CardTitle>
                   <CardDescription>
-                    Tùy chỉnh quiz theo nhu cầu của bạn
+                    {t("folder.quizConfig.subtitle")}
                   </CardDescription>
                 </CardHeader>
 
@@ -928,12 +921,12 @@ export function FolderDetailPage() {
                     {generateQuiz.isPending ? (
                       <>
                         <Loader2 className="size-5 animate-spin" />
-                        Đang tạo quiz...
+                        {t("folder.generating")}
                       </>
                     ) : (
                       <>
                         <Sparkles className="size-5" />
-                        Tạo Quiz
+                        {t("folder.createQuizBtn")}
                         <ArrowRight className="size-4" />
                       </>
                     )}

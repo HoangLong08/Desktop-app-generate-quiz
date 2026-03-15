@@ -3,6 +3,7 @@ import { motion, type Transition } from "framer-motion";
 import { Trash2, Star, Folder, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import i18n from "@/config/i18n";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -62,7 +63,7 @@ const PAPERS: PaperConfig[] = [
     hoverY: -40,
     hoverRotate: 4,
     left: 18,
-    title: "Bài tập",
+    title: i18n.t("interactiveFolder.paper1"),
   },
   {
     restRotate: 7,
@@ -70,7 +71,7 @@ const PAPERS: PaperConfig[] = [
     hoverY: -24,
     hoverRotate: 11,
     left: 24,
-    title: "Ôn tập",
+    title: i18n.t("interactiveFolder.paper2"),
   },
 ];
 

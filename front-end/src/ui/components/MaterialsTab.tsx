@@ -1,4 +1,6 @@
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "@/config/i18n";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -100,7 +102,7 @@ function getInputModeBadge(mode: string) {
   > = {
     files: { label: "File", variant: "secondary" },
     youtube: { label: "YouTube", variant: "default" },
-    text: { label: "Văn bản", variant: "outline" },
+    text: { label: i18n.t("materials.text"), variant: "outline" },
   };
   const m = map[mode] ?? { label: mode, variant: "outline" as const };
   return (
@@ -116,7 +118,7 @@ function getProcessingBadge(record: UploadRecord) {
       return (
         <span className="inline-flex items-center gap-1 text-[10px] text-blue-500">
           <Loader2 className="size-3 animate-spin" />
-          Đang xử lý
+          {i18n.t("materials.processing")}
         </span>
       );
     case "completed":
@@ -130,14 +132,14 @@ function getProcessingBadge(record: UploadRecord) {
       return (
         <span className="inline-flex items-center gap-1 text-[10px] text-destructive">
           <AlertCircle className="size-3" />
-          Lỗi xử lý
+          {i18n.t("materials.processingError")}
         </span>
       );
     default:
       return (
         <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
           <Loader2 className="size-3" />
-          Chờ xử lý
+          {i18n.t("materials.pending")}
         </span>
       );
   }
@@ -146,6 +148,7 @@ function getProcessingBadge(record: UploadRecord) {
 // ─── Upload Form ──────────────────────────────────────────────────────────────
 
 function UploadForm({ folderId }: { folderId: string }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<UploadMode>("files");
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [ytUrl, setYtUrl] = useState("");
@@ -187,15 +190,17 @@ function UploadForm({ folderId }: { folderId: string }) {
       },
       {
         onSuccess: (records) => {
-          toast.success("Tải lên thành công", {
-            description: `Đã thêm ${records.length} tài liệu vào thư mục.`,
+          toast.success(t("materials.uploadSuccess"), {
+            description: t("materials.uploadSuccessDesc", {
+              count: records.length,
+            }),
           });
           setPendingFiles([]);
           setYtUrl("");
           setRawText("");
         },
         onError: (err) => {
-          toast.error("Tải lên thất bại", {
+          toast.error(t("materials.uploadFailed"), {
             description: err.message,
           });
         },
@@ -208,13 +213,21 @@ function UploadForm({ folderId }: { folderId: string }) {
     label: string;
     icon: React.ReactNode;
   }[] = [
-    { value: "files", label: "Tập tin", icon: <Upload className="size-4" /> },
+    {
+      value: "files",
+      label: t("materials.modeFiles"),
+      icon: <Upload className="size-4" />,
+    },
     {
       value: "youtube",
       label: "YouTube",
       icon: <Youtube className="size-4" />,
     },
-    { value: "text", label: "Văn bản", icon: <AlignLeft className="size-4" /> },
+    {
+      value: "text",
+      label: t("materials.modeText"),
+      icon: <AlignLeft className="size-4" />,
+    },
   ];
 
   return (
@@ -222,11 +235,9 @@ function UploadForm({ folderId }: { folderId: string }) {
       <CardHeader className="shrink-0 pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Upload className="size-4" />
-          Thêm tài liệu
+          {t("materials.addMaterial")}
         </CardTitle>
-        <CardDescription>
-          Tải file, nhập link YouTube hoặc dán văn bản
-        </CardDescription>
+        <CardDescription>{t("materials.addMaterialDesc")}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto space-y-4">
         {/* Mode selector */}
@@ -288,8 +299,8 @@ function UploadForm({ folderId }: { folderId: string }) {
               <div className="text-center">
                 <p className="text-sm font-medium">
                   {isDragging
-                    ? "Thả file vào đây..."
-                    : "Kéo thả file hoặc click để chọn"}
+                    ? t("materials.dropFilesHere")
+                    : t("materials.dragOrClickFiles")}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   PDF, DOCX, PNG, JPG, WEBP, BMP
@@ -297,7 +308,7 @@ function UploadForm({ folderId }: { folderId: string }) {
               </div>
               <Button variant="outline" size="sm" className="relative">
                 <FileUp className="size-4" />
-                Chọn file
+                {t("materials.chooseFile")}
                 <input
                   type="file"
                   multiple
@@ -314,7 +325,7 @@ function UploadForm({ folderId }: { folderId: string }) {
             {pendingFiles.length > 0 && (
               <div className="space-y-1.5">
                 <p className="text-sm font-medium text-muted-foreground">
-                  {pendingFiles.length} file đã chọn
+                  {t("materials.filesSelected", { count: pendingFiles.length })}
                 </p>
                 {pendingFiles.map((f, i) => (
                   <div
@@ -347,14 +358,13 @@ function UploadForm({ folderId }: { folderId: string }) {
         {mode === "youtube" && (
           <div className="space-y-4">
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-300">
-              <p className="font-medium">Trích xuất phụ đề YouTube</p>
+              <p className="font-medium">{t("materials.youtubeTitle")}</p>
               <p className="mt-0.5 text-xs opacity-80">
-                Lưu link YouTube để sử dụng khi tạo quiz. Video phải có bật phụ
-                đề.
+                {t("materials.youtubeDescription")}
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="yt-url-mat">Link YouTube</Label>
+              <Label htmlFor="yt-url-mat">{t("materials.youtubeLabel")}</Label>
               <div className="relative">
                 <Youtube className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -389,10 +399,11 @@ function UploadForm({ folderId }: { folderId: string }) {
         {mode === "text" && (
           <div className="space-y-3">
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-              <p className="font-medium">Nhập văn bản trực tiếp</p>
+              <p className="font-medium">{t("materials.textDirectInput")}</p>
               <p className="mt-0.5 text-xs opacity-80">
-                Dán nội dung tài liệu. Tối đa {TEXT_MAX_CHARS.toLocaleString()}{" "}
-                ký tự.
+                {t("materials.textInfoDescription", {
+                  max: TEXT_MAX_CHARS.toLocaleString(),
+                })}
               </p>
             </div>
             <textarea
@@ -402,7 +413,7 @@ function UploadForm({ folderId }: { folderId: string }) {
                   ? "border-destructive focus:ring-destructive/30"
                   : "border-input focus:ring-ring/30",
               )}
-              placeholder="Dán nội dung tài liệu vào đây..."
+              placeholder={t("materials.textPlaceholder")}
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
               spellCheck={false}
@@ -417,7 +428,7 @@ function UploadForm({ folderId }: { folderId: string }) {
                 )}
               >
                 {rawText.length.toLocaleString()} /{" "}
-                {TEXT_MAX_CHARS.toLocaleString()} ký tự
+                {TEXT_MAX_CHARS.toLocaleString()} {t("materials.characters")}
               </span>
             </div>
           </div>
@@ -433,12 +444,12 @@ function UploadForm({ folderId }: { folderId: string }) {
             {uploadMaterials.isPending ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                Đang tải lên...
+                {t("materials.uploading")}
               </>
             ) : (
               <>
                 <Upload className="size-4" />
-                Tải lên
+                {t("materials.upload")}
               </>
             )}
           </Button>
@@ -451,6 +462,7 @@ function UploadForm({ folderId }: { folderId: string }) {
 // ─── Materials List ───────────────────────────────────────────────────────────
 
 function MaterialsList({ folderId }: { folderId: string }) {
+  const { t } = useTranslation();
   const { data: records, isLoading } = useUploadRecords(folderId);
   const deleteRecord = useDeleteUploadRecord();
   const reprocess = useReprocessUpload();
@@ -458,11 +470,15 @@ function MaterialsList({ folderId }: { folderId: string }) {
   const handleDelete = (record: UploadRecord) => {
     deleteRecord.mutate(record.id, {
       onSuccess: () =>
-        toast.success("Đã xóa", {
-          description: `"${record.originalName}" đã được xóa.`,
+        toast.success(t("materials.deleteSuccess"), {
+          description: t("materials.deleteSuccessDesc", {
+            name: record.originalName,
+          }),
         }),
       onError: () =>
-        toast.error("Xóa thất bại", { description: "Vui lòng thử lại." }),
+        toast.error(t("materials.deleteFailed"), {
+          description: t("materials.deleteFailedDesc"),
+        }),
     });
   };
 
@@ -483,9 +499,9 @@ function MaterialsList({ folderId }: { folderId: string }) {
     return (
       <div className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
         <Upload className="size-10 opacity-30" />
-        <p className="text-sm font-medium">Chưa có tài liệu nào</p>
+        <p className="text-sm font-medium">{t("materials.noMaterials")}</p>
         <p className="text-xs text-muted-foreground/70">
-          Nhấn &quot;Thêm tài liệu&quot; để bắt đầu tải lên
+          {t("materials.noMaterialsHint")}
         </p>
       </div>
     );
@@ -539,7 +555,7 @@ function MaterialsList({ folderId }: { folderId: string }) {
                 )}
                 {!record.hasFile && record.inputMode === "files" && (
                   <span className="text-amber-500">
-                    · File không còn trên server
+                    · {t("materials.fileNotOnServer")}
                   </span>
                 )}
                 {getProcessingBadge(record)}
@@ -552,7 +568,7 @@ function MaterialsList({ folderId }: { folderId: string }) {
                 className="h-8 w-8 p-0 shrink-0 text-muted-foreground hover:text-blue-500"
                 disabled={reprocess.isPending}
                 onClick={() => reprocess.mutate(record.id)}
-                title="Thử xử lý lại"
+                title={t("materials.reprocess")}
               >
                 <RefreshCw className="size-3.5" />
               </Button>
@@ -580,6 +596,7 @@ interface MaterialsTabProps {
 }
 
 export function MaterialsTab({ folderId }: MaterialsTabProps) {
+  const { t } = useTranslation();
   const { data: records } = useUploadRecords(folderId);
 
   return (
@@ -594,7 +611,7 @@ export function MaterialsTab({ folderId }: MaterialsTabProps) {
         <CardHeader className="shrink-0 pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <FileUp className="size-4" />
-            Tài liệu đã tải lên
+            {t("materials.uploadedMaterials")}
             {records && records.length > 0 && (
               <Badge variant="secondary" className="text-xs">
                 {records.length}
@@ -602,7 +619,7 @@ export function MaterialsTab({ folderId }: MaterialsTabProps) {
             )}
           </CardTitle>
           <CardDescription className="mt-1">
-            Chọn tài liệu ở tab &quot;Tạo Quiz&quot; để tạo câu hỏi
+            {t("materials.chooseForQuiz")}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex-1 min-h-0 p-0">

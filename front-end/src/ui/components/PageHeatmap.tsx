@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -69,6 +70,7 @@ export function PageHeatmap({
   className,
   compact = false,
 }: PageHeatmapProps) {
+  const { t } = useTranslation();
   const maxCount = Math.max(
     ...Object.values(distribution).filter((v) => v > 0),
     1,
@@ -141,21 +143,21 @@ export function PageHeatmap({
                   className="max-w-[260px] space-y-1 text-xs"
                 >
                   <p className="font-semibold">
-                    Trang {page}
+                    {t("pageHeatmap.pageN", { n: page })}
                     {count > 0 && (
                       <span className="ml-1.5 font-normal text-muted-foreground">
-                        · {count} câu
+                        · {count} {t("pageHeatmap.questionsCount")}
                         {totalQuestions > 0 &&
                           ` (${Math.round((count / totalQuestions) * 100)}%)`}
                       </span>
                     )}
                   </p>
                   {count === 0 ? (
-                    <p className="text-muted-foreground">Không có câu quiz</p>
+                    <p className="text-muted-foreground">{t("pageHeatmap.noQuestions")}</p>
                   ) : loadingQuestions ? (
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Loader2 className="size-3 animate-spin" />
-                      <span>Đang tải từ khóa…</span>
+                      <span>{t("pageHeatmap.loadingKeywords")}</span>
                     </div>
                   ) : pageKws.length > 0 ? (
                     <ul className="space-y-1 pt-0.5">
@@ -178,7 +180,7 @@ export function PageHeatmap({
                     </ul>
                   ) : (
                     <p className="text-muted-foreground text-[10px]">
-                      Hover để tải từ khóa
+                      {t("pageHeatmap.hoverToLoad")}
                     </p>
                   )}
                 </TooltipContent>
@@ -192,15 +194,15 @@ export function PageHeatmap({
           <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
             <span>
               <span className="font-medium text-foreground">{totalPages}</span>{" "}
-              trang ·{" "}
+              {t("pageHeatmap.page")} ·{" "}
               <span className="font-medium text-foreground">
                 {totalQuestions}
               </span>{" "}
-              câu
+              {t("pageHeatmap.questions")}
             </span>
             {hotspots.length > 0 && (
               <span>
-                Hotspot:{" "}
+                {t("pageHeatmap.hotspot")}{" "}
                 {hotspots.map(([page, count], idx) => (
                   <span key={page}>
                     {idx > 0 && ", "}
@@ -216,12 +218,12 @@ export function PageHeatmap({
 
         {/* Legend */}
         <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-          <span>Ít</span>
+          <span>{t("pageHeatmap.low")}</span>
           <div
             className="h-1.5 w-16 rounded-sm"
             style={{ background: LEGEND_GRADIENT }}
           />
-          <span>Nhiều</span>
+          <span>{t("pageHeatmap.high")}</span>
         </div>
       </div>
     </TooltipProvider>

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -33,49 +34,69 @@ interface QuizConfigProps {
 
 const questionTypeOptions: {
   value: QuestionType;
-  label: string;
+  labelKey: string;
   icon: React.ReactNode;
 }[] = [
   {
     value: "multiple-choice",
-    label: "Trắc nghiệm (1 đáp án)",
+    labelKey: "quizConfig.types.multiple-choice",
     icon: <ListChecks className="size-4" />,
   },
   {
     value: "multiple-answer",
-    label: "Chọn nhiều đáp án",
+    labelKey: "quizConfig.types.multiple-answer",
     icon: <CheckSquare className="size-4" />,
   },
   {
     value: "true-false",
-    label: "Đúng / Sai",
+    labelKey: "quizConfig.types.true-false",
     icon: <CheckCircle2 className="size-4" />,
   },
   {
     value: "fill-blank",
-    label: "Điền vào chỗ trống",
+    labelKey: "quizConfig.types.fill-blank",
     icon: <PenLine className="size-4" />,
   },
   {
     value: "mixed",
-    label: "Hỗn hợp",
+    labelKey: "quizConfig.types.mixed",
     icon: <Shuffle className="size-4" />,
   },
 ];
 
-const difficultyOptions: { value: Difficulty; label: string; color: string }[] =
-  [
-    { value: "easy", label: "Dễ", color: "text-green-400" },
-    { value: "medium", label: "Trung bình", color: "text-yellow-400" },
-    { value: "hard", label: "Khó", color: "text-red-400" },
-    { value: "mixed", label: "Hỗn hợp", color: "text-purple-400" },
-  ];
+const difficultyOptions: {
+  value: Difficulty;
+  labelKey: string;
+  color: string;
+}[] = [
+  {
+    value: "easy",
+    labelKey: "quizConfig.difficulties.easy",
+    color: "text-green-400",
+  },
+  {
+    value: "medium",
+    labelKey: "quizConfig.difficulties.medium",
+    color: "text-yellow-400",
+  },
+  {
+    value: "hard",
+    labelKey: "quizConfig.difficulties.hard",
+    color: "text-red-400",
+  },
+  {
+    value: "mixed",
+    labelKey: "quizConfig.difficulties.mixed",
+    color: "text-purple-400",
+  },
+];
 
 export function QuizConfigPanel({
   config,
   onConfigChange,
   className,
 }: QuizConfigProps) {
+  const { t } = useTranslation();
   const updateConfig = <K extends keyof QuizConfigType>(
     key: K,
     value: QuizConfigType[K],
@@ -89,7 +110,7 @@ export function QuizConfigPanel({
       <div className="space-y-2">
         <Label className="text-sm font-medium">
           <Hash className="size-3.5" />
-          Số lượng câu hỏi
+          {t("quizConfig.questionCount")}
         </Label>
         <Select
           value={String(config.numberOfQuestions)}
@@ -103,7 +124,7 @@ export function QuizConfigPanel({
           <SelectContent>
             {[5, 10, 15, 20, 25, 30, 40, 45, 50].map((n) => (
               <SelectItem key={n} value={String(n)}>
-                {n} câu
+                {t("quizConfig.questionCountUnit", { n })}
               </SelectItem>
             ))}
           </SelectContent>
@@ -116,7 +137,7 @@ export function QuizConfigPanel({
       <div className="space-y-2">
         <Label className="text-sm font-medium">
           <ListChecks className="size-3.5" />
-          Loại câu hỏi
+          {t("quizConfig.questionType")}
         </Label>
         <Select
           value={config.questionType}
@@ -132,7 +153,7 @@ export function QuizConfigPanel({
               <SelectItem key={opt.value} value={opt.value}>
                 <span className="flex items-center gap-2">
                   {opt.icon}
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </span>
               </SelectItem>
             ))}
@@ -146,7 +167,7 @@ export function QuizConfigPanel({
       <div className="space-y-2">
         <Label className="text-sm font-medium">
           <Brain className="size-3.5" />
-          Độ khó
+          {t("quizConfig.difficulty")}
         </Label>
         <Select
           value={config.difficulty}
@@ -159,7 +180,7 @@ export function QuizConfigPanel({
             {difficultyOptions.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
                 <span className={cn("flex items-center gap-2", opt.color)}>
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </span>
               </SelectItem>
             ))}
@@ -173,7 +194,7 @@ export function QuizConfigPanel({
       <div className="space-y-2">
         <Label className="text-sm font-medium">
           <Globe className="size-3.5" />
-          Ngôn ngữ
+          {t("quizConfig.language")}
         </Label>
         <Select
           value={config.language}
@@ -183,8 +204,8 @@ export function QuizConfigPanel({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="vi">🇻🇳 Tiếng Việt</SelectItem>
-            <SelectItem value="en">🇺🇸 English</SelectItem>
+            <SelectItem value="vi">{t("quizConfig.languages.vi")}</SelectItem>
+            <SelectItem value="en">{t("quizConfig.languages.en")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -195,7 +216,7 @@ export function QuizConfigPanel({
       <div className="space-y-2">
         <Label className="text-sm font-medium">
           <Clock className="size-3.5" />
-          Thời gian mỗi câu
+          {t("quizConfig.timePerQuestion")}
         </Label>
         <Select
           value={String(config.timePerQuestion)}
@@ -205,11 +226,13 @@ export function QuizConfigPanel({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="0">Không giới hạn</SelectItem>
-            <SelectItem value="15">15 giây</SelectItem>
-            <SelectItem value="30">30 giây</SelectItem>
-            <SelectItem value="60">1 phút</SelectItem>
-            <SelectItem value="120">2 phút</SelectItem>
+            <SelectItem value="0">{t("quizConfig.timeOptions.0")}</SelectItem>
+            <SelectItem value="15">{t("quizConfig.timeOptions.15")}</SelectItem>
+            <SelectItem value="30">{t("quizConfig.timeOptions.30")}</SelectItem>
+            <SelectItem value="60">{t("quizConfig.timeOptions.60")}</SelectItem>
+            <SelectItem value="120">
+              {t("quizConfig.timeOptions.120")}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>

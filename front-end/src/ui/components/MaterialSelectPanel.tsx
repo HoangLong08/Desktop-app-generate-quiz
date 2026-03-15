@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "@/config/i18n";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -65,7 +67,7 @@ function getInputModeBadge(mode: string) {
   > = {
     files: { label: "File", variant: "secondary" },
     youtube: { label: "YouTube", variant: "default" },
-    text: { label: "Văn bản", variant: "outline" },
+    text: { label: i18n.t("materials.text"), variant: "outline" },
   };
   const m = map[mode] ?? { label: mode, variant: "outline" as const };
   return (
@@ -88,6 +90,7 @@ export function MaterialSelectPanel({
   selectedIds,
   onSelectedIdsChange,
 }: MaterialSelectPanelProps) {
+  const { t } = useTranslation();
   const { data: records, isLoading } = useUploadRecords(folderId);
   const selectedId = selectedIds[0] ?? "";
 
@@ -122,15 +125,15 @@ export function MaterialSelectPanel({
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
               <CheckSquare className="size-4" />
-              Chọn 1 tài liệu
+              {t("materialSelect.title")}
               {selectedIds.length > 0 && (
                 <Badge variant="secondary" className="text-xs">
-                  Đã chọn
+                  {t("materialSelect.selected")}
                 </Badge>
               )}
             </CardTitle>
             <CardDescription className="mt-1">
-              Chỉ được chọn một tài liệu đã tải lên để tạo quiz
+              {t("materialSelect.description")}
             </CardDescription>
           </div>
           {selectedId && (
@@ -138,7 +141,7 @@ export function MaterialSelectPanel({
               onClick={clearSelection}
               className="text-xs font-medium text-primary hover:underline"
             >
-              Bỏ chọn
+              {t("materialSelect.deselect")}
             </button>
           )}
         </div>
@@ -158,10 +161,9 @@ export function MaterialSelectPanel({
           ) : usableRecords.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-12 text-muted-foreground px-6">
               <Upload className="size-10 opacity-30" />
-              <p className="text-sm font-medium">Chưa có tài liệu nào</p>
+              <p className="text-sm font-medium">{t("materialSelect.empty")}</p>
               <p className="text-xs text-muted-foreground/70 text-center">
-                Vào tab &quot;Tài liệu&quot; để tải lên file, YouTube hoặc văn
-                bản trước
+                {t("materialSelect.emptyHint")}
               </p>
             </div>
           ) : (
@@ -218,7 +220,9 @@ export function MaterialSelectPanel({
               {pendingRecords.length > 0 && (
                 <div className="px-4 py-3 space-y-2">
                   <p className="text-xs font-medium text-muted-foreground">
-                    Đang xử lý ({pendingRecords.length})
+                    {t("materialSelect.processingCount", {
+                      count: pendingRecords.length,
+                    })}
                   </p>
                   {pendingRecords.map((record) => (
                     <div
@@ -235,8 +239,8 @@ export function MaterialSelectPanel({
                         <span className="inline-flex items-center gap-1 text-[10px] text-blue-500">
                           <Loader2 className="size-3 animate-spin" />
                           {record.processingStatus === "processing"
-                            ? "Đang xử lý..."
-                            : "Chờ xử lý"}
+                            ? t("materialSelect.processingStatus")
+                            : t("materialSelect.pendingStatus")}
                         </span>
                       </div>
                     </div>

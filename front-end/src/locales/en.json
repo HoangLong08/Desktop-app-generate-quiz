@@ -1,0 +1,571 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "close": "Close",
+    "back": "Back",
+    "confirm": "Confirm",
+    "create": "Create",
+    "questions": "questions",
+    "attempts": "attempts"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "header": {
+    "settingsTitle": "API Keys Settings",
+    "settingsDescription": "Manage Gemini API keys used to generate quizzes."
+  },
+  "home": {
+    "loading": "Loading folders...",
+    "errorPrefix": "Error: {{error}}",
+    "title": "Quiz Folders",
+    "subtitle": "Manage and organize your Quiz collections",
+    "createFolder": "Create Folder",
+    "createFolderNew": "Create New Folder",
+    "createDialog": {
+      "title": "Create New Folder",
+      "description": "Enter a name and choose a color for your folder.",
+      "nameLabel": "Folder Name",
+      "namePlaceholder": "E.g.: Mathematics, History...",
+      "descLabel": "Description (optional)",
+      "descPlaceholder": "Short description of the folder...",
+      "colorLabel": "Folder Color"
+    },
+    "editDialog": {
+      "title": "Edit Folder",
+      "description": "Update your folder information.",
+      "saveChanges": "Save Changes"
+    },
+    "tabs": {
+      "all": "All",
+      "recent": "Recent",
+      "favorites": "Favorites"
+    },
+    "empty": {
+      "title": "No folders yet",
+      "description": "Create your first folder to start organizing your Quizzes."
+    },
+    "emptyFavorites": "No favorite folders yet.",
+    "emptyRecent": "No recently opened folders."
+  },
+  "folder": {
+    "title": "Folder",
+    "tabs": {
+      "materials": "Materials",
+      "createQuiz": "Create Quiz",
+      "history": "History",
+      "stats": "Statistics"
+    },
+    "quizConfig": {
+      "title": "Quiz Configuration",
+      "subtitle": "Customize the quiz to your needs"
+    },
+    "generating": "Generating quiz...",
+    "generatingWait": "Please wait, do not close this window.",
+    "createQuizBtn": "Create Quiz",
+    "noMaterialSelected": "No material selected",
+    "noMaterialSelectedDesc": "Please select at least one uploaded material to create a quiz.",
+    "noMaterialSelectedPdf": "No PDF file",
+    "noMaterialSelectedPdfDesc": "This quiz has no source PDF file to display. Source viewing is only supported for quizzes created from PDF files.",
+    "steps": {
+      "upload": "Uploading files to server",
+      "uploadDesc": "Receiving data...",
+      "extract": "Extracting text",
+      "extractDesc": "OCR / PDF / DOCX processing...",
+      "analyze": "Analyzing content",
+      "analyzeDesc": "Cleaning and selecting important passages...",
+      "aiGenerate": "AI generating questions",
+      "aiGenerateDesc": "Gemini is composing questions...",
+      "ytTranscript": "Loading YouTube transcript",
+      "ytTranscriptDesc": "Fetching subtitles...",
+      "ytSummarize": "AI summarizing transcript",
+      "ytSummarizeDesc": "Gemini is processing...",
+      "ytQuiz": "Composing questions from video content...",
+      "textAnalyze": "Analyzing text",
+      "textAnalyzeDesc": "Cleaning...",
+      "textQuiz": "Gemini is composing questions..."
+    }
+  },
+  "errors": {
+    "allModelsExhausted": {
+      "title": "All models exhausted",
+      "description": "Tried gemini-2.5-flash → gemini-2.5-flash-lite → gemini-2.0-flash, all free quota exhausted today. Quota resets at 00:00 US time. Try again later!"
+    },
+    "quotaExceeded": {
+      "title": "Gemini API Quota Exceeded",
+      "description": "Account has exhausted free quota for Gemini model.",
+      "retryIn": "Please try again in {{seconds}} seconds.",
+      "retryLater": "Please try again in a few minutes.",
+      "checkBilling": "Check billing at ai.google.dev."
+    },
+    "noApiKey": {
+      "title": "No API Key",
+      "description": "Go to API Keys page (button on header) to add a Gemini API key."
+    },
+    "invalidApiKey": {
+      "title": "Invalid API Key",
+      "description": "Gemini API key is incorrect or expired. Check the key in the API Keys page."
+    },
+    "noTextExtracted": {
+      "title": "Could not extract text",
+      "description": "The uploaded file has no readable text content. Try another file or enter text directly."
+    },
+    "noTranscript": {
+      "title": "Video has no subtitles",
+      "description": "This YouTube video has no subtitle/captions. Choose another video or switch to text input."
+    },
+    "invalidYoutubeUrl": {
+      "title": "Invalid YouTube Link",
+      "description": "URL is not in a valid YouTube format. Check the link again."
+    },
+    "networkError": {
+      "title": "Cannot connect to server",
+      "description": "Check that backend is running at http://localhost:5000."
+    },
+    "quizFailed": {
+      "title": "Quiz creation failed",
+      "unknownError": "Unknown error."
+    },
+    "loadQuizFailed": "Failed to load quiz",
+    "tryAgain": "Please try again.",
+    "deleteFailed": "Delete failed",
+    "deleted": "Deleted"
+  },
+  "quizHistory": {
+    "title": "Quiz History",
+    "description": "Quizzes created in this folder",
+    "empty": "No quizzes created yet",
+    "viewSource": "View source",
+    "start": "Start"
+  },
+  "quiz": {
+    "back": "Back",
+    "viewDoc": "View document",
+    "docTitle": "Original Document",
+    "noPreview": "No preview available.",
+    "title": "Multiple Choice Quiz",
+    "downloadDocx": "Download DOCX",
+    "downloadPdf": "Download PDF",
+    "answered": "answered",
+    "complete": "complete",
+    "prevQuestion": "Previous",
+    "questionOf": "Question {{current}} / {{total}}",
+    "nextQuestion": "Next",
+    "submit": "Submit",
+    "submitCount": "Submit ({{count}}/{{total}})",
+    "shortcuts": {
+      "navigate": "navigate",
+      "selectAnswer": "select answer",
+      "nextOrSubmit": "next / submit"
+    },
+    "results": {
+      "title": "Results",
+      "excellent": "Excellent! 🎉",
+      "good": "Good job! 👍",
+      "needsWork": "Keep trying 💪",
+      "correct": "Correct",
+      "wrong": "Wrong",
+      "skipped": "Skipped",
+      "time": "Time",
+      "retake": "Retake",
+      "newQuiz": "New Quiz"
+    },
+    "questionList": "Question List",
+    "viewing": "Viewing",
+    "answeredStatus": "Answered",
+    "unanswered": "Unanswered"
+  },
+  "quizQuestion": {
+    "questionN": "Question {{n}}: ",
+    "answer": "Answer: ",
+    "correctAnswer": "Correct answer: ",
+    "explanation": "Explanation: ",
+    "typeMultipleChoice": "Multiple choice (1 answer)",
+    "typeMultipleAnswer": "Multiple answers",
+    "typeTrueFalse": "True / False",
+    "typeFillBlank": "Fill in the blank",
+    "copyQuestion": "Copy question",
+    "fillPlaceholder": "Enter your answer...",
+    "selectAllCorrect": "Select all correct answers (may be more than 1)",
+    "true": "True",
+    "false": "False",
+    "correctLabel": "Correct answer",
+    "wrongLabel": "Wrong",
+    "explanationLabel": "Explanation:"
+  },
+  "quizConfig": {
+    "questionCount": "Number of Questions",
+    "questionCountUnit": "{{n}} questions",
+    "questionType": "Question Type",
+    "types": {
+      "multiple-choice": "Multiple choice (1 answer)",
+      "multiple-answer": "Multiple answers",
+      "true-false": "True / False",
+      "fill-blank": "Fill in the blank",
+      "mixed": "Mixed"
+    },
+    "difficulty": "Difficulty",
+    "difficulties": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard",
+      "mixed": "Mixed"
+    },
+    "language": "Language",
+    "languages": {
+      "vi": "🇻🇳 Tiếng Việt",
+      "en": "🇬🇧 English"
+    },
+    "timePerQuestion": "Time per Question",
+    "timeOptions": {
+      "0": "No limit",
+      "15": "15 seconds",
+      "30": "30 seconds",
+      "60": "1 minute",
+      "120": "2 minutes"
+    }
+  },
+  "inputSource": {
+    "tabs": {
+      "files": "Files",
+      "youtube": "YouTube",
+      "text": "Text"
+    },
+    "fileNotOnServer": "File no longer on server",
+    "dropHere": "Drop files here...",
+    "dragOrClick": "Drag & drop files here or click to select",
+    "supportedFormats": "Supports PDF, DOCX, PNG, JPG, WEBP, BMP",
+    "chooseFile": "Choose file",
+    "selectedFiles": "{{count}} file(s) selected",
+    "removeAll": "Remove all",
+    "previousFiles": "Previously uploaded files",
+    "selected": "selected",
+    "collapse": "Collapse",
+    "showMore": "Show {{count}} more files",
+    "deselectAll": "Deselect all",
+    "previousYoutubeLinks": "Previously used YouTube links",
+    "youtubeTitle": "Extract YouTube subtitles",
+    "youtubeDescription": "The app will find and extract subtitles (CC) from YouTube videos to create quizzes.",
+    "youtubeLabel": "YouTube Link",
+    "youtubeInvalid": "Invalid URL. Please enter a valid YouTube link.",
+    "subtitleLanguage": "Preferred subtitle language",
+    "subtitlePlaceholder": "Select language...",
+    "subtitleNote": "If subtitles in this language are not found, the app will automatically use available subtitles.",
+    "previousTexts": "Previously used texts",
+    "textInputTitle": "Direct text input",
+    "textRestored": "Text restored",
+    "textLoadError": "Cannot load text content",
+    "textDirectInput": "Enter text directly",
+    "textDirectDescription": "Paste or enter lesson content, documents that you want to create a quiz from.",
+    "textPlaceholder": "Paste document content here...",
+    "textOverLimit": "Exceeds {{count}} characters — please shorten the content",
+    "characters": "characters",
+    "images": "images"
+  },
+  "materials": {
+    "processing": "Processing",
+    "processingError": "Processing error",
+    "pending": "Pending",
+    "uploadSuccess": "Upload successful",
+    "uploadSuccessDesc": "Added {{count}} material(s) to the folder.",
+    "uploadFailed": "Upload failed",
+    "modeFiles": "Files",
+    "modeText": "Text",
+    "addMaterial": "Add Material",
+    "addMaterialDesc": "Upload files, enter YouTube links or paste text",
+    "dropFilesHere": "Drop files here...",
+    "dragOrClickFiles": "Drag & drop files or click to select",
+    "chooseFile": "Choose file",
+    "filesSelected": "{{count}} file(s) selected",
+    "youtubeTitle": "Extract YouTube subtitles",
+    "youtubeDescription": "Save YouTube link to use when creating quiz. Subtitles will be automatically extracted when you create a quiz.",
+    "youtubeLabel": "YouTube Link",
+    "textDirectInput": "Enter text directly",
+    "textPlaceholder": "Paste document content here...",
+    "textInfoDescription": "Maximum {{max}} characters",
+    "characters": "characters",
+    "uploading": "Uploading...",
+    "upload": "Upload",
+    "deleteSuccess": "Deleted",
+    "deleteSuccessDesc": "\"{{name}}\" has been deleted.",
+    "deleteFailed": "Delete failed",
+    "deleteFailedDesc": "Please try again.",
+    "noMaterials": "No materials yet",
+    "noMaterialsHint": "Click 'Add Material' to start uploading",
+    "fileNotOnServer": "File no longer on server",
+    "reprocess": "Retry processing",
+    "uploadedMaterials": "Uploaded Materials",
+    "chooseForQuiz": "Select materials in 'Create Quiz' tab to generate questions",
+    "text": "Text"
+  },
+  "materialSelect": {
+    "title": "Select 1 material",
+    "selected": "Selected",
+    "description": "Only one uploaded material can be selected to create a quiz",
+    "deselect": "Deselect",
+    "empty": "No materials yet",
+    "emptyHint": "Go to 'Materials' tab to upload materials first",
+    "processingCount": "Processing ({{count}})",
+    "processingStatus": "Processing...",
+    "pendingStatus": "Pending"
+  },
+  "uploadHistory": {
+    "deleteSuccess": "Deleted",
+    "deleteSuccessDesc": "\"{{name}}\" has been removed from history.",
+    "deleteFailed": "Delete failed",
+    "deleteFailedDesc": "Please try again.",
+    "title": "Uploaded Files",
+    "description": "Files and content sources used to create quizzes",
+    "empty": "No files uploaded yet",
+    "emptyHint": "Create a quiz to start saving file history",
+    "textMode": "Text"
+  },
+  "docxPreview": {
+    "error": "Cannot display this document.",
+    "loading": "Loading document preview..."
+  },
+  "fileUpload": {
+    "dropHere": "Drop files here...",
+    "dragOrClick": "Drag & drop files here or click to select",
+    "supportedFormats": "Supports PDF, DOCX, PNG, JPG, WEBP, BMP",
+    "chooseFile": "Choose file",
+    "selectedFiles": "{{count}} file(s) selected",
+    "removeAll": "Remove all",
+    "image": "Image"
+  },
+  "export": {
+    "defaultTitle": "Quiz",
+    "questionPrefix": "Question {{n}}: ",
+    "answerKey": "ANSWER KEY",
+    "explanation": "Explanation: "
+  },
+  "pdfViewer": {
+    "pageLabel": "Page:",
+    "noPageInfo": "No page information",
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in",
+    "resetZoom": "Reset zoom",
+    "heatmapOff": "Turn off heatmap",
+    "heatmapOn": "Show thermal heatmap on PDF",
+    "questionCount": "{{count}} questions",
+    "all": "All",
+    "highlightAllOff": "Turn off highlight all",
+    "highlightAllOn": "Highlight all keywords in PDF",
+    "highlightingAll": "Highlighting all keywords",
+    "turnOff": "Off",
+    "viewingSource": "Viewing source of question {{n}}",
+    "deselect": "Deselect",
+    "clickToView": "Click a question to view source page",
+    "pdfLoadError": "Failed to load PDF",
+    "unknownError": "Unknown error",
+    "loadingPdf": "Loading PDF...",
+    "page": "Page",
+    "pageN": "Page {{n}}",
+    "questions": "questions",
+    "zones": "zones",
+    "low": "Low",
+    "high": "High",
+    "pagesWithQuestions": "pages with questions",
+    "heatZones": "heat zones",
+    "pagesLabel": "pages covered",
+    "questionsWithKeywords": "questions with keywords",
+    "noSourcePage": "no source page",
+    "questionN": "Question {{n}}"
+  },
+  "pageHeatmap": {
+    "pageN": "Page {{n}}",
+    "questionsCount": "questions",
+    "noQuestions": "No quiz questions",
+    "loadingKeywords": "Loading keywords…",
+    "hoverToLoad": "Hover to load keywords",
+    "page": "pages",
+    "questions": "questions",
+    "hotspot": "Hotspot:",
+    "low": "Low",
+    "high": "High"
+  },
+  "interactiveFolder": {
+    "paper1": "Exercise",
+    "paper2": "Review"
+  },
+  "settings": {
+    "timeAgo": {
+      "never": "Never used",
+      "justNow": "Just now",
+      "minutesAgo": "{{n}} minutes ago",
+      "hoursAgo": "{{n}} hours ago",
+      "daysAgo": "{{n}} days ago"
+    },
+    "addKeySuccess": "API key added",
+    "addKeyError": "Error adding key",
+    "keyAlreadyExists": "Key already exists",
+    "addKeyButton": "Add Key",
+    "addKeyDialog": {
+      "title": "Add Gemini API Key",
+      "description": "Enter API key from Google AI Studio. Key will be saved and used in rotation when creating quizzes.",
+      "labelField": "Label (optional)",
+      "labelPlaceholder": "E.g.: Main account, Secondary...",
+      "cancelButton": "Cancel",
+      "addingButton": "Adding...",
+      "addButton": "Add key"
+    },
+    "modelUsage": {
+      "title": "Token by Model",
+      "description": "Usage details and limits for each Gemini model",
+      "totalTokens": "Total tokens",
+      "successRate": "Success rate",
+      "errorPrefix": "Error:"
+    },
+    "keyCard": {
+      "save": "Save",
+      "noLabel": "No label"
+    },
+    "summary": {
+      "totalKeys": "Total keys",
+      "activeKeys": "Active",
+      "totalTokens": "Total tokens",
+      "totalRequests": "Total requests"
+    },
+    "tokenUsage": {
+      "title": "Token Usage",
+      "description": "Total tokens used across all keys",
+      "total": "Total"
+    },
+    "loading": "Loading...",
+    "emptyState": {
+      "title": "No API keys yet",
+      "description": "Add a Gemini API key to start creating quizzes. The system will automatically rotate between keys when hitting rate limits."
+    },
+    "deletedKey": "Key deleted",
+    "updatedLabel": "Label updated",
+    "freeTier": {
+      "title": "Free Tier Limits (Gemini API)",
+      "description": "Rate limit per API key, each model has separate quota",
+      "bestQuality": "Best quality",
+      "fastest": "Fastest, cheapest",
+      "highestQuota": "Highest quota",
+      "requestsPerDay": "Requests/day",
+      "requestsPerMin": "Requests/min",
+      "tokensPerMin": "Tokens/min",
+      "note": "Each model has separate quota — the system will automatically fallback to another model when quota is exhausted."
+    },
+    "keyRotation": {
+      "title": "How Key Rotation Works",
+      "rules": [
+        "System selects the key with fewest requests (round-robin)",
+        "If 429 error (rate limit) occurs, automatically switches to next key",
+        "If 429 error on a model, automatically falls back: gemini-2.5-flash → gemini-2.5-flash-lite → gemini-2.0-flash",
+        "Keys with 401/403 errors are marked as inactive",
+        "All keys share the same pool — more keys = higher throughput"
+      ]
+    },
+    "rateLimit": {
+      "perDay": "/day",
+      "perMinute": "/min"
+    }
+  },
+  "folderStats": {
+    "loading": "Loading statistics...",
+    "loadError": "Failed to load statistics",
+    "noData": "No statistics data yet",
+    "hasQuizSets": "You have {{count}} quizzes ready — take a quiz to see statistics!",
+    "createFirst": "Create and complete your first quiz to see detailed statistics here.",
+    "timeMin": "m",
+    "score": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "average": "Average",
+      "needsImprovement": "Needs improvement"
+    },
+    "metrics": {
+      "avgScore": "Average Score",
+      "bestScore": "Best Score",
+      "lowestScore": "Lowest: {{score}}%",
+      "accuracy": "Accuracy",
+      "accuracyDetail": "{{correct}} / {{total}} questions",
+      "avgTime": "Avg Time",
+      "totalAttempts": "{{count}} attempts"
+    },
+    "scoreTrend": {
+      "title": "Score Trend",
+      "score": "Score",
+      "attempt": "Attempt {{n}}"
+    },
+    "recentAttempts": {
+      "title": "Recent Attempts",
+      "questions": "questions"
+    },
+    "completionDonut": {
+      "completed": "Completed",
+      "notAttempted": "Not attempted",
+      "improvement": "+{{rate}}% from before",
+      "title": "Completion Progress",
+      "quizCount": "{{done}}/{{total}} quizzes",
+      "remaining": "{{count}} quizzes remaining",
+      "allDone": "All completed!"
+    },
+    "difficultyChart": {
+      "title": "By Difficulty",
+      "avgScore": "Avg Score",
+      "accuracy": "Accuracy"
+    },
+    "categoryRadar": {
+      "title": "Analysis by Type",
+      "avgScore": "Avg Score",
+      "accuracy": "Accuracy"
+    },
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard",
+      "mixed": "Mixed"
+    },
+    "qtype": {
+      "multiple-choice": "Multiple choice",
+      "true-false": "True / False",
+      "fill-blank": "Fill in blank",
+      "mixed": "Mixed"
+    },
+    "quizTreemap": {
+      "title": "Quiz Comparison",
+      "modeScore": "Score",
+      "legendScore": "size = attempts · color = score",
+      "modeActivity": "Activity",
+      "legendActivity": "size = questions · color = activity level",
+      "modeDifficulty": "Difficulty",
+      "legendDifficulty": "size = attempts · color = difficulty",
+      "veryActive": "Very Active",
+      "active": "Active",
+      "moderate": "Average",
+      "inactive": "Inactive",
+      "diffEasy": "Easy",
+      "diffMedium": "Medium",
+      "diffHard": "Hard",
+      "diffVeryHard": "Very Hard",
+      "attempted": "attempted",
+      "notAttempted": "not attempted",
+      "times": "times",
+      "questionsUnit": "questions",
+      "bestScore": "best score",
+      "timesLabel": "attempts",
+      "avgScore": "avg score",
+      "avg": "Avg",
+      "last": "Last",
+      "highest": "Best",
+      "activity": "Activity",
+      "difficulty": "Difficulty",
+      "average": "Average",
+      "lastAttempt": "Last",
+      "attemptCount": "Attempts",
+      "questionCount": "Questions",
+      "notAttemptedLabel": "Not attempted"
+    }
+  }
+}

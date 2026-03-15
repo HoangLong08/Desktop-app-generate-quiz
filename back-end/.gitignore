@@ -21,9 +21,6 @@ venv.bak/
 # Local packages
 packages/
 
-# PaddleOCR cache
-.paddleocr/
-
 # IDE
 .vscode/
 .idea/

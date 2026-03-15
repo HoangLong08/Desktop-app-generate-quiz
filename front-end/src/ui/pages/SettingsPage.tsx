@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "@/config/i18n";
 import { cn } from "@/lib/utils";
 import { useApiKeys } from "@/features/api-keys";
 import type { GeminiApiKey, ModelSummary } from "@/features/api-keys";
@@ -52,15 +54,15 @@ function formatNumber(n: number): string {
 }
 
 function timeAgo(isoDate: string | null): string {
-  if (!isoDate) return "Chưa sử dụng";
+  if (!isoDate) return i18n.t("settings.timeAgo.never");
   const diff = Date.now() - new Date(isoDate).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Vừa xong";
-  if (mins < 60) return `${mins} phút trước`;
+  if (mins < 1) return i18n.t("settings.timeAgo.justNow");
+  if (mins < 60) return i18n.t("settings.timeAgo.minutesAgo", { n: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} giờ trước`;
+  if (hours < 24) return i18n.t("settings.timeAgo.hoursAgo", { n: hours });
   const days = Math.floor(hours / 24);
-  return `${days} ngày trước`;
+  return i18n.t("settings.timeAgo.daysAgo", { n: days });
 }
 
 const statusConfig = {
@@ -107,6 +109,7 @@ function AddKeyDialog({
 }: {
   onAdd: (key: string, label: string) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [key, setKey] = useState("");
   const [label, setLabel] = useState("");
   const [adding, setAdding] = useState(false);
@@ -120,9 +123,11 @@ function AddKeyDialog({
       setKey("");
       setLabel("");
       setOpen(false);
-      toast.success("Đã thêm API key");
+      toast.success(t("settings.addKeySuccess"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Lỗi khi thêm key");
+      toast.error(
+        err instanceof Error ? err.message : t("settings.addKeyError"),
+      );
     } finally {
       setAdding(false);
     }
@@ -133,15 +138,14 @@ function AddKeyDialog({
       <DialogTrigger asChild>
         <Button size="sm" className="gap-1.5">
           <Plus className="size-4" />
-          Thêm Key
+          {t("settings.addKeyButton")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Thêm Gemini API Key</DialogTitle>
+          <DialogTitle>{t("settings.addKeyDialog.title")}</DialogTitle>
           <DialogDescription>
-            Nhập API key từ Google AI Studio. Key sẽ được lưu và dùng xoay vòng
-            khi tạo quiz.
+            {t("settings.addKeyDialog.description")}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-2">
@@ -157,10 +161,12 @@ function AddKeyDialog({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="key-label">Nhãn (tùy chọn)</Label>
+            <Label htmlFor="key-label">
+              {t("settings.addKeyDialog.labelField")}
+            </Label>
             <Input
               id="key-label"
-              placeholder="VD: Account chính, Account phụ..."
+              placeholder={t("settings.addKeyDialog.labelPlaceholder")}
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
@@ -169,10 +175,14 @@ function AddKeyDialog({
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="ghost">Hủy</Button>
+            <Button variant="ghost">
+              {t("settings.addKeyDialog.cancelButton")}
+            </Button>
           </DialogClose>
           <Button onClick={handleSubmit} disabled={!key.trim() || adding}>
-            {adding ? "Đang thêm..." : "Thêm key"}
+            {adding
+              ? t("settings.addKeyDialog.addingButton")
+              : t("settings.addKeyDialog.addButton")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -183,6 +193,7 @@ function AddKeyDialog({
 // ─── Per-model usage table (global) ──────────────────────────────────────────
 
 function ModelUsageTable({ models }: { models: ModelSummary[] }) {
+  const { t } = useTranslation();
   if (models.length === 0) return null;
 
   return (
@@ -190,10 +201,10 @@ function ModelUsageTable({ models }: { models: ModelSummary[] }) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <Cpu className="size-4 text-primary" />
-          Token theo Model
+          {t("settings.modelUsage.title")}
         </CardTitle>
         <CardDescription>
-          Chi tiết sử dụng và giới hạn từng model Gemini
+          {t("settings.modelUsage.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -206,7 +217,7 @@ function ModelUsageTable({ models }: { models: ModelSummary[] }) {
                 <th className="pb-2 px-3 font-medium text-right">Input</th>
                 <th className="pb-2 px-3 font-medium text-right">Output</th>
                 <th className="pb-2 px-3 font-medium text-right">
-                  Tổng tokens
+                  {t("settings.modelUsage.totalTokens")}
                 </th>
                 <th className="pb-2 px-3 font-medium text-right">RPD</th>
                 <th className="pb-2 px-3 font-medium text-right">RPM</th>
@@ -269,7 +280,8 @@ function ModelUsageTable({ models }: { models: ModelSummary[] }) {
                     <td className="py-2.5 px-3 text-right">
                       {m.limits ? (
                         <span className="text-xs text-muted-foreground">
-                          {m.limits.rpd}/ngày
+                          {m.limits.rpd}
+                          {t("settings.rateLimit.perDay")}
                         </span>
                       ) : (
                         <span className="text-muted-foreground/50 text-xs">
@@ -280,7 +292,8 @@ function ModelUsageTable({ models }: { models: ModelSummary[] }) {
                     <td className="py-2.5 px-3 text-right">
                       {m.limits ? (
                         <span className="text-xs text-muted-foreground">
-                          {m.limits.rpm}/phút
+                          {m.limits.rpm}
+                          {t("settings.rateLimit.perMinute")}
                         </span>
                       ) : (
                         <span className="text-muted-foreground/50 text-xs">
@@ -291,7 +304,8 @@ function ModelUsageTable({ models }: { models: ModelSummary[] }) {
                     <td className="py-2.5 pl-3 text-right">
                       {m.limits ? (
                         <span className="text-xs text-muted-foreground">
-                          {formatNumber(m.limits.tpm)}/phút
+                          {formatNumber(m.limits.tpm)}
+                          {t("settings.rateLimit.perMinute")}
                         </span>
                       ) : (
                         <span className="text-muted-foreground/50 text-xs">
@@ -371,6 +385,7 @@ function KeyCard({
   onDelete: () => void;
   onRename: (label: string) => void;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [labelDraft, setLabelDraft] = useState(apiKey.label);
   const [deleting, setDeleting] = useState(false);
@@ -422,7 +437,7 @@ function KeyCard({
                     className="h-7 px-2"
                     onClick={handleSaveLabel}
                   >
-                    Lưu
+                    {t("settings.keyCard.save")}
                   </Button>
                 </div>
               ) : (
@@ -433,7 +448,7 @@ function KeyCard({
                     setEditing(true);
                   }}
                 >
-                  {apiKey.label || "Không có nhãn"}
+                  {apiKey.label || t("settings.keyCard.noLabel")}
                   <Pencil className="size-3 opacity-0 group-hover:opacity-50" />
                 </button>
               )}
@@ -507,7 +522,7 @@ function KeyCard({
             {apiKey.usageCount > 0 && (
               <div className="flex items-center gap-2">
                 <span className="text-[10px] text-muted-foreground">
-                  Tỷ lệ thành công
+                  {t("settings.modelUsage.successRate")}
                 </span>
                 <Progress
                   value={successRate}
@@ -531,7 +546,7 @@ function KeyCard({
             {/* Last error */}
             {apiKey.lastError && (
               <p className="text-[10px] text-red-400/80 truncate max-w-[400px]">
-                Lỗi: {apiKey.lastError}
+                {t("settings.modelUsage.errorPrefix")} {apiKey.lastError}
               </p>
             )}
           </div>
@@ -562,6 +577,7 @@ function KeyCard({
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export function SettingsContent() {
+  const { t } = useTranslation();
   const {
     keys,
     summary,
@@ -591,7 +607,9 @@ export function SettingsContent() {
               <div className="text-2xl font-bold text-primary">
                 {summary.totalKeys}
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">Tổng key</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {t("settings.summary.totalKeys")}
+              </p>
             </CardContent>
           </Card>
           <Card className="border-border/50 bg-card/50">
@@ -600,7 +618,7 @@ export function SettingsContent() {
                 {summary.activeKeys}
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Đang hoạt động
+                {t("settings.summary.activeKeys")}
               </p>
             </CardContent>
           </Card>
@@ -610,7 +628,7 @@ export function SettingsContent() {
                 {formatNumber(summary.totalTokens)}
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Tổng tokens
+                {t("settings.summary.totalTokens")}
               </p>
             </CardContent>
           </Card>
@@ -620,7 +638,7 @@ export function SettingsContent() {
                 {summary.totalUsage}
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Tổng requests
+                {t("settings.summary.totalRequests")}
               </p>
             </CardContent>
           </Card>
@@ -630,9 +648,11 @@ export function SettingsContent() {
         {summary.totalTokens > 0 && (
           <Card className="border-border/50 bg-card/50">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Token Usage</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                {t("settings.tokenUsage.title")}
+              </CardTitle>
               <CardDescription>
-                Tổng tokens đã sử dụng trên tất cả key
+                {t("settings.tokenUsage.description")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -666,7 +686,9 @@ export function SettingsContent() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">Tổng</span>
+                  <span className="text-muted-foreground">
+                    {t("settings.tokenUsage.total")}
+                  </span>
                   <span className="font-bold">
                     {formatNumber(summary.totalTokens)}
                   </span>
@@ -729,18 +751,17 @@ export function SettingsContent() {
           {loading && keys.length === 0 ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground">
               <RefreshCw className="size-5 animate-spin mr-2" />
-              Đang tải...
+              {t("settings.loading")}
             </div>
           ) : keys.length === 0 ? (
             <Card className="border-dashed border-2 border-border/50 bg-transparent">
               <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                 <Key className="size-10 text-muted-foreground/30 mb-3" />
                 <p className="text-sm font-medium text-muted-foreground">
-                  Chưa có API key nào
+                  {t("settings.emptyState.title")}
                 </p>
                 <p className="text-xs text-muted-foreground/70 mt-1 max-w-sm">
-                  Thêm Gemini API key để bắt đầu tạo quiz. Hệ thống sẽ tự động
-                  xoay vòng giữa các key khi gặp rate limit.
+                  {t("settings.emptyState.description")}
                 </p>
                 <div className="mt-4">
                   <AddKeyDialog
@@ -760,11 +781,11 @@ export function SettingsContent() {
                   onToggle={() => toggleKey(k.id, k.status)}
                   onDelete={() => {
                     removeKey(k.id);
-                    toast.success("Đã xóa key");
+                    toast.success(t("settings.deletedKey"));
                   }}
                   onRename={(label) => {
                     updateLabel(k.id, label);
-                    toast.success("Đã cập nhật nhãn");
+                    toast.success(t("settings.updatedLabel"));
                   }}
                 />
               ))}
@@ -777,10 +798,10 @@ export function SettingsContent() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium">
               <Gauge className="size-4 text-amber-400" />
-              Giới hạn Free Tier (Gemini API)
+              {t("settings.freeTier.title")}
             </CardTitle>
             <CardDescription>
-              Rate limit cho mỗi API key, mỗi model có quota riêng
+              {t("settings.freeTier.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -792,7 +813,7 @@ export function SettingsContent() {
                   rpd: 500,
                   rpm: 15,
                   tpm: "1M",
-                  desc: "Chất lượng tốt nhất",
+                  desc: t("settings.freeTier.bestQuality"),
                   color: "border-blue-500/30 bg-blue-500/5",
                 },
                 {
@@ -801,7 +822,7 @@ export function SettingsContent() {
                   rpd: 500,
                   rpm: 30,
                   tpm: "1M",
-                  desc: "Nhanh nhất, rẻ nhất",
+                  desc: t("settings.freeTier.fastest"),
                   color: "border-cyan-500/30 bg-cyan-500/5",
                 },
                 {
@@ -810,7 +831,7 @@ export function SettingsContent() {
                   rpd: 1500,
                   rpm: 15,
                   tpm: "4M",
-                  desc: "Quota cao nhất",
+                  desc: t("settings.freeTier.highestQuota"),
                   color: "border-amber-500/30 bg-amber-500/5",
                 },
               ].map((m) => (
@@ -827,18 +848,20 @@ export function SettingsContent() {
                   <div className="space-y-1 text-[11px]">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
-                        Requests/ngày
+                        {t("settings.freeTier.requestsPerDay")}
                       </span>
                       <span className="font-mono font-semibold">{m.rpd}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
-                        Requests/phút
+                        {t("settings.freeTier.requestsPerMin")}
                       </span>
                       <span className="font-mono font-semibold">{m.rpm}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Tokens/phút</span>
+                      <span className="text-muted-foreground">
+                        {t("settings.freeTier.tokensPerMin")}
+                      </span>
                       <span className="font-mono font-semibold">{m.tpm}</span>
                     </div>
                   </div>
@@ -846,9 +869,7 @@ export function SettingsContent() {
               ))}
             </div>
             <p className="text-[10px] text-muted-foreground mt-3">
-              Mỗi model có quota riêng biệt. Khi model chính (2.5 Flash) hết
-              quota, hệ thống tự động chuyển sang model tiếp theo trong chuỗi
-              fallback.
+              {t("settings.freeTier.note")}
             </p>
           </CardContent>
         </Card>
@@ -858,19 +879,16 @@ export function SettingsContent() {
           <CardContent className="p-4 text-sm text-blue-300/80 space-y-2">
             <p className="font-medium text-blue-300 flex items-center gap-1.5">
               <ArrowUpDown className="size-4" />
-              Cách hoạt động Key Rotation
+              {t("settings.keyRotation.title")}
             </p>
             <ul className="list-disc list-inside space-y-1 text-xs">
-              <li>Key ít dùng nhất sẽ được chọn trước (round-robin)</li>
-              <li>
-                Khi gặp rate limit 429, key tự động chuyển sang cooldown 65s
-              </li>
-              <li>
-                Sau thời gian cooldown, key tự phục hồi và tiếp tục hoạt động
-              </li>
-              <li>Token usage được tính tự động mỗi lần gọi Gemini API</li>
-              <li>Bắt buộc phải thêm ít nhất 1 key để tạo quiz</li>
-              <li>Fallback chain: 2.5 Flash → 2.5 Flash Lite → 2.0 Flash</li>
+              {(
+                t("settings.keyRotation.rules", {
+                  returnObjects: true,
+                }) as string[]
+              ).map((rule, i) => (
+                <li key={i}>{rule}</li>
+              ))}
             </ul>
           </CardContent>
         </Card>

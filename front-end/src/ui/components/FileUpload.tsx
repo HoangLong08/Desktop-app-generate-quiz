@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +38,7 @@ export function FileUpload({
   onFilesChange,
   className,
 }: FileUploadProps) {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
 
   const processFiles = useCallback(
@@ -58,7 +60,8 @@ export function FileUpload({
         if (
           file.type.startsWith("image/") ||
           file.type === "application/pdf" ||
-          file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+          file.type ===
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
           file.type === "application/msword"
         ) {
           uploadedFile.preview = URL.createObjectURL(file);
@@ -119,7 +122,8 @@ export function FileUpload({
       return <FileText className="size-5 text-red-500" />;
     }
     if (
-      type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || 
+      type ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
       type === "application/msword"
     ) {
       return <FileText className="size-5 text-blue-500" />;
@@ -158,17 +162,17 @@ export function FileUpload({
         <div className="text-center">
           <p className="text-base font-medium">
             {isDragging
-              ? "Thả file vào đây..."
-              : "Kéo thả file vào đây hoặc click để chọn"}
+              ? t("fileUpload.dropHere")
+              : t("fileUpload.dragOrClick")}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Hỗ trợ PDF, DOCX, PNG, JPG, WEBP, BMP
+            {t("fileUpload.supportedFormats")}
           </p>
         </div>
 
         <Button variant="outline" size="sm" className="relative">
           <FileUp className="size-4" />
-          Chọn file
+          {t("fileUpload.chooseFile")}
           <input
             type="file"
             multiple
@@ -184,7 +188,7 @@ export function FileUpload({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-muted-foreground">
-              Đã chọn {files.length} file
+              {t("fileUpload.selectedFiles", { count: files.length })}
             </p>
             <Button
               variant="ghost"
@@ -197,7 +201,7 @@ export function FileUpload({
                 onFilesChange([]);
               }}
             >
-              Xóa tất cả
+              {t("fileUpload.removeAll")}
             </Button>
           </div>
 
@@ -230,7 +234,8 @@ export function FileUpload({
                     >
                       {file.type === "application/pdf"
                         ? "PDF"
-                        : file.type.includes("wordprocessingml") || file.type.includes("msword")
+                        : file.type.includes("wordprocessingml") ||
+                            file.type.includes("msword")
                           ? "Word"
                           : "Ảnh"}
                     </Badge>

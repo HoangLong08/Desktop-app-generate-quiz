@@ -7,8 +7,9 @@ import {
   Tooltip,
 } from "recharts";
 import { Activity } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { CategoryAnalysis } from "@/features/stats";
-import { DIFFICULTY_LABELS, QTYPE_LABELS } from "./helpers";
+import { getDifficultyLabels, getQtypeLabels } from "./helpers";
 import { BentoCell, CellHeader } from "./BentoCell";
 
 export function CategoryRadar({ analysis }: { analysis: CategoryAnalysis }) {
@@ -17,18 +18,20 @@ export function CategoryRadar({ analysis }: { analysis: CategoryAnalysis }) {
 
   const radarData = [
     ...difficulties.map(([key, stat]) => ({
-      subject: DIFFICULTY_LABELS[key] ?? key,
+      subject: getDifficultyLabels()[key] ?? key,
       score: stat.avgScore,
       accuracy: stat.accuracy,
     })),
     ...questionTypes.map(([key, stat]) => ({
-      subject: QTYPE_LABELS[key] ?? key,
+      subject: getQtypeLabels()[key] ?? key,
       score: stat.avgScore,
       accuracy: stat.accuracy,
     })),
   ];
 
   if (radarData.length === 0) return null;
+
+  const { t } = useTranslation();
 
   // Need at least 3 points for a radar
   while (radarData.length < 3) {
@@ -37,7 +40,7 @@ export function CategoryRadar({ analysis }: { analysis: CategoryAnalysis }) {
 
   return (
     <BentoCell glowColor="hsl(217 70% 60%)">
-      <CellHeader icon={Activity} title="Phân tích theo loại" />
+      <CellHeader icon={Activity} title={t("folderStats.categoryRadar.title")} />
       <ResponsiveContainer width="100%" height={220}>
         <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="72%">
           <PolarGrid stroke="hsl(var(--border))" strokeOpacity={0.4} />
@@ -47,7 +50,7 @@ export function CategoryRadar({ analysis }: { analysis: CategoryAnalysis }) {
             className="text-muted-foreground"
           />
           <Radar
-            name="Điểm TB"
+            name={t("folderStats.categoryRadar.avgScore")}
             dataKey="score"
             stroke="hsl(217 70% 60%)"
             fill="hsl(217 70% 60%)"
@@ -55,7 +58,7 @@ export function CategoryRadar({ analysis }: { analysis: CategoryAnalysis }) {
             strokeWidth={2}
           />
           <Radar
-            name="Chính xác"
+            name={t("folderStats.categoryRadar.accuracy")}
             dataKey="accuracy"
             stroke="hsl(152 60% 52%)"
             fill="hsl(152 60% 52%)"
@@ -82,14 +85,14 @@ export function CategoryRadar({ analysis }: { analysis: CategoryAnalysis }) {
             className="size-2 rounded-full"
             style={{ backgroundColor: "hsl(217 70% 60%)" }}
           />
-          Điểm TB
+          {t("folderStats.categoryRadar.avgScore")}
         </div>
         <div className="flex items-center gap-1.5">
           <div
             className="size-2 rounded-full"
             style={{ backgroundColor: "hsl(152 60% 52%)" }}
           />
-          Chính xác
+          {t("folderStats.categoryRadar.accuracy")}
         </div>
       </div>
     </BentoCell>

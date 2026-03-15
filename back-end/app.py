@@ -51,5 +51,5 @@ if __name__ == "__main__":
         port=port,
         debug=debug,
         threaded=True,
-        use_reloader=False,  # Reloader kills active requests (OCR+LLM takes 60-120s)
+        use_reloader=False,  # Reloader kills active requests (LLM takes 60-120s)
     )

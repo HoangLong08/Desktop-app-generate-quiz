@@ -4,10 +4,7 @@ flask-cors
 flask-sqlalchemy
 python-dotenv
 
-# OCR
-paddlepaddle==3.3.0
-paddleocr
-opencv-python
+# Image processing
 pillow
 numpy
 

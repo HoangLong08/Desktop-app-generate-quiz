@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +39,7 @@ import { useSaveAttempt } from "@/features/stats";
 export function QuizPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -291,7 +293,7 @@ export function QuizPage() {
             className="gap-1.5"
           >
             <ArrowLeft className="size-4" />
-            Quay lại
+            {t("quiz.back")}
           </Button>
           <div className="flex items-center gap-3">
             {sourceFiles.length > 0 && (
@@ -303,12 +305,12 @@ export function QuizPage() {
                     className="gap-1.5 hidden sm:flex text-muted-foreground hover:text-foreground"
                   >
                     <Eye className="size-4" />
-                    Xem tài liệu
+                    {t("quiz.viewDoc")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
                   <DialogHeader className="px-6 py-4 border-b shrink-0">
-                    <DialogTitle>Tài liệu gốc</DialogTitle>
+                    <DialogTitle>{t("quiz.docTitle")}</DialogTitle>
                   </DialogHeader>
                   <ScrollArea className="flex-1">
                     <div className="p-6 space-y-8">
@@ -340,7 +342,7 @@ export function QuizPage() {
                             )
                           ) : (
                             <p className="text-sm text-muted-foreground italic">
-                              Không có bản xem trước.
+                              {t("quiz.noPreview")}
                             </p>
                           )}
                         </div>
@@ -356,11 +358,11 @@ export function QuizPage() {
               size="sm"
               className="gap-1.5"
               onClick={() => {
-                exportQuizToDocx(questions, "Bài Kiểm Tra Trắc Nghiệm");
+                exportQuizToDocx(questions, t("quiz.title"));
               }}
             >
               <Download className="size-4" />
-              Tải DOCX
+              {t("quiz.downloadDocx")}
             </Button>
             <Button
               variant="outline"
@@ -369,7 +371,7 @@ export function QuizPage() {
               onClick={() => window.print()}
             >
               <Download className="size-4" />
-              Tải PDF
+              {t("quiz.downloadPdf")}
             </Button>
 
             <Badge
@@ -380,7 +382,7 @@ export function QuizPage() {
               {formatTime(elapsed)}
             </Badge>
             <Badge variant="secondary" className="px-3 py-1">
-              {answeredCount}/{questions.length} đã trả lời
+              {answeredCount}/{questions.length} {t("quiz.answered")}
             </Badge>
           </div>
         </div>
@@ -389,7 +391,7 @@ export function QuizPage() {
         <div className="space-y-1.5">
           <Progress value={progressPercent} className="h-2" />
           <p className="text-xs text-muted-foreground text-right">
-            {Math.round(progressPercent)}% hoàn thành
+            {Math.round(progressPercent)}% {t("quiz.complete")}
           </p>
         </div>
 
@@ -439,12 +441,15 @@ export function QuizPage() {
                 className="gap-1.5"
               >
                 <ArrowLeft className="size-4" />
-                Câu trước
+                {t("quiz.prevQuestion")}
               </Button>
 
               <div className="flex-1 flex justify-center mx-4">
                 <span className="text-sm font-medium text-muted-foreground">
-                  Câu {currentIndex + 1} / {questions.length}
+                  {t("quiz.questionOf", {
+                    current: currentIndex + 1,
+                    total: questions.length,
+                  })}
                 </span>
               </div>
 
@@ -457,7 +462,7 @@ export function QuizPage() {
                   }
                   className="gap-1.5"
                 >
-                  Câu tiếp
+                  {t("quiz.nextQuestion")}
                   <ArrowRight className="size-4" />
                 </Button>
               ) : (
@@ -466,19 +471,22 @@ export function QuizPage() {
                   className="gap-1.5 bg-green-600 hover:bg-green-700"
                 >
                   <Send className="size-4" />
-                  Nộp bài
+                  {t("quiz.submit")}
                 </Button>
               )}
             </div>
             {/* Keyboard hint */}
             <p className="text-center text-[11px] text-muted-foreground/60 select-none hidden sm:block">
               <kbd className="font-mono">←</kbd>
-              <kbd className="font-mono">→</kbd> điều hướng &nbsp;·&nbsp;
+              <kbd className="font-mono">→</kbd> {t("quiz.shortcuts.navigate")}{" "}
+              &nbsp;·&nbsp;
               <kbd className="font-mono">A</kbd>
               <kbd className="font-mono">B</kbd>
               <kbd className="font-mono">C</kbd>
-              <kbd className="font-mono">D</kbd> chọn đáp án &nbsp;·&nbsp;
-              <kbd className="font-mono">Enter</kbd> tiếp theo / nộp bài
+              <kbd className="font-mono">D</kbd>{" "}
+              {t("quiz.shortcuts.selectAnswer")} &nbsp;·&nbsp;
+              <kbd className="font-mono">Enter</kbd>{" "}
+              {t("quiz.shortcuts.nextOrSubmit")}
             </p>
           </div>
         )}
@@ -492,7 +500,7 @@ export function QuizPage() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Flag className="size-5" />
-                Kết quả
+                {t("quiz.results.title")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -514,10 +522,10 @@ export function QuizPage() {
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {result.score >= 80
-                    ? "Xuất sắc! 🎉"
+                    ? t("quiz.results.excellent")
                     : result.score >= 50
-                      ? "Khá tốt! 👍"
-                      : "Cần cố gắng thêm 💪"}
+                      ? t("quiz.results.good")
+                      : t("quiz.results.needsWork")}
                 </p>
               </div>
 
@@ -526,25 +534,33 @@ export function QuizPage() {
               {/* Stats */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Đúng</span>
+                  <span className="text-muted-foreground">
+                    {t("quiz.results.correct")}
+                  </span>
                   <span className="font-medium text-green-500">
                     {result.correctAnswers}/{result.totalQuestions}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Sai</span>
+                  <span className="text-muted-foreground">
+                    {t("quiz.results.wrong")}
+                  </span>
                   <span className="font-medium text-red-500">
                     {result.wrongAnswers}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Bỏ qua</span>
+                  <span className="text-muted-foreground">
+                    {t("quiz.results.skipped")}
+                  </span>
                   <span className="font-medium text-muted-foreground">
                     {result.skippedQuestions}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Thời gian</span>
+                  <span className="text-muted-foreground">
+                    {t("quiz.results.time")}
+                  </span>
                   <span className="font-medium">
                     {formatTime(result.timeTaken)}
                   </span>
@@ -560,10 +576,10 @@ export function QuizPage() {
                   className="w-full gap-2"
                   onClick={handleRetry}
                 >
-                  Làm lại
+                  {t("quiz.results.retake")}
                 </Button>
                 <Button className="w-full gap-2" onClick={() => navigate("/")}>
-                  Tạo quiz mới
+                  {t("quiz.results.newQuiz")}
                 </Button>
               </div>
             </CardContent>
@@ -575,7 +591,7 @@ export function QuizPage() {
               <Card className="flex min-h-0 flex-1 flex-col">
                 <CardHeader className="pb-3 shrink-0">
                   <CardTitle className="text-sm font-medium">
-                    Danh sách câu hỏi
+                    {t("quiz.questionList")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="min-h-0 flex-1 p-0">
@@ -605,15 +621,15 @@ export function QuizPage() {
                       <div className="space-y-2 text-xs text-muted-foreground">
                         <div className="flex items-center gap-2">
                           <div className="size-3 rounded-sm bg-primary" />
-                          <span>Đang xem</span>
+                          <span>{t("quiz.viewing")}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="size-3 rounded-sm bg-green-500/15 border border-green-500/30" />
-                          <span>Đã trả lời</span>
+                          <span>{t("quiz.answeredStatus")}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="size-3 rounded-sm bg-muted" />
-                          <span>Chưa trả lời</span>
+                          <span>{t("quiz.unanswered")}</span>
                         </div>
                       </div>
                     </div>
@@ -628,7 +644,10 @@ export function QuizPage() {
                 size="lg"
               >
                 <CheckCircle2 className="size-5" />
-                Nộp bài ({answeredCount}/{questions.length})
+                {t("quiz.submitCount", {
+                  count: answeredCount,
+                  total: questions.length,
+                })}
               </Button>
             </div>
           </>

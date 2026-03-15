@@ -1,4 +1,5 @@
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { useTranslation } from "react-i18next";
 import { TrendingUp, TrendingDown, Minus, Percent } from "lucide-react";
 import type { FolderProgress, FolderStatsSummary } from "@/features/stats";
 import { BentoCell, CellHeader } from "./BentoCell";
@@ -13,15 +14,16 @@ export function CompletionDonut({
   summary: FolderStatsSummary;
 }) {
   const { completedQuizSets, totalQuizSets, completionRate } = progress;
+  const { t } = useTranslation();
   const donutData = [
-    { name: "Hoàn thành", value: completedQuizSets },
-    { name: "Chưa thử", value: totalQuizSets - completedQuizSets },
+    { name: t("folderStats.completionDonut.completed"), value: completedQuizSets },
+    { name: t("folderStats.completionDonut.notAttempted"), value: totalQuizSets - completedQuizSets },
   ];
 
   const trendMsg =
     summary.improvementRate > 0
       ? {
-          text: `+${summary.improvementRate}% so với trước`,
+          text: t("folderStats.completionDonut.improvement", { rate: summary.improvementRate }),
           icon: TrendingUp,
           color: "text-emerald-400",
         }
@@ -35,7 +37,7 @@ export function CompletionDonut({
 
   return (
     <BentoCell glowColor="hsl(var(--primary))">
-      <CellHeader icon={Percent} title="Tiến độ hoàn thành" />
+      <CellHeader icon={Percent} title={t("folderStats.completionDonut.title")} />
       <div className="flex items-center gap-5">
         <div className="relative shrink-0">
           <ResponsiveContainer width={120} height={120}>
@@ -63,12 +65,12 @@ export function CompletionDonut({
 
         <div className="flex-1 space-y-2 min-w-0">
           <p className="text-sm font-medium">
-            {completedQuizSets}/{totalQuizSets} quiz
+            {t("folderStats.completionDonut.quizCount", { done: completedQuizSets, total: totalQuizSets })}
           </p>
           <p className="text-xs text-muted-foreground">
             {totalQuizSets - completedQuizSets > 0
-              ? `Còn ${totalQuizSets - completedQuizSets} quiz chưa thử`
-              : "Đã hoàn thành tất cả!"}
+              ? t("folderStats.completionDonut.remaining", { count: totalQuizSets - completedQuizSets })
+              : t("folderStats.completionDonut.allDone")}
           </p>
           <div className={`flex items-center gap-1 text-xs ${trendMsg.color}`}>
             <trendMsg.icon className="size-3" />

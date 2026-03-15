@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./ModeToggle";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import {
   Drawer,
   DrawerContent,
@@ -13,6 +15,7 @@ import { SettingsContent } from "@/ui/pages/SettingsPage";
 
 export function FloatingToolbar() {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <>
@@ -26,6 +29,7 @@ export function FloatingToolbar() {
           <Settings className="size-4" />
         </Button>
         <ModeToggle />
+        <LanguageSwitcher />
       </div>
 
       <Drawer
@@ -35,9 +39,9 @@ export function FloatingToolbar() {
       >
         <DrawerContent className="h-full w-full sm:max-w-2xl">
           <DrawerHeader>
-            <DrawerTitle>Cài đặt API Keys</DrawerTitle>
+            <DrawerTitle>{t("header.settingsTitle")}</DrawerTitle>
             <DrawerDescription>
-              Quản lý các Gemini API key dùng để tạo quiz.
+              {t("header.settingsDescription")}
             </DrawerDescription>
           </DrawerHeader>
           <div className="flex-1 overflow-hidden">

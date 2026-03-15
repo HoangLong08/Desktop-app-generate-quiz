@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 import { Clock } from "lucide-react";
 import {
   getScoreColor,
@@ -23,9 +24,11 @@ export function RecentAttemptsList({
 }) {
   if (attempts.length === 0) return null;
 
+  const { t } = useTranslation();
+
   return (
     <BentoCell glowColor="hsl(var(--primary))">
-      <CellHeader icon={Clock} title="Lần làm gần đây" />
+      <CellHeader icon={Clock} title={t("folderStats.recentAttempts.title")} />
       <div className="space-y-1 -mx-1">
         {attempts.map((a, i) => (
           <div
@@ -45,7 +48,7 @@ export function RecentAttemptsList({
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{a.quizTitle}</p>
               <p className="text-xs text-muted-foreground">
-                {a.correctCount}/{a.totalQuestions} câu ·{" "}
+                {a.correctCount}/{a.totalQuestions} {t("folderStats.recentAttempts.questions")} ·{" "}
                 {formatTime(a.timeTaken)}
               </p>
             </div>

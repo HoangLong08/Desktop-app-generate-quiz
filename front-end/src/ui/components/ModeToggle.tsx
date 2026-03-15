@@ -1,4 +1,5 @@
 import { Moon, Sun, Monitor } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,6 +11,7 @@ import { useTheme } from "@/config/theme-provider";
 
 export function ModeToggle() {
   const { setTheme, theme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <DropdownMenu>
@@ -26,21 +28,21 @@ export function ModeToggle() {
           className={theme === "light" ? "bg-accent" : ""}
         >
           <Sun className="size-4" />
-          Sáng
+          {t("theme.light")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme("dark")}
           className={theme === "dark" ? "bg-accent" : ""}
         >
           <Moon className="size-4" />
-          Tối
+          {t("theme.dark")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme("system")}
           className={theme === "system" ? "bg-accent" : ""}
         >
           <Monitor className="size-4" />
-          Hệ thống
+          {t("theme.system")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

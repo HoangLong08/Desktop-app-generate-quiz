@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -23,6 +24,7 @@ export function QuizQuestion({
   showResult = false,
   className,
 }: QuizQuestionProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   // For multiple-answer: selectedAnswer is comma-separated sorted ids e.g. "a,c"
@@ -45,7 +47,9 @@ export function QuizQuestion({
     const lines: string[] = [];
 
     // Question text
-    lines.push(`Câu ${question.questionNumber}: ${question.questionText}`);
+    lines.push(
+      `${t("quizQuestion.questionN", { n: question.questionNumber })}${question.questionText}`,
+    );
     lines.push("");
 
     // Options
@@ -53,7 +57,9 @@ export function QuizQuestion({
       const correctOpt = question.options.find(
         (o) => o.id === question.correctAnswerId,
       );
-      lines.push(`Đáp án: ${correctOpt?.text ?? question.correctAnswerId}`);
+      lines.push(
+        `${t("quizQuestion.answer")}${correctOpt?.text ?? question.correctAnswerId}`,
+      );
     } else if (question.type === "multiple-answer") {
       question.options.forEach((opt, i) => {
         const letter = String.fromCharCode(65 + i);
@@ -68,7 +74,7 @@ export function QuizQuestion({
           return String.fromCharCode(65 + idx);
         })
         .join(", ");
-      lines.push(`Đáp án đúng: ${correctLetters}`);
+      lines.push(`${t("quizQuestion.correctAnswer")}${correctLetters}`);
     } else {
       question.options.forEach((opt, i) => {
         const letter = String.fromCharCode(65 + i);
@@ -83,11 +89,13 @@ export function QuizQuestion({
         65 +
           question.options.findIndex((o) => o.id === question.correctAnswerId),
       );
-      lines.push(`Đáp án đúng: ${correctLetter}. ${correctOpt?.text ?? ""}`);
+      lines.push(
+        `${t("quizQuestion.correctAnswer")}${correctLetter}. ${correctOpt?.text ?? ""}`,
+      );
     }
 
     if (question.explanation) {
-      lines.push(`Giải thích: ${question.explanation}`);
+      lines.push(`${t("quizQuestion.explanation")}${question.explanation}`);
     }
 
     navigator.clipboard.writeText(lines.join("\n")).then(() => {
@@ -133,13 +141,25 @@ export function QuizQuestion({
   const getTypeBadge = () => {
     switch (question.type) {
       case "multiple-choice":
-        return <Badge variant="secondary">Trắc nghiệm (1 đáp án)</Badge>;
+        return (
+          <Badge variant="secondary">
+            {t("quizQuestion.typeMultipleChoice")}
+          </Badge>
+        );
       case "multiple-answer":
-        return <Badge variant="secondary">Chọn nhiều đáp án</Badge>;
+        return (
+          <Badge variant="secondary">
+            {t("quizQuestion.typeMultipleAnswer")}
+          </Badge>
+        );
       case "true-false":
-        return <Badge variant="secondary">Đúng / Sai</Badge>;
+        return (
+          <Badge variant="secondary">{t("quizQuestion.typeTrueFalse")}</Badge>
+        );
       case "fill-blank":
-        return <Badge variant="secondary">Điền vào chỗ trống</Badge>;
+        return (
+          <Badge variant="secondary">{t("quizQuestion.typeFillBlank")}</Badge>
+        );
     }
   };
 
@@ -159,7 +179,7 @@ export function QuizQuestion({
             size="icon"
             className="size-7 shrink-0 text-muted-foreground hover:text-foreground"
             onClick={handleCopy}
-            title="Sao chép câu hỏi"
+            title={t("quizQuestion.copyQuestion")}
           >
             {copied ? (
               <Check className="size-3.5 text-green-500" />
@@ -176,7 +196,7 @@ export function QuizQuestion({
       {/* Options */}
       {question.type === "fill-blank" ? (
         <Input
-          placeholder="Nhập câu trả lời..."
+          placeholder={t("quizQuestion.fillPlaceholder")}
           value={selectedAnswer ?? ""}
           onChange={(e) => onAnswerChange(question.id, e.target.value)}
           disabled={showResult}
@@ -193,7 +213,7 @@ export function QuizQuestion({
         <div className="space-y-2">
           {showResult && (
             <p className="text-xs text-muted-foreground mb-1">
-              Chọn tất cả đáp án đúng (có thể nhiều hơn 1)
+              {t("quizQuestion.selectAllCorrect")}
             </p>
           )}
           {question.options.map((option, index) => {
@@ -235,12 +255,12 @@ export function QuizQuestion({
                     variant="default"
                     className="bg-green-600 text-white text-[10px]"
                   >
-                    Đúng
+                    {t("quizQuestion.true")}
                   </Badge>
                 )}
                 {showResult && isSelected && !isCorrectOpt && (
                   <Badge variant="destructive" className="text-[10px]">
-                    Sai
+                    {t("quizQuestion.wrongLabel")}
                   </Badge>
                 )}
               </Label>
@@ -276,14 +296,14 @@ export function QuizQuestion({
                   variant="default"
                   className="bg-green-600 text-white text-[10px]"
                 >
-                  Đáp án đúng
+                  {t("quizQuestion.correctLabel")}
                 </Badge>
               )}
               {showResult &&
                 selectedAnswer === option.id &&
                 option.id !== question.correctAnswerId && (
                   <Badge variant="destructive" className="text-[10px]">
-                    Sai
+                    {t("quizQuestion.wrongLabel")}
                   </Badge>
                 )}
             </Label>
@@ -294,7 +314,9 @@ export function QuizQuestion({
       {/* Explanation */}
       {showResult && question.explanation && (
         <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-3">
-          <p className="text-xs font-medium text-blue-400 mb-1">Giải thích:</p>
+          <p className="text-xs font-medium text-blue-400 mb-1">
+            {t("quizQuestion.explanationLabel")}
+          </p>
           <p className="text-sm text-muted-foreground">
             {question.explanation}
           </p>

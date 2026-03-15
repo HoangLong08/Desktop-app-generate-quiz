@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -118,6 +119,7 @@ function ReusableFileItem({
   isSelected: boolean;
   onToggle: () => void;
 }) {
+  const { t } = useTranslation();
   const ext = record.fileType.toLowerCase();
   const available = record.hasFile;
   let icon = <FileText className="size-4 text-muted-foreground" />;
@@ -169,7 +171,7 @@ function ReusableFileItem({
           {!available && (
             <span className="ml-1 text-amber-500">
               {" "}
-              · File không còn trên máy chủ
+              · {t("inputSource.fileNotOnServer")}
             </span>
           )}
         </p>
@@ -191,6 +193,7 @@ function FileUploadTab({
   reusedFileIds: string[];
   onReusedFileIdsChange: (ids: string[]) => void;
 }) {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
 
   const processFiles = useCallback(
@@ -270,16 +273,16 @@ function FileUploadTab({
         <div className="text-center">
           <p className="text-base font-medium">
             {isDragging
-              ? "Thả file vào đây..."
-              : "Kéo thả file vào đây hoặc click để chọn"}
+              ? t("inputSource.dropHere")
+              : t("inputSource.dragOrClick")}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Hỗ trợ PDF, DOCX, PNG, JPG, WEBP, BMP
+            {t("inputSource.supportedFormats")}
           </p>
         </div>
         <Button variant="outline" size="sm" className="relative">
           <FileUp className="size-4" />
-          Chọn file
+          {t("inputSource.chooseFile")}
           <input
             type="file"
             multiple
@@ -298,7 +301,7 @@ function FileUploadTab({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-muted-foreground">
-              Đã chọn {files.length} file
+              {t("inputSource.selectedFiles", { count: files.length })}
             </p>
             <Button
               variant="ghost"
@@ -311,7 +314,7 @@ function FileUploadTab({
                 onFilesChange([]);
               }}
             >
-              Xóa tất cả
+              {t("inputSource.removeAll")}
             </Button>
           </div>
           <div className="space-y-1.5">
@@ -360,6 +363,7 @@ function PreviousUploadsSection({
   reusedFileIds: string[];
   onReusedFileIdsChange: (ids: string[]) => void;
 }) {
+  const { t } = useTranslation();
   const { data: records, isLoading } = useUploadRecords(folderId);
   const [expanded, setExpanded] = useState(false);
 
@@ -383,11 +387,11 @@ function PreviousUploadsSection({
       <div className="flex items-center gap-2">
         <History className="size-3.5 text-muted-foreground" />
         <p className="text-sm font-medium text-muted-foreground">
-          File đã tải trước
+          {t("inputSource.previousFiles")}
         </p>
         {reusedFileIds.length > 0 && (
           <Badge variant="secondary" className="h-5 px-1.5 text-xs">
-            {reusedFileIds.length} đã chọn
+            {reusedFileIds.length} {t("inputSource.selected")}
           </Badge>
         )}
       </div>
@@ -409,8 +413,8 @@ function PreviousUploadsSection({
           onClick={() => setExpanded(!expanded)}
         >
           {expanded
-            ? "Thu gọn"
-            : `Xem thêm ${fileRecords.length - 4} file khác`}
+            ? t("inputSource.collapse")
+            : t("inputSource.showMore", { count: fileRecords.length - 4 })}
         </Button>
       )}
       {reusedFileIds.length > 0 && (
@@ -420,7 +424,7 @@ function PreviousUploadsSection({
           className="text-muted-foreground"
           onClick={() => onReusedFileIdsChange([])}
         >
-          Bỏ chọn tất cả
+          {t("inputSource.deselectAll")}
         </Button>
       )}
     </div>
@@ -436,6 +440,7 @@ function PreviousYouTubeSection({
   folderId?: string;
   onSelect: (url: string) => void;
 }) {
+  const { t } = useTranslation();
   const { data: records } = useUploadRecords(folderId);
   const ytRecords = (records ?? []).filter(
     (r) => r.inputMode === "youtube" && r.sourceLabel,
@@ -448,7 +453,7 @@ function PreviousYouTubeSection({
       <div className="flex items-center gap-2">
         <History className="size-3.5 text-muted-foreground" />
         <p className="text-sm font-medium text-muted-foreground">
-          Link YouTube đã dùng
+          {t("inputSource.previousYoutubeLinks")}
         </p>
       </div>
       <div className="space-y-1">
@@ -486,6 +491,7 @@ function YouTubeTab({
   onYoutubeChange: (input: YouTubeInput) => void;
   folderId?: string;
 }) {
+  const { t } = useTranslation();
   const urlValid =
     youtubeInput.url === "" || isValidYouTubeUrl(youtubeInput.url);
   const urlFilled = youtubeInput.url.trim() !== "";
@@ -494,16 +500,15 @@ function YouTubeTab({
     <div className="space-y-5">
       {/* Info banner */}
       <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-300">
-        <p className="font-medium">Trích xuất phụ đề YouTube</p>
+        <p className="font-medium">{t("inputSource.youtubeTitle")}</p>
         <p className="mt-0.5 text-xs opacity-80">
-          Ứng dụng sẽ tìm và trích xuất phụ đề (subtitle) từ video để tạo quiz.
-          Video phải có bật phụ đề / captions.
+          {t("inputSource.youtubeDescription")}
         </p>
       </div>
 
       {/* URL Input */}
       <div className="space-y-2">
-        <Label htmlFor="yt-url">Link YouTube</Label>
+        <Label htmlFor="yt-url">{t("inputSource.youtubeLabel")}</Label>
         <div className="relative">
           <Youtube className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -534,7 +539,7 @@ function YouTubeTab({
         </div>
         {urlFilled && !urlValid && (
           <p className="text-xs text-destructive">
-            URL không hợp lệ. Vui lòng nhập link YouTube hợp lệ.
+            {t("inputSource.youtubeInvalid")}
           </p>
         )}
         <p className="text-xs text-muted-foreground">
@@ -544,7 +549,7 @@ function YouTubeTab({
 
       {/* Caption Language */}
       <div className="space-y-2">
-        <Label htmlFor="caption-lang">Ngôn ngữ phụ đề ưu tiên</Label>
+        <Label htmlFor="caption-lang">{t("inputSource.subtitleLanguage")}</Label>
         <Select
           value={youtubeInput.captionLang}
           onValueChange={(val) =>
@@ -552,7 +557,7 @@ function YouTubeTab({
           }
         >
           <SelectTrigger id="caption-lang">
-            <SelectValue placeholder="Chọn ngôn ngữ..." />
+            <SelectValue placeholder={t("inputSource.subtitlePlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {CAPTION_LANG_OPTIONS.map((opt) => (
@@ -563,8 +568,7 @@ function YouTubeTab({
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">
-          Nếu không tìm thấy phụ đề ngôn ngữ này, sẽ tự động fallback sang
-          English hoặc bất kỳ ngôn ngữ nào khả dụng.
+          {t("inputSource.subtitleNote")}
         </p>
       </div>
 
@@ -586,6 +590,7 @@ function PreviousTextSection({
   folderId?: string;
   onSelect: (text: string) => void;
 }) {
+  const { t } = useTranslation();
   const { data: records } = useUploadRecords(folderId);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const textRecords = (records ?? []).filter(
@@ -599,9 +604,9 @@ function PreviousTextSection({
     try {
       const content = await getUploadContentApi(record.id);
       onSelect(content);
-      toast.success("Đã khôi phục văn bản");
+      toast.success(t("inputSource.textRestored"));
     } catch {
-      toast.error("Không thể tải nội dung văn bản");
+      toast.error(t("inputSource.textLoadError"));
     } finally {
       setLoadingId(null);
     }
@@ -612,7 +617,7 @@ function PreviousTextSection({
       <div className="flex items-center gap-2">
         <History className="size-3.5 text-muted-foreground" />
         <p className="text-sm font-medium text-muted-foreground">
-          Văn bản đã dùng trước
+          {t("inputSource.previousTexts")}
         </p>
       </div>
       <div className="space-y-1">
@@ -632,7 +637,7 @@ function PreviousTextSection({
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm text-foreground">
-                {record.sourceLabel || "Văn bản nhập trực tiếp"}
+                {record.sourceLabel || t("inputSource.textDirectInput")}
               </p>
               <p className="text-[11px] text-muted-foreground">
                 {new Date(record.createdAt).toLocaleDateString("vi-VN")}
@@ -655,6 +660,7 @@ function TextInputTab({
   onTextChange: (text: string) => void;
   folderId?: string;
 }) {
+  const { t } = useTranslation();
   const charCount = rawText.length;
   const isOverLimit = charCount > TEXT_MAX_CHARS;
 
@@ -662,10 +668,9 @@ function TextInputTab({
     <div className="space-y-3">
       {/* Info */}
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-        <p className="font-medium">Nhập văn bản trực tiếp</p>
+        <p className="font-medium">{t("inputSource.textDirectInput")}</p>
         <p className="mt-0.5 text-xs opacity-80">
-          Dán hoặc nhập nội dung bài học, tài liệu, đoạn văn… để tạo quiz. Tối
-          đa {TEXT_MAX_CHARS.toLocaleString()} ký tự.
+          {t("inputSource.textDirectDescription")}
         </p>
       </div>
 
@@ -678,7 +683,7 @@ function TextInputTab({
               ? "border-destructive focus:ring-destructive/30"
               : "border-input focus:ring-ring/30",
           )}
-          placeholder="Dán nội dung tài liệu vào đây..."
+          placeholder={t("inputSource.textPlaceholder")}
           value={rawText}
           onChange={(e) => onTextChange(e.target.value)}
           spellCheck={false}
@@ -691,13 +696,12 @@ function TextInputTab({
               isOverLimit ? "text-destructive" : "text-muted-foreground",
             )}
           >
-            {charCount.toLocaleString()} / {TEXT_MAX_CHARS.toLocaleString()} ký
-            tự
+            {charCount.toLocaleString()} / {TEXT_MAX_CHARS.toLocaleString()}{" "}
+            {t("inputSource.characters")}
           </span>
           {isOverLimit && (
             <span className="text-destructive">
-              Vượt quá {(charCount - TEXT_MAX_CHARS).toLocaleString()} ký tự —
-              hãy rút gọn nội dung
+              {t("inputSource.textOverLimit", { count: charCount - TEXT_MAX_CHARS })}
             </span>
           )}
         </div>
@@ -725,6 +729,7 @@ export function InputSourceTabs({
   onReusedFileIdsChange,
   className,
 }: InputSourceTabsProps) {
+  const { t } = useTranslation();
   // Summary badges for files tab
   const pdfCount = files.filter((f) => f.type === "application/pdf").length;
   const docCount = files.filter(
@@ -745,7 +750,7 @@ export function InputSourceTabs({
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="files" className="gap-1.5">
             <Upload className="size-4" />
-            Tập tin
+            {t("inputSource.tabs.files")}
             {(files.length > 0 || reusedFileIds.length > 0) && (
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                 {files.length + reusedFileIds.length}
@@ -763,7 +768,7 @@ export function InputSourceTabs({
           </TabsTrigger>
           <TabsTrigger value="text" className="gap-1.5">
             <AlignLeft className="size-4" />
-            Văn bản
+            {t("inputSource.tabs.text")}
             {mode === "text" && rawText.trim().length > 0 && (
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                 {rawText.length > 999
@@ -792,7 +797,7 @@ export function InputSourceTabs({
             {imgCount > 0 && (
               <Badge variant="outline" className="gap-1">
                 <ImageIcon className="size-3 text-green-500" />
-                {imgCount} ảnh
+                {imgCount} {t("inputSource.images")}
               </Badge>
             )}
           </div>

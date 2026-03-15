@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "@/config/i18n";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -92,21 +94,21 @@ function computeTreemap(
 
 type TreemapMode = "score" | "activity" | "difficulty";
 
-const MODES: { key: TreemapMode; label: string; legend: string }[] = [
+const MODES: { key: TreemapMode; labelKey: string; legendKey: string }[] = [
   {
     key: "score",
-    label: "Điểm số",
-    legend: "size = số lần làm · màu = điểm số",
+    labelKey: "folderStats.quizTreemap.modeScore",
+    legendKey: "folderStats.quizTreemap.legendScore",
   },
   {
     key: "activity",
-    label: "Hoạt động",
-    legend: "size = số câu hỏi · màu = mức hoạt động",
+    labelKey: "folderStats.quizTreemap.modeActivity",
+    legendKey: "folderStats.quizTreemap.legendActivity",
   },
   {
     key: "difficulty",
-    label: "Độ khó",
-    legend: "size = số lần làm · màu = độ khó",
+    labelKey: "folderStats.quizTreemap.modeDifficulty",
+    legendKey: "folderStats.quizTreemap.legendDifficulty",
   },
 ];
 
@@ -142,10 +144,10 @@ function getActivityGradient(n: number): string {
 }
 
 function getActivityLabel(n: number): string {
-  if (n >= 0.75) return "Rất tích cực";
-  if (n >= 0.5) return "Tích cực";
-  if (n >= 0.25) return "Trung bình";
-  return "Ít hoạt động";
+  if (n >= 0.75) return i18n.t("folderStats.quizTreemap.veryActive");
+  if (n >= 0.5) return i18n.t("folderStats.quizTreemap.active");
+  if (n >= 0.25) return i18n.t("folderStats.quizTreemap.moderate");
+  return i18n.t("folderStats.quizTreemap.inactive");
 }
 
 // ─── Difficulty Mode Colors (lower avgScore = harder = warmer) ─────────────────
@@ -168,10 +170,10 @@ function getDifficultyGradient(avg: number): string {
 }
 
 function getDifficultyLabel(avg: number): string {
-  if (avg >= 80) return "Dễ";
-  if (avg >= 60) return "Vừa";
-  if (avg >= 40) return "Khó";
-  return "Rất khó";
+  if (avg >= 80) return i18n.t("folderStats.quizTreemap.diffEasy");
+  if (avg >= 60) return i18n.t("folderStats.quizTreemap.diffMedium");
+  if (avg >= 40) return i18n.t("folderStats.quizTreemap.diffHard");
+  return i18n.t("folderStats.quizTreemap.diffVeryHard");
 }
 
 // ─── Mode Helpers ─────────────────────────────────────────────────────────────
@@ -209,6 +211,7 @@ function getModeCellGradient(
 
 export function QuizTreemap({ quizzes }: { quizzes: QuizBreakdown[] }) {
   const [mode, setMode] = useState<TreemapMode>("score");
+  const { t } = useTranslation();
   const attempted = quizzes.filter((q) => q.attemptCount > 0);
   const notAttempted = quizzes.filter((q) => q.attemptCount === 0);
 
@@ -231,7 +234,7 @@ export function QuizTreemap({ quizzes }: { quizzes: QuizBreakdown[] }) {
       <div className="flex items-center gap-2 px-1 flex-wrap">
         <BookOpen className="size-4 text-muted-foreground" />
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          So sánh Quiz
+          {t("folderStats.quizTreemap.title")}
         </span>
 
         {/* ── Mode Toggle ── */}
@@ -254,14 +257,14 @@ export function QuizTreemap({ quizzes }: { quizzes: QuizBreakdown[] }) {
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
-              <span className="relative z-10">{m.label}</span>
+              <span className="relative z-10">{t(m.labelKey)}</span>
             </button>
           ))}
         </div>
 
         <span className="ml-auto text-[10px] text-muted-foreground">
-          {attempted.length} đã làm · {notAttempted.length} chưa thử ·
-          <span className="italic"> {modeConfig.legend}</span>
+          {attempted.length} {t("folderStats.quizTreemap.attempted")} · {notAttempted.length} {t("folderStats.quizTreemap.notAttempted")} ·
+          <span className="italic"> {t(modeConfig.legendKey)}</span>
         </span>
       </div>
 
@@ -342,7 +345,7 @@ export function QuizTreemap({ quizzes }: { quizzes: QuizBreakdown[] }) {
                             >
                               {mode === "score" && `${best.toFixed(0)}%`}
                               {mode === "activity" &&
-                                `${quiz.attemptCount} lần`}
+                                `${quiz.attemptCount} ${t("folderStats.quizTreemap.times")}`}
                               {mode === "difficulty" && getDifficultyLabel(avg)}
                             </motion.div>
                             {isMedium && (
@@ -355,9 +358,9 @@ export function QuizTreemap({ quizzes }: { quizzes: QuizBreakdown[] }) {
                               >
                                 {mode === "score" && `${pct}%`}
                                 {mode === "activity" &&
-                                  `${quiz.questionCount} câu`}
+                                  `${quiz.questionCount} ${t("folderStats.quizTreemap.questionsUnit")}`}
                                 {mode === "difficulty" &&
-                                  `TB: ${avg.toFixed(0)}%`}
+                                  `${t("folderStats.quizTreemap.avg")}: ${avg.toFixed(0)}%`}
                               </motion.span>
                             )}
                           </div>
@@ -391,9 +394,9 @@ export function QuizTreemap({ quizzes }: { quizzes: QuizBreakdown[] }) {
                                     {mode === "difficulty" && avg.toFixed(0)}
                                   </span>
                                   <span className="text-[10px] text-muted-foreground">
-                                    {mode === "score" && "điểm cao nhất"}
-                                    {mode === "activity" && "lần làm"}
-                                    {mode === "difficulty" && "điểm TB"}
+                                    {mode === "score" && t("folderStats.quizTreemap.bestScore")}
+                                    {mode === "activity" && t("folderStats.quizTreemap.timesLabel")}
+                                    {mode === "difficulty" && t("folderStats.quizTreemap.avgScore")}
                                   </span>
                                 </motion.div>
                               )}
@@ -410,11 +413,11 @@ export function QuizTreemap({ quizzes }: { quizzes: QuizBreakdown[] }) {
                                   style={{ fontSize: isLarge ? 10 : 9 }}
                                 >
                                   {mode === "score" &&
-                                    `${quiz.attemptCount} lần · TB: ${avg.toFixed(0)}% · Cuối: ${last.toFixed(0)}%`}
+                                    `${quiz.attemptCount} ${t("folderStats.quizTreemap.times")} · ${t("folderStats.quizTreemap.avg")}: ${avg.toFixed(0)}% · ${t("folderStats.quizTreemap.last")}: ${last.toFixed(0)}%`}
                                   {mode === "activity" &&
-                                    `TB: ${avg.toFixed(0)}% · Cao nhất: ${best.toFixed(0)}%`}
+                                    `${t("folderStats.quizTreemap.avg")}: ${avg.toFixed(0)}% · ${t("folderStats.quizTreemap.highest")}: ${best.toFixed(0)}%`}
                                   {mode === "difficulty" &&
-                                    `${quiz.attemptCount} lần · Cao nhất: ${best.toFixed(0)}%`}
+                                    `${quiz.attemptCount} ${t("folderStats.quizTreemap.times")} · ${t("folderStats.quizTreemap.highest")}: ${best.toFixed(0)}%`}
                                 </motion.p>
                               )}
                             </AnimatePresence>
@@ -433,7 +436,7 @@ export function QuizTreemap({ quizzes }: { quizzes: QuizBreakdown[] }) {
                         {mode === "score" && (
                           <>
                             <span className="text-muted-foreground">
-                              Cao nhất
+                              {t("folderStats.quizTreemap.highest")}
                             </span>
                             <span
                               className="font-bold text-right"
@@ -446,13 +449,13 @@ export function QuizTreemap({ quizzes }: { quizzes: QuizBreakdown[] }) {
                         {mode === "activity" && (
                           <>
                             <span className="text-muted-foreground">
-                              Hoạt động
+                              {t("folderStats.quizTreemap.activity")}
                             </span>
                             <span
                               className="font-bold text-right"
                               style={{ color: getActivityColor(actNorm) }}
                             >
-                              {quiz.attemptCount} lần ·{" "}
+                              {quiz.attemptCount} {t("folderStats.quizTreemap.times")} ·{" "}
                               {getActivityLabel(actNorm)}
                             </span>
                           </>
@@ -460,37 +463,37 @@ export function QuizTreemap({ quizzes }: { quizzes: QuizBreakdown[] }) {
                         {mode === "difficulty" && (
                           <>
                             <span className="text-muted-foreground">
-                              Độ khó
+                              {t("folderStats.quizTreemap.difficulty")}
                             </span>
                             <span
                               className="font-bold text-right"
                               style={{ color: getDifficultyColor(avg) }}
                             >
-                              {getDifficultyLabel(avg)} · TB {avg.toFixed(0)}%
+                              {getDifficultyLabel(avg)} · {t("folderStats.quizTreemap.avg")} {avg.toFixed(0)}%
                             </span>
                           </>
                         )}
-                        <span className="text-muted-foreground">Cao nhất</span>
+                        <span className="text-muted-foreground">{t("folderStats.quizTreemap.highest")}</span>
                         <span className="font-medium text-right">
                           {best.toFixed(0)}%
                         </span>
                         <span className="text-muted-foreground">
-                          Trung bình
+                          {t("folderStats.quizTreemap.average")}
                         </span>
                         <span className="font-medium text-right">
                           {avg.toFixed(0)}%
                         </span>
-                        <span className="text-muted-foreground">Lần cuối</span>
+                        <span className="text-muted-foreground">{t("folderStats.quizTreemap.lastAttempt")}</span>
                         <span className="font-medium text-right">
                           {last.toFixed(0)}%
                         </span>
                         <span className="text-muted-foreground">
-                          Số lần làm
+                          {t("folderStats.quizTreemap.attemptCount")}
                         </span>
                         <span className="font-medium text-right">
                           {quiz.attemptCount} ({pct}%)
                         </span>
-                        <span className="text-muted-foreground">Số câu</span>
+                        <span className="text-muted-foreground">{t("folderStats.quizTreemap.questionCount")}</span>
                         <span className="font-medium text-right">
                           {quiz.questionCount}
                         </span>
@@ -507,7 +510,7 @@ export function QuizTreemap({ quizzes }: { quizzes: QuizBreakdown[] }) {
       {notAttempted.length > 0 && (
         <div className="flex flex-wrap gap-1.5 px-1">
           <span className="text-[10px] text-muted-foreground mr-1">
-            Chưa thử:
+            {t("folderStats.quizTreemap.notAttemptedLabel")}:
           </span>
           {notAttempted.map((q) => (
             <Badge
@@ -515,7 +518,7 @@ export function QuizTreemap({ quizzes }: { quizzes: QuizBreakdown[] }) {
               variant="outline"
               className="text-[10px] border-dashed"
             >
-              {q.title} · {q.questionCount} câu
+              {q.title} · {q.questionCount} {t("folderStats.quizTreemap.questionsUnit")}
             </Badge>
           ))}
         </div>

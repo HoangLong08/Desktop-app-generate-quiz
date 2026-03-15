@@ -1,4 +1,5 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useTranslation } from "react-i18next";
 import { Loader2, BarChart3, AlertTriangle } from "lucide-react";
 import { useFolderDetailStats } from "@/features/stats";
 import { MetricCards } from "./MetricCards";
@@ -10,6 +11,7 @@ import { ScoreTrendArea } from "./ScoreTrendArea";
 import { RecentAttemptsList } from "./RecentAttemptsList";
 
 export function FolderStatsSection({ folderId }: { folderId: string }) {
+  const { t } = useTranslation();
   const { data, isLoading, error } = useFolderDetailStats(folderId);
 
   if (isLoading) {
@@ -17,7 +19,7 @@ export function FolderStatsSection({ folderId }: { folderId: string }) {
       <div className="flex items-center justify-center h-full">
         <div className="flex flex-col items-center gap-3 py-16">
           <Loader2 className="size-5 animate-spin text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Đang tải thống kê...</p>
+          <p className="text-sm text-muted-foreground">{t("folderStats.loading")}</p>
         </div>
       </div>
     );
@@ -28,7 +30,7 @@ export function FolderStatsSection({ folderId }: { folderId: string }) {
       <div className="flex items-center justify-center h-full">
         <div className="flex flex-col items-center gap-2 py-16 text-muted-foreground">
           <AlertTriangle className="size-5 opacity-40" />
-          <p className="text-sm">Không tải được thống kê</p>
+          <p className="text-sm">{t("folderStats.loadError")}</p>
         </div>
       </div>
     );
@@ -44,12 +46,12 @@ export function FolderStatsSection({ folderId }: { folderId: string }) {
           </div>
           <div>
             <p className="text-sm font-medium text-foreground">
-              Chưa có dữ liệu thống kê
+              {t("folderStats.noData")}
             </p>
             <p className="text-xs mt-1.5 leading-relaxed">
               {hasQuizSets
-                ? `Bạn có ${data!.progress.totalQuizSets} quiz sẵn sàng. Hoàn thành ít nhất 1 quiz để bắt đầu theo dõi tiến trình!`
-                : "Tạo và hoàn thành quiz đầu tiên để bắt đầu hành trình học tập!"}
+                ? t("folderStats.hasQuizSets", { count: data!.progress.totalQuizSets })
+                : t("folderStats.createFirst")}
             </p>
           </div>
         </div>
