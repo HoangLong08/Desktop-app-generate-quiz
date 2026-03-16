@@ -64,20 +64,25 @@ jobs:
         id: release
         working-directory: front-end
         run: |
-          npx semantic-release --dry-run 2>&1 | tee sr-output.txt || true
-          # Run for real
-          npx semantic-release 2>&1 | tee sr-real-output.txt
+          SR_EXIT=0
+          npx semantic-release 2>&1 | tee sr-output.txt || SR_EXIT=$?
 
-          # Parse version from output
-          VERSION=$(grep -oP 'Published release \K[0-9]+\.[0-9]+\.[0-9]+' sr-real-output.txt || echo "")
-          if [ -n "$VERSION" ]; then
+          # Check version file written by @semantic-release/exec successCmd
+          if [ -f .release-version ]; then
+            VERSION=$(cat .release-version | tr -d '[:space:]')
             echo "new-release=true" >> "$GITHUB_OUTPUT"
             echo "version=$VERSION" >> "$GITHUB_OUTPUT"
             echo "🎉 Released v$VERSION"
           else
             echo "new-release=false" >> "$GITHUB_OUTPUT"
             echo "version=" >> "$GITHUB_OUTPUT"
-            echo "ℹ️ No new release"
+            if [ $SR_EXIT -ne 0 ]; then
+              echo "❌ semantic-release failed with exit code $SR_EXIT"
+              echo "--- Output ---"
+              cat sr-output.txt
+            else
+              echo "ℹ️ No new release"
+            fi
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -147,10 +152,8 @@ jobs:
           name: ${{ matrix.artifact-name }}
           path: |
             front-end/dist/*.exe
-            front-end/dist/*.msi
             front-end/dist/*.dmg
             front-end/dist/*.AppImage
-            front-end/dist/*.snap
           if-no-files-found: warn
           retention-days: 5
 

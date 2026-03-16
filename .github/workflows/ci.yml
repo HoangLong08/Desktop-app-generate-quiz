@@ -100,9 +100,7 @@ jobs:
           name: ${{ matrix.artifact-name }}
           path: |
             front-end/dist/*.exe
-            front-end/dist/*.msi
             front-end/dist/*.dmg
             front-end/dist/*.AppImage
-            front-end/dist/*.snap
           if-no-files-found: warn
           retention-days: 14
