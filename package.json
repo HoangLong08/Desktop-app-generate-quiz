@@ -1,0 +1,16 @@
+{
+  "name": "web-quizz",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "lint:frontend": "cd front-end && npx eslint ."
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0"
+  },
+  "lint-staged": {
+    "front-end/src/**/*.{ts,tsx}": "npx --prefix front-end eslint"
+  }
+}
