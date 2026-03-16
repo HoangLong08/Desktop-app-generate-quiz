@@ -24,14 +24,6 @@ function getSystemTheme(): "dark" | "light" {
     : "light";
 }
 
-function applyTheme(theme: Theme) {
-  const root = document.documentElement;
-  const resolved = theme === "system" ? getSystemTheme() : theme;
-  root.classList.remove("light", "dark");
-  root.classList.add(resolved);
-  return resolved;
-}
-
 export function ThemeProvider({
   children,
   defaultTheme = "dark",
@@ -48,22 +40,22 @@ export function ThemeProvider({
     }
   });
 
-  const [resolvedTheme, setResolvedTheme] = useState<"dark" | "light">(() =>
-    theme === "system" ? getSystemTheme() : theme,
+  const [systemTheme, setSystemTheme] = useState<"dark" | "light">(
+    getSystemTheme,
   );
+  const resolvedTheme: "dark" | "light" =
+    theme === "system" ? systemTheme : theme;
 
   useEffect(() => {
-    const resolved = applyTheme(theme);
-    setResolvedTheme(resolved);
-  }, [theme]);
+    const root = document.documentElement;
+    root.classList.remove("light", "dark");
+    root.classList.add(resolvedTheme);
+  }, [resolvedTheme]);
 
   useEffect(() => {
     if (theme !== "system") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => {
-      const resolved = applyTheme("system");
-      setResolvedTheme(resolved);
-    };
+    const handler = () => setSystemTheme(getSystemTheme());
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, [theme]);
@@ -71,7 +63,9 @@ export function ThemeProvider({
   const setTheme = useCallback((t: Theme) => {
     try {
       localStorage.setItem(STORAGE_KEY, t);
-    } catch { /* storage unavailable */ }
+    } catch {
+      /* storage unavailable */
+    }
     setThemeState(t);
   }, []);
 
@@ -82,6 +76,7 @@ export function ThemeProvider({
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTheme() {
   const ctx = useContext(ThemeContext);
   if (!ctx) throw new Error("useTheme must be used within ThemeProvider");

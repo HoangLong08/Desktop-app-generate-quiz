@@ -549,7 +549,9 @@ function YouTubeTab({
 
       {/* Caption Language */}
       <div className="space-y-2">
-        <Label htmlFor="caption-lang">{t("inputSource.subtitleLanguage")}</Label>
+        <Label htmlFor="caption-lang">
+          {t("inputSource.subtitleLanguage")}
+        </Label>
         <Select
           value={youtubeInput.captionLang}
           onValueChange={(val) =>
@@ -701,7 +703,9 @@ function TextInputTab({
           </span>
           {isOverLimit && (
             <span className="text-destructive">
-              {t("inputSource.textOverLimit", { count: charCount - TEXT_MAX_CHARS })}
+              {t("inputSource.textOverLimit", {
+                count: charCount - TEXT_MAX_CHARS,
+              })}
             </span>
           )}
         </div>
@@ -836,6 +840,7 @@ export function InputSourceTabs({
 /**
  * Returns true when the current input source has enough content to generate a quiz.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function isInputReady(
   mode: InputMode,
   files: UploadedFile[],

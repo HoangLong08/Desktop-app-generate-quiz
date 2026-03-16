@@ -158,6 +158,7 @@ export function TextSourceViewer({
 
   useEffect(() => {
     if (!open || !quizSetId) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     getQuizSetSourceTextApi(quizSetId)
       .then((res) => setPages(res.pages))

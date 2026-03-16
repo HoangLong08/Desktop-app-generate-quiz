@@ -54,7 +54,7 @@ export function QuizPage() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [startTime] = useState(Date.now());
+  const [startTime] = useState(() => Date.now());
   const [elapsed, setElapsed] = useState(0);
 
   // Get questions from route state (passed from HomePage after API call)
@@ -73,7 +73,10 @@ export function QuizPage() {
     }[];
   } | null;
 
-  const questions: QuizQuestionType[] = routeState?.questions ?? [];
+  const questions = useMemo<QuizQuestionType[]>(
+    () => routeState?.questions ?? [],
+    [routeState?.questions],
+  );
   const sourceFiles = routeState?.sourceFiles ?? [];
   const quizSetId = routeState?.quizSetId;
   const folderId = routeState?.folderId;
@@ -346,6 +349,7 @@ export function QuizPage() {
     currentQuestion,
     handleAnswerChange,
     handleSubmit,
+    answers,
   ]);
 
   // Don't render if no questions (will redirect via useEffect)

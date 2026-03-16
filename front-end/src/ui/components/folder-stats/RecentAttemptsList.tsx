@@ -22,9 +22,9 @@ export function RecentAttemptsList({
     createdAt: string;
   }[];
 }) {
-  if (attempts.length === 0) return null;
-
   const { t } = useTranslation();
+
+  if (attempts.length === 0) return null;
 
   return (
     <BentoCell glowColor="hsl(var(--primary))">
@@ -48,7 +48,8 @@ export function RecentAttemptsList({
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{a.quizTitle}</p>
               <p className="text-xs text-muted-foreground">
-                {a.correctCount}/{a.totalQuestions} {t("folderStats.recentAttempts.questions")} ·{" "}
+                {a.correctCount}/{a.totalQuestions}{" "}
+                {t("folderStats.recentAttempts.questions")} ·{" "}
                 {formatTime(a.timeTaken)}
               </p>
             </div>

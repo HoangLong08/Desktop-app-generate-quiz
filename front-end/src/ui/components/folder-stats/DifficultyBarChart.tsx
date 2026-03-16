@@ -25,13 +25,16 @@ export function DifficultyBarChart({
     attempts: stat.attempts,
   }));
 
-  if (data.length === 0) return null;
-
   const { t } = useTranslation();
+
+  if (data.length === 0) return null;
 
   return (
     <BentoCell glowColor="hsl(270 50% 60%)">
-      <CellHeader icon={BarChart3} title={t("folderStats.difficultyChart.title")} />
+      <CellHeader
+        icon={BarChart3}
+        title={t("folderStats.difficultyChart.title")}
+      />
       <ResponsiveContainer
         width="100%"
         height={Math.max(100, data.length * 52)}

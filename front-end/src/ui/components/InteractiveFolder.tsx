@@ -323,10 +323,8 @@ function FolderBees({ isHovered }: { isHovered: boolean }) {
 export function InteractiveFolder({
   id,
   name,
-  description: _description,
   color,
   quizCount,
-  createdAt: _createdAt,
   isFavorite = false,
   onClick,
   onDelete,
@@ -502,7 +500,6 @@ export function InteractiveFolder({
 // ─── Folder List Item ────────────────────────────────────────────────────────
 
 export function FolderListItem({
-  id: _id,
   name,
   description,
   color,

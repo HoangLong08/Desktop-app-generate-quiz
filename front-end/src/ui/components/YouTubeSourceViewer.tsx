@@ -260,6 +260,7 @@ export function YouTubeSourceViewer({
 
   useEffect(() => {
     if (!open || !quizSetId) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
     getYouTubeTimelineApi(quizSetId)

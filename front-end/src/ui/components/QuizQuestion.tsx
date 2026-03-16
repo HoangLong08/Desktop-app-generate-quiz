@@ -69,7 +69,7 @@ export function QuizQuestion({
       lines.push("");
       const correctLetters = question.options
         .filter((o) => correctIds.has(o.id))
-        .map((o, _i) => {
+        .map((o) => {
           const idx = question.options.findIndex((x) => x.id === o.id);
           return String.fromCharCode(65 + idx);
         })

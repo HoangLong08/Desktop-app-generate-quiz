@@ -35,15 +35,12 @@ export function TypewriterEffect({
 
   // Build character spans with word-level className
   const chars: { char: string; className?: string }[] = [];
-  let pos = 0;
   words.forEach((word, wi) => {
     for (const ch of word.text) {
       chars.push({ char: ch, className: word.className });
-      pos++;
     }
     if (wi < words.length - 1) {
       chars.push({ char: " " });
-      pos++;
     }
   });
 

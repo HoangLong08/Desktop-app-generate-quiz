@@ -7,6 +7,7 @@ export type ChartProps = {
   selectedView: "CPU" | "RAM" | "STORAGE";
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const COLOR_MAP = {
   CPU: {
     stroke: "#5DD4EE",

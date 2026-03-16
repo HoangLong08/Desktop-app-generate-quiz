@@ -29,9 +29,9 @@ export function CategoryRadar({ analysis }: { analysis: CategoryAnalysis }) {
     })),
   ];
 
-  if (radarData.length === 0) return null;
-
   const { t } = useTranslation();
+
+  if (radarData.length === 0) return null;
 
   // Need at least 3 points for a radar
   while (radarData.length < 3) {
@@ -40,7 +40,10 @@ export function CategoryRadar({ analysis }: { analysis: CategoryAnalysis }) {
 
   return (
     <BentoCell glowColor="hsl(217 70% 60%)">
-      <CellHeader icon={Activity} title={t("folderStats.categoryRadar.title")} />
+      <CellHeader
+        icon={Activity}
+        title={t("folderStats.categoryRadar.title")}
+      />
       <ResponsiveContainer width="100%" height={220}>
         <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="72%">
           <PolarGrid stroke="hsl(var(--border))" strokeOpacity={0.4} />

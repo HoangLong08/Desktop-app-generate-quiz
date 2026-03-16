@@ -15,6 +15,7 @@ export function DocxPreview({ url }: DocxPreviewProps) {
 
   useEffect(() => {
     let isMounted = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
     fetch(url)
@@ -40,7 +41,7 @@ export function DocxPreview({ url }: DocxPreviewProps) {
     return () => {
       isMounted = false;
     };
-  }, [url]);
+  }, [url, t]);
 
   if (loading) {
     return (

@@ -640,11 +640,9 @@ function GeneratingModal({
   const [currentStage, setCurrentStage] = useState(0);
 
   useEffect(() => {
-    if (!open) {
-      setCurrentStage(0);
-      return;
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentStage(0);
+    if (!open) return;
     const stageDelays = STAGE_DELAYS[inputMode];
     const timers: ReturnType<typeof setTimeout>[] = [];
     let cumulative = 0;

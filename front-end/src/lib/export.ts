@@ -8,7 +8,7 @@ export async function exportQuizToDocx(
   title = i18n.t("export.defaultTitle"),
   withAnswers = true,
 ) {
-  const children: any[] = [
+  const children: Paragraph[] = [
     new Paragraph({
       text: title,
       heading: HeadingLevel.HEADING_1,

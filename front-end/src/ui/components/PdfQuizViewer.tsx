@@ -291,6 +291,7 @@ export function PdfQuizViewer({
   // Reset state when dialog opens/closes
   useEffect(() => {
     if (!open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveQuestionIdx(null);
       setNumPages(0);
       setPdfError(null);
@@ -305,6 +306,7 @@ export function PdfQuizViewer({
   // Fetch heatmap block data when heatmap mode is toggled on
   useEffect(() => {
     if (!showHeatmap || !quizSetId || heatmapBlocks.length > 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHeatmapLoading(true);
     getHeatmapBlocksApi(quizSetId)
       .then((data) => {
@@ -356,10 +358,13 @@ export function PdfQuizViewer({
   const highlights = highlightMap();
 
   // Build keyword renderer for the active question
-  const activeKeywords =
-    activeQuestionIdx !== null
-      ? (questions[activeQuestionIdx]?.sourceKeyword ?? [])
-      : [];
+  const activeKeywords = useMemo(
+    () =>
+      activeQuestionIdx !== null
+        ? (questions[activeQuestionIdx]?.sourceKeyword ?? [])
+        : [],
+    [activeQuestionIdx, questions],
+  );
   const keywordRenderer = useMemo(() => {
     if (!activeKeywords.length || activeQuestionIdx === null) return undefined;
     const color = KEYWORD_COLORS[activeQuestionIdx % KEYWORD_COLORS.length];

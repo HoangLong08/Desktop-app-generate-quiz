@@ -23,9 +23,9 @@ export function ScoreTrendArea({
     createdAt: string;
   }[];
 }) {
-  if (attempts.length < 2) return null;
-
   const { t } = useTranslation();
+
+  if (attempts.length < 2) return null;
 
   const trendData = [...attempts].reverse().map((a, i) => ({
     index: i + 1,
@@ -85,7 +85,9 @@ export function ScoreTrendArea({
             }}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             formatter={(v: any) => [`${v}%`, t("folderStats.scoreTrend.score")]}
-            labelFormatter={(l) => t("folderStats.scoreTrend.attempt", { n: l })}
+            labelFormatter={(l) =>
+              t("folderStats.scoreTrend.attempt", { n: l })
+            }
           />
           <Area
             type="monotone"
