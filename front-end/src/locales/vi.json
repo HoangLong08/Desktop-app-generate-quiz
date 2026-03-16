@@ -152,6 +152,10 @@
     "noPreview": "Không có bản xem trước.",
     "title": "Bài Kiểm Tra Trắc Nghiệm",
     "downloadDocx": "Tải DOCX",
+    "exportKahoot": "Xuất Kahoot",
+    "export": "Xuất",
+    "withAnswers": "Có đáp án",
+    "withoutAnswers": "Không đáp án",
     "downloadPdf": "Tải PDF",
     "answered": "đã trả lời",
     "complete": "hoàn thành",
@@ -301,6 +305,9 @@
     "noMaterialsHint": "Nhấn 'Thêm tài liệu' để bắt đầu tải lên",
     "fileNotOnServer": "File không còn trên server",
     "reprocess": "Thử xử lý lại",
+    "duplicateFile": "File đã được tải lên trước đó",
+    "duplicateYoutube": "Link YouTube này đã được thêm trước đó",
+    "duplicateText": "Văn bản này đã được thêm trước đó",
     "uploadedMaterials": "Tài liệu đã tải lên",
     "chooseForQuiz": "Chọn tài liệu ở tab 'Tạo Quiz' để tạo câu hỏi",
     "text": "Văn bản"
@@ -348,6 +355,7 @@
   },
   "pdfViewer": {
     "pageLabel": "Trang:",
+    "sectionLabel": "Phần:",
     "noPageInfo": "Không có thông tin trang",
     "zoomOut": "Thu nhỏ",
     "zoomIn": "Phóng to",
@@ -378,6 +386,29 @@
     "questionsWithKeywords": "câu có từ khóa",
     "noSourcePage": "không có trang nguồn",
     "questionN": "Câu {{n}}"
+  },
+  "textViewer": {
+    "title": "Văn bản nguồn",
+    "sourceText": "Văn bản",
+    "section": "Phần",
+    "sections": "phần",
+    "chars": "ký tự",
+    "noContent": "Không có văn bản nguồn"
+  },
+  "youtubeViewer": {
+    "title": "Nguồn YouTube",
+    "openVideo": "Mở video",
+    "timelineTitle": "Mật độ câu hỏi theo timeline",
+    "duration": "Thời lượng",
+    "conceptMatches": "concept khớp",
+    "conceptsFound": "{{count}} concept tìm thấy",
+    "worthStudying": "Đáng học",
+    "fewConcepts": "Ít",
+    "manyConcepts": "Nhiều",
+    "clickTimeToWatch": "Click thời gian để xem",
+    "clickToWatch": "Click để xem đoạn này",
+    "watchOnYouTube": "Xem trên YouTube",
+    "noTimeline": "Không thể tạo timeline cho video này"
   },
   "pageHeatmap": {
     "pageN": "Trang {{n}}",

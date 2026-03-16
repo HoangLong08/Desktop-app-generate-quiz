@@ -121,12 +121,24 @@ def get_quiz_set_source_text(quiz_set_id):
     if not quiz_set:
         return jsonify({"error": "Quiz set not found"}), 404
 
-    uploads = (
-        UploadedFileRecord.query
-        .filter_by(quiz_set_id=quiz_set_id)
-        .order_by(UploadedFileRecord.created_at)
-        .all()
-    )
+    # Look up uploads by source_upload_ids first (handles reused files),
+    # fall back to quiz_set_id FK for older records.
+    uploads = []
+    source_ids = quiz_set.get_source_upload_ids()
+    if source_ids:
+        uploads = (
+            UploadedFileRecord.query
+            .filter(UploadedFileRecord.id.in_(source_ids))
+            .order_by(UploadedFileRecord.created_at)
+            .all()
+        )
+    if not uploads:
+        uploads = (
+            UploadedFileRecord.query
+            .filter_by(quiz_set_id=quiz_set_id)
+            .order_by(UploadedFileRecord.created_at)
+            .all()
+        )
 
     if not uploads:
         return jsonify({"pages": [], "inputType": "unknown", "totalPages": 0}), 200
@@ -311,6 +323,120 @@ def get_quiz_set_heatmap_blocks(quiz_set_id):
 
     max_count = max((b["count"] for b in all_blocks), default=0)
     return jsonify({"blocks": all_blocks, "maxCount": max_count}), 200
+
+
+@quiz_bp.route("/sets/<quiz_set_id>/youtube-timeline", methods=["GET"])
+def get_quiz_set_youtube_timeline(quiz_set_id):
+    """
+    Return a timeline heatmap for YouTube-sourced quizzes.
+
+    Fetches the timed transcript from YouTube on demand, then maps
+    question sourceKeywords to transcript segments grouped by minute.
+
+    Response:
+      {
+        "segments": [
+          {"minute": 0, "label": "0:00", "questionCount": 2, "keywords": [...]},
+          ...
+        ],
+        "totalDuration": 600,
+        "youtubeUrl": "https://..."
+      }
+    """
+    quiz_set = QuizSet.query.get(quiz_set_id)
+    if not quiz_set:
+        return jsonify({"error": "Quiz set not found"}), 404
+
+    uploads = (
+        UploadedFileRecord.query
+        .filter_by(quiz_set_id=quiz_set_id)
+        .order_by(UploadedFileRecord.created_at)
+        .all()
+    )
+    if not uploads:
+        source_ids = quiz_set.get_source_upload_ids()
+        if source_ids:
+            uploads = UploadedFileRecord.query.filter(
+                UploadedFileRecord.id.in_(source_ids)
+            ).all()
+
+    yt_record = next((r for r in uploads if r.input_mode == "youtube"), None)
+    if not yt_record:
+        return jsonify({"error": "This quiz was not created from YouTube"}), 400
+
+    yt_url = yt_record.source_label or ""
+    if not yt_url:
+        return jsonify({"error": "YouTube URL not found"}), 400
+
+    questions = [q.to_dict() for q in quiz_set.questions]
+
+    # Determine transcript language from quiz config
+    quiz_config = quiz_set.get_config() or {}
+    transcript_lang = quiz_config.get("language", "vi")
+
+    # Fetch timed transcript
+    from app.features.quizz.youtube_service import extract_transcript_timed
+    try:
+        timed_entries = extract_transcript_timed(yt_url, lang=transcript_lang)
+    except Exception as e:
+        logger.warning("Failed to fetch timed transcript: %s", e)
+        # Fallback: try English
+        try:
+            timed_entries = extract_transcript_timed(yt_url, lang="en")
+        except Exception:
+            return jsonify({"error": f"Could not fetch transcript: {e}"}), 422
+
+    if not timed_entries:
+        return jsonify({"segments": [], "totalDuration": 0, "youtubeUrl": yt_url}), 200
+
+    # Determine total duration
+    last_entry = timed_entries[-1]
+    total_duration = last_entry["start"] + last_entry["duration"]
+    total_minutes = int(total_duration // 60) + 1
+
+    # Build minute buckets with text
+    minute_texts: dict[int, str] = {}
+    for entry in timed_entries:
+        minute = int(entry["start"] // 60)
+        if minute not in minute_texts:
+            minute_texts[minute] = ""
+        minute_texts[minute] += " " + entry["text"]
+
+    # Build keyword list from questions
+    def _normalize(text: str) -> str:
+        return re.sub(r"\s+", " ", text.lower().strip())
+
+    kw_list: list[str] = []
+    for q in questions:
+        for kw in (q.get("sourceKeyword") or []):
+            k = _normalize(kw)
+            if k and len(k) >= 2:
+                kw_list.append(k)
+
+    # Match keywords to minute buckets
+    segments = []
+    for minute in range(total_minutes):
+        bucket_text = _normalize(minute_texts.get(minute, ""))
+        matched_keywords = []
+        for kw in kw_list:
+            if kw in bucket_text:
+                matched_keywords.append(kw)
+        m = minute
+        hours = m // 60
+        mins = m % 60
+        label = f"{hours}:{mins:02d}:00" if hours > 0 else f"{mins}:00"
+        segments.append({
+            "minute": minute,
+            "label": label,
+            "questionCount": len(matched_keywords),
+            "keywords": list(set(matched_keywords)),
+        })
+
+    return jsonify({
+        "segments": segments,
+        "totalDuration": round(total_duration, 1),
+        "youtubeUrl": yt_url,
+    }), 200
 
 
 # ---------------------------------------------------------------------------

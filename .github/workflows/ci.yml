@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  lint-and-build:
+    name: Lint & Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [20]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: front-end/package-lock.json
+
+      - name: Install dependencies
+        working-directory: front-end
+        run: npm ci
+
+      - name: Lint
+        working-directory: front-end
+        run: npm run lint
+
+      - name: TypeScript check
+        working-directory: front-end
+        run: npx tsc -b --noEmit
+
+      - name: Build React (Vite)
+        working-directory: front-end
+        run: npm run build
+
+      - name: Transpile Electron
+        working-directory: front-end
+        run: npm run transpile:electron
+
+  build-desktop:
+    name: Build Desktop (${{ matrix.os }})
+    needs: lint-and-build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            electron-args: --win --x64
+            artifact-name: desktop-windows
+          - os: macos-latest
+            electron-args: --mac --arm64
+            artifact-name: desktop-macos
+          - os: ubuntu-latest
+            electron-args: --linux --x64
+            artifact-name: desktop-linux
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: front-end/package-lock.json
+
+      - name: Install dependencies
+        working-directory: front-end
+        run: npm ci
+
+      - name: Build React (Vite)
+        working-directory: front-end
+        run: npm run build
+
+      - name: Transpile Electron
+        working-directory: front-end
+        run: npm run transpile:electron
+
+      - name: Build Electron app
+        working-directory: front-end
+        run: npx electron-builder ${{ matrix.electron-args }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: |
+            front-end/dist/*.exe
+            front-end/dist/*.msi
+            front-end/dist/*.dmg
+            front-end/dist/*.AppImage
+            front-end/dist/*.snap
+          if-no-files-found: warn
+          retention-days: 14

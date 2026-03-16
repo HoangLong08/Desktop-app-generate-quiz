@@ -95,8 +95,11 @@ export function MaterialSelectPanel({
   const selectedId = selectedIds[0] ?? "";
 
   // Only completed (processed) records can be selected for quiz generation
+  // For files mode, require the file to exist on disk; for youtube/text, only require completed processing
   const usableRecords = (records ?? []).filter(
-    (r) => r.hasFile && r.processingStatus === "completed",
+    (r) =>
+      r.processingStatus === "completed" &&
+      (r.inputMode !== "files" || r.hasFile),
   );
   // Records still being processed — shown separately
   const pendingRecords = (records ?? []).filter(

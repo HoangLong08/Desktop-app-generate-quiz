@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import confetti from "canvas-confetti";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,9 +13,10 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
+  ChevronDown,
   Clock,
-  Flag,
-  Send,
+  FileSpreadsheet,
+  Printer,
   Download,
   Eye,
   FileText,
@@ -28,7 +30,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { exportQuizToDocx } from "@/lib/export";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { exportQuizToDocx, exportQuizToKahoot } from "@/lib/export";
 import { QuizQuestion } from "../components/QuizQuestion";
 import type {
   QuizQuestion as QuizQuestionType,
@@ -148,6 +159,68 @@ export function QuizPage() {
 
   const handleSubmit = useCallback(() => {
     setIsSubmitted(true);
+
+    // Confetti effect
+    const correctCount = questions.filter((q) => {
+      const isMulti = q.type === "multiple-answer";
+      const raw = answers[q.id] || null;
+      if (isMulti) {
+        const sel = (raw || "").split(",").filter(Boolean).sort();
+        const cor = (q.correctAnswerIds ?? []).slice().sort();
+        return sel.join(",") === cor.join(",");
+      }
+      return raw === q.correctAnswerId;
+    }).length;
+    const scorePercent = (correctCount / questions.length) * 100;
+
+    // Initial burst
+    setTimeout(() => {
+      confetti({
+        particleCount: scorePercent >= 80 ? 150 : scorePercent >= 50 ? 80 : 40,
+        spread: 70,
+        origin: { y: 0.6 },
+      });
+    }, 100);
+
+    // Side streams for good scores
+    if (scorePercent >= 50) {
+      setTimeout(() => {
+        confetti({
+          particleCount: 50,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.7 },
+        });
+        confetti({
+          particleCount: 50,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.7 },
+        });
+      }, 400);
+    }
+
+    // Continuous streams for excellent scores
+    if (scorePercent >= 80) {
+      const duration = 2500;
+      const end = Date.now() + duration;
+      const frame = () => {
+        confetti({
+          particleCount: 3,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.6 },
+        });
+        confetti({
+          particleCount: 3,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.6 },
+        });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+    }
 
     // Save attempt to backend (fire-and-forget)
     if (quizSetId) {
@@ -353,26 +426,47 @@ export function QuizPage() {
               </Dialog>
             )}
 
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={() => {
-                exportQuizToDocx(questions, t("quiz.title"));
-              }}
-            >
-              <Download className="size-4" />
-              {t("quiz.downloadDocx")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={() => window.print()}
-            >
-              <Download className="size-4" />
-              {t("quiz.downloadPdf")}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Download className="size-4" />
+                  {t("quiz.export")}
+                  <ChevronDown className="size-3 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <FileText className="size-4" />
+                    {t("quiz.downloadDocx")}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        exportQuizToDocx(questions, t("quiz.title"), true)
+                      }
+                    >
+                      {t("quiz.withAnswers")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        exportQuizToDocx(questions, t("quiz.title"), false)
+                      }
+                    >
+                      {t("quiz.withoutAnswers")}
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuItem onClick={() => exportQuizToKahoot(questions)}>
+                  <FileSpreadsheet className="size-4" />
+                  {t("quiz.exportKahoot")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => window.print()}>
+                  <Printer className="size-4" />
+                  {t("quiz.downloadPdf")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Badge
               variant="outline"
@@ -466,12 +560,9 @@ export function QuizPage() {
                   <ArrowRight className="size-4" />
                 </Button>
               ) : (
-                <Button
-                  onClick={handleSubmit}
-                  className="gap-1.5 bg-green-600 hover:bg-green-700"
-                >
-                  <Send className="size-4" />
-                  {t("quiz.submit")}
+                <Button disabled className="gap-1.5">
+                  {t("quiz.nextQuestion")}
+                  <ArrowRight className="size-4" />
                 </Button>
               )}
             </div>
@@ -496,75 +587,128 @@ export function QuizPage() {
       <div className="flex min-h-0 w-72 shrink-0 flex-col space-y-4 overflow-y-auto">
         {isSubmitted && result ? (
           // Result panel
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Flag className="size-5" />
-                {t("quiz.results.title")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Score circle */}
-              <div className="flex flex-col items-center gap-2 py-4">
+          <Card className="overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div
+              className={cn(
+                "px-6 pt-6 pb-5 text-center",
+                result.score >= 80
+                  ? "bg-linear-to-b from-green-500/15 to-transparent"
+                  : result.score >= 50
+                    ? "bg-linear-to-b from-yellow-500/15 to-transparent"
+                    : "bg-linear-to-b from-red-500/15 to-transparent",
+              )}
+            >
+              <div className="flex flex-col items-center gap-3">
                 <div
                   className={cn(
-                    "flex size-24 items-center justify-center rounded-full border-4",
+                    "flex size-28 items-center justify-center rounded-full border-[5px] shadow-lg",
                     result.score >= 80
-                      ? "border-green-500 text-green-500"
+                      ? "border-green-500 shadow-green-500/25"
                       : result.score >= 50
-                        ? "border-yellow-500 text-yellow-500"
-                        : "border-red-500 text-red-500",
+                        ? "border-yellow-500 shadow-yellow-500/25"
+                        : "border-red-500 shadow-red-500/25",
                   )}
                 >
-                  <span className="text-3xl font-bold">
+                  <span
+                    className={cn(
+                      "text-4xl font-bold",
+                      result.score >= 80
+                        ? "text-green-500"
+                        : result.score >= 50
+                          ? "text-yellow-500"
+                          : "text-red-500",
+                    )}
+                  >
                     {Math.round(result.score)}%
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {result.score >= 80
-                    ? t("quiz.results.excellent")
-                    : result.score >= 50
-                      ? t("quiz.results.good")
-                      : t("quiz.results.needsWork")}
-                </p>
+                <div className="text-center">
+                  <p className="font-semibold text-lg">
+                    {result.score >= 80
+                      ? t("quiz.results.excellent")
+                      : result.score >= 50
+                        ? t("quiz.results.good")
+                        : t("quiz.results.needsWork")}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {result.correctAnswers}/{result.totalQuestions}{" "}
+                    {t("quiz.results.correct").toLowerCase()}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <CardContent className="p-5 space-y-4">
+              {/* Stat bars */}
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
+                      <div className="size-2.5 rounded-full bg-green-500" />
+                      {t("quiz.results.correct")}
+                    </span>
+                    <span className="font-semibold text-green-500">
+                      {result.correctAnswers}/{result.totalQuestions}
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-green-500 transition-all duration-1000 ease-out"
+                      style={{
+                        width: `${(result.correctAnswers / result.totalQuestions) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
+                      <div className="size-2.5 rounded-full bg-red-500" />
+                      {t("quiz.results.wrong")}
+                    </span>
+                    <span className="font-semibold text-red-500">
+                      {result.wrongAnswers}
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-red-500 transition-all duration-1000 ease-out"
+                      style={{
+                        width: `${(result.wrongAnswers / result.totalQuestions) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {result.skippedQuestions > 0 && (
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <div className="size-2.5 rounded-full bg-muted-foreground/40" />
+                        {t("quiz.results.skipped")}
+                      </span>
+                      <span className="font-semibold text-muted-foreground">
+                        {result.skippedQuestions}
+                      </span>
+                    </div>
+                    <div className="h-2 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-muted-foreground/40 transition-all duration-1000 ease-out"
+                        style={{
+                          width: `${(result.skippedQuestions / result.totalQuestions) * 100}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <Separator />
-
-              {/* Stats */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    {t("quiz.results.correct")}
-                  </span>
-                  <span className="font-medium text-green-500">
-                    {result.correctAnswers}/{result.totalQuestions}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    {t("quiz.results.wrong")}
-                  </span>
-                  <span className="font-medium text-red-500">
-                    {result.wrongAnswers}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    {t("quiz.results.skipped")}
-                  </span>
-                  <span className="font-medium text-muted-foreground">
-                    {result.skippedQuestions}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    {t("quiz.results.time")}
-                  </span>
-                  <span className="font-medium">
-                    {formatTime(result.timeTaken)}
-                  </span>
-                </div>
+              <div className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-muted/50">
+                <Clock className="size-4 text-muted-foreground" />
+                <span className="text-sm font-medium">
+                  {formatTime(result.timeTaken)}
+                </span>
               </div>
 
               <Separator />

@@ -254,3 +254,32 @@ export async function getHeatmapBlocksApi(
   if (!response.ok) throw new Error("Failed to fetch heatmap blocks");
   return response.json();
 }
+
+// ─── YouTube timeline ───────────────────────────────────────────────────────
+
+export interface YouTubeTimelineSegment {
+  minute: number;
+  label: string;
+  questionCount: number;
+  keywords: string[];
+}
+
+export interface YouTubeTimelineResponse {
+  segments: YouTubeTimelineSegment[];
+  totalDuration: number;
+  youtubeUrl: string;
+}
+
+/**
+ * GET /api/quiz/sets/<id>/youtube-timeline
+ * Returns timeline heatmap data for YouTube-sourced quizzes.
+ */
+export async function getYouTubeTimelineApi(
+  id: string,
+): Promise<YouTubeTimelineResponse> {
+  const response = await fetch(
+    `${API_URL}/api/quiz/sets/${id}/youtube-timeline`,
+  );
+  if (!response.ok) throw new Error("Failed to fetch YouTube timeline");
+  return response.json();
+}

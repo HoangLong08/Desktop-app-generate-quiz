@@ -154,6 +154,7 @@ function UploadForm({ folderId }: { folderId: string }) {
   const [ytUrl, setYtUrl] = useState("");
   const [rawText, setRawText] = useState("");
   const uploadMaterials = useUploadMaterials();
+  const { data: existingRecords } = useUploadRecords(folderId);
 
   const [isDragging, setIsDragging] = useState(false);
 
@@ -179,6 +180,55 @@ function UploadForm({ folderId }: { folderId: string }) {
 
   const handleSubmit = () => {
     if (!canSubmit) return;
+
+    // ── Duplicate detection ──
+    if (existingRecords && existingRecords.length > 0) {
+      if (mode === "files") {
+        const dupes = pendingFiles.filter((f) =>
+          existingRecords.some(
+            (r) =>
+              r.inputMode === "files" &&
+              r.originalName === f.name &&
+              r.fileSize === f.size,
+          ),
+        );
+        if (dupes.length > 0) {
+          toast.warning(t("materials.duplicateFile"), {
+            description: dupes.map((f) => f.name).join(", "),
+          });
+          return;
+        }
+      } else if (mode === "youtube") {
+        const newVideoId = YT_URL_RE.exec(ytUrl)?.[1];
+        if (newVideoId) {
+          const existing = existingRecords.find((r) => {
+            if (r.inputMode !== "youtube" || !r.sourceLabel) return false;
+            const existingId = YT_URL_RE.exec(r.sourceLabel)?.[1];
+            return existingId === newVideoId;
+          });
+          if (existing) {
+            toast.warning(t("materials.duplicateYoutube"), {
+              description: existing.sourceLabel,
+            });
+            return;
+          }
+        }
+      } else if (mode === "text") {
+        const trimmed = rawText.trim();
+        const existing = existingRecords.find(
+          (r) =>
+            r.inputMode === "text" &&
+            r.sourceLabel ===
+              (trimmed.length > 200
+                ? trimmed.slice(0, 200) + "\u2026"
+                : trimmed),
+        );
+        if (existing) {
+          toast.warning(t("materials.duplicateText"));
+          return;
+        }
+      }
+    }
 
     uploadMaterials.mutate(
       {

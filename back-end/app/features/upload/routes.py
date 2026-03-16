@@ -93,10 +93,17 @@ def upload_materials():
         yt_url = (request.form.get("youtubeUrl") or "").strip()
         if not yt_url:
             return jsonify({"error": "youtubeUrl is required"}), 400
+        from app.features.quizz.youtube_service import extract_video_id, fetch_video_title
+        video_title = fetch_video_title(yt_url)
+        if video_title:
+            yt_name = video_title
+        else:
+            vid = extract_video_id(yt_url)
+            yt_name = f"YouTube - {vid}" if vid else "YouTube Video"
         record = UploadedFileRecord(
             id=str(uuid.uuid4()),
             folder_id=folder_id,
-            original_name="YouTube Video",
+            original_name=yt_name,
             file_size=0,
             file_type="youtube",
             input_mode="youtube",
@@ -116,10 +123,13 @@ def upload_materials():
         preview = raw[:200].replace("\n", " ").strip()
         if len(raw) > 200:
             preview += "…"
+        text_name = raw[:60].replace("\n", " ").strip()
+        if len(raw) > 60:
+            text_name += "…"
         record = UploadedFileRecord(
             id=str(uuid.uuid4()),
             folder_id=folder_id,
-            original_name="Văn bản nhập trực tiếp",
+            original_name=text_name or "Văn bản nhập trực tiếp",
             file_size=len(raw.encode("utf-8")),
             file_type="text",
             input_mode="text",

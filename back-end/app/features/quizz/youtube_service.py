@@ -4,10 +4,28 @@ using youtube-transcript-api.
 """
 
 import re
+import json
 import logging
+import urllib.request
+import urllib.parse
 from typing import Optional, List
 
 logger = logging.getLogger(__name__)
+
+
+def fetch_video_title(url: str) -> Optional[str]:
+    """Fetch YouTube video title via the oEmbed endpoint (no API key needed)."""
+    try:
+        oembed_url = "https://www.youtube.com/oembed?" + urllib.parse.urlencode(
+            {"url": url, "format": "json"}
+        )
+        req = urllib.request.Request(oembed_url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return data.get("title")
+    except Exception as e:
+        logger.warning("Failed to fetch YouTube title for %s: %s", url, e)
+        return None
 
 
 def extract_video_id(url: str) -> Optional[str]:
@@ -140,6 +158,73 @@ def extract_transcript(url: str, lang: str = "vi") -> str:
         f"from video_id={video_id}"
     )
     return text
+
+
+def extract_transcript_timed(url: str, lang: str = "vi") -> List[dict]:
+    """
+    Extract transcript with timestamps from a YouTube video.
+
+    Returns:
+        List of {"start": float, "duration": float, "text": str}
+    """
+    try:
+        from youtube_transcript_api import (
+            YouTubeTranscriptApi,
+            TranscriptsDisabled,
+            NoTranscriptFound,
+        )
+    except ImportError:
+        raise RuntimeError("youtube-transcript-api is not installed")
+
+    video_id = extract_video_id(url)
+    if not video_id:
+        raise ValueError(f"Invalid YouTube URL: {url!r}")
+
+    _use_new_api = not hasattr(YouTubeTranscriptApi, "list_transcripts")
+
+    try:
+        if _use_new_api:
+            api = YouTubeTranscriptApi()
+            transcript_list = api.list(video_id)
+        else:
+            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+    except TranscriptsDisabled:
+        raise ValueError("This video has transcripts/captions disabled.")
+    except Exception as e:
+        raise ValueError(f"Could not fetch transcripts for video: {e}") from e
+
+    transcript = None
+    try:
+        transcript = transcript_list.find_transcript([lang])
+    except NoTranscriptFound:
+        pass
+    if transcript is None and lang != "en":
+        try:
+            transcript = transcript_list.find_transcript(["en"])
+        except NoTranscriptFound:
+            pass
+    if transcript is None:
+        for t in transcript_list:
+            transcript = t
+            break
+    if transcript is None:
+        raise ValueError("No transcripts available for this video.")
+
+    entries = transcript.fetch()
+    result = []
+    for entry in entries:
+        if hasattr(entry, "text"):
+            text_val = str(entry.text).strip()
+            start = float(getattr(entry, "start", 0))
+            duration = float(getattr(entry, "duration", 0))
+        else:
+            text_val = str(entry.get("text", "")).strip()
+            start = float(entry.get("start", 0))
+            duration = float(entry.get("duration", 0))
+        if text_val:
+            result.append({"start": start, "duration": duration, "text": text_val})
+
+    return result
 
 
 # ---------------------------------------------------------------------------

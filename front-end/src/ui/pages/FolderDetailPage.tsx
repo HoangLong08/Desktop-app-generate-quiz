@@ -45,6 +45,8 @@ import {
   BookOpenCheck,
 } from "lucide-react";
 import { PdfQuizViewer } from "../components/PdfQuizViewer";
+import { TextSourceViewer } from "../components/TextSourceViewer";
+import { YouTubeSourceViewer } from "../components/YouTubeSourceViewer";
 import {
   useUploadsByQuizSet,
   useUploadsByIds,
@@ -156,7 +158,9 @@ function parseQuizError(err: Error): {
   return {
     title: i18n.t("errors.quizFailed.title"),
     description:
-      msg.length > 200 ? msg.slice(0, 200) + "…" : msg || i18n.t("errors.quizFailed.unknownError"),
+      msg.length > 200
+        ? msg.slice(0, 200) + "…"
+        : msg || i18n.t("errors.quizFailed.unknownError"),
     duration: 8000,
   };
 }
@@ -314,22 +318,19 @@ function QuizHistorySection({ folderId }: QuizHistorySectionProps) {
   const handleDelete = (set: QuizSetSummary) => {
     deleteQuizSet.mutate(set.id, {
       onSuccess: () =>
-        toast.success(i18n.t("errors.deleted"), { description: `"${set.title}"` }),
+        toast.success(i18n.t("errors.deleted"), {
+          description: `"${set.title}"`,
+        }),
       onError: () =>
-        toast.error(i18n.t("errors.deleteFailed"), { description: i18n.t("errors.tryAgain") }),
+        toast.error(i18n.t("errors.deleteFailed"), {
+          description: i18n.t("errors.tryAgain"),
+        }),
     });
   };
 
   return (
     <>
       <Card className="flex flex-col h-full">
-        <CardHeader className="shrink-0 pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <History className="size-4" />
-            {i18n.t("quizHistory.title")}
-          </CardTitle>
-          <CardDescription>{i18n.t("quizHistory.description")}</CardDescription>
-        </CardHeader>
         <CardContent className="flex-1 min-h-0 p-0">
           <ScrollArea className="h-full">
             {isLoading ? (
@@ -369,7 +370,9 @@ function QuizHistorySection({ folderId }: QuizHistorySectionProps) {
                             title={i18n.t("quizHistory.viewSource")}
                           >
                             <BookOpenCheck className="size-3.5" />
-                            <span className="hidden sm:inline">{i18n.t("quizHistory.viewSource")}</span>
+                            <span className="hidden sm:inline">
+                              {i18n.t("quizHistory.viewSource")}
+                            </span>
                           </Button>
                           <Button
                             size="sm"
@@ -400,9 +403,14 @@ function QuizHistorySection({ folderId }: QuizHistorySectionProps) {
                       {/* Row 2: Meta + badges + score */}
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs text-muted-foreground">
-                          {formatDate(set.createdAt)} · {set.questionCount} {i18n.t("common.questions")}
+                          {formatDate(set.createdAt)} · {set.questionCount}{" "}
+                          {i18n.t("common.questions")}
                           {qStats && qStats.attemptCount > 0 && (
-                            <> · {qStats.attemptCount} {i18n.t("common.attempts")}</>
+                            <>
+                              {" "}
+                              · {qStats.attemptCount}{" "}
+                              {i18n.t("common.attempts")}
+                            </>
                           )}
                         </span>
                         <Badge
@@ -459,6 +467,7 @@ function QuizHistorySection({ folderId }: QuizHistorySectionProps) {
         viewerQuestions={_viewerQs}
         viewerLoading={viewerLoading}
         viewerPdfRecord={viewerPdfRecord}
+        viewerUploads={viewerUploads}
         quizTitle={viewerQuizTitle}
         onClose={() => setViewerQuizSetId(null)}
       />
@@ -470,6 +479,7 @@ function QuizPdfViewerDialog({
   viewerQuestions,
   viewerLoading,
   viewerPdfRecord,
+  viewerUploads,
   quizTitle,
   onClose,
 }: {
@@ -477,10 +487,15 @@ function QuizPdfViewerDialog({
   viewerQuestions: import("@/features/quizz").QuizQuestion[];
   viewerLoading: boolean;
   viewerPdfRecord: import("@/features/upload").UploadRecord | undefined;
+  viewerUploads: import("@/features/upload").UploadRecord[] | undefined;
   quizTitle: string;
   onClose: () => void;
 }) {
   if (!quizSetId) return null;
+
+  // Detect input mode from upload records
+  const inputMode = viewerUploads?.[0]?.inputMode;
+
   return (
     <>
       {viewerLoading && (
@@ -499,21 +514,44 @@ function QuizPdfViewerDialog({
           quizSetId={quizSetId ?? undefined}
         />
       )}
-      {!viewerLoading && !viewerPdfRecord && (
-        <Dialog open onOpenChange={(v) => !v && onClose()}>
-          <DialogContent className="max-w-sm">
-            <DialogHeader>
-              <DialogTitle>{i18n.t("folder.noMaterialSelectedPdf")}</DialogTitle>
-            </DialogHeader>
-            <p className="text-sm text-muted-foreground">
-              {i18n.t("folder.noMaterialSelectedPdfDesc")}
-            </p>
-            <Button variant="outline" onClick={onClose}>
-              {i18n.t("common.close")}
-            </Button>
-          </DialogContent>
-        </Dialog>
+      {!viewerLoading && !viewerPdfRecord && inputMode === "text" && (
+        <TextSourceViewer
+          open
+          onClose={onClose}
+          questions={viewerQuestions}
+          quizTitle={quizTitle}
+          quizSetId={quizSetId}
+        />
       )}
+      {!viewerLoading && !viewerPdfRecord && inputMode === "youtube" && (
+        <YouTubeSourceViewer
+          open
+          onClose={onClose}
+          questions={viewerQuestions}
+          quizTitle={quizTitle}
+          quizSetId={quizSetId}
+        />
+      )}
+      {!viewerLoading &&
+        !viewerPdfRecord &&
+        inputMode !== "text" &&
+        inputMode !== "youtube" && (
+          <Dialog open onOpenChange={(v) => !v && onClose()}>
+            <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle>
+                  {i18n.t("folder.noMaterialSelectedPdf")}
+                </DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-muted-foreground">
+                {i18n.t("folder.noMaterialSelectedPdfDesc")}
+              </p>
+              <Button variant="outline" onClick={onClose}>
+                {i18n.t("common.close")}
+              </Button>
+            </DialogContent>
+          </Dialog>
+        )}
     </>
   );
 }

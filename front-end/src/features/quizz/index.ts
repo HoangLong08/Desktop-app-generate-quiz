@@ -8,6 +8,7 @@ export {
   deleteQuizSetApi,
   getQuizSetSourceTextApi,
   getHeatmapBlocksApi,
+  getYouTubeTimelineApi,
 } from "./api";
 export type {
   GenerateQuizResponse,
@@ -16,6 +17,8 @@ export type {
   SourceTextResponse,
   HeatmapBlock,
   HeatmapBlocksResponse,
+  YouTubeTimelineSegment,
+  YouTubeTimelineResponse,
 } from "./api";
 export {
   useGenerateQuiz,

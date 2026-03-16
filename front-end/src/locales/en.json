@@ -152,6 +152,10 @@
     "noPreview": "No preview available.",
     "title": "Multiple Choice Quiz",
     "downloadDocx": "Download DOCX",
+    "exportKahoot": "Export Kahoot",
+    "export": "Export",
+    "withAnswers": "With answers",
+    "withoutAnswers": "Without answers",
     "downloadPdf": "Download PDF",
     "answered": "answered",
     "complete": "complete",
@@ -301,6 +305,9 @@
     "noMaterialsHint": "Click 'Add Material' to start uploading",
     "fileNotOnServer": "File no longer on server",
     "reprocess": "Retry processing",
+    "duplicateFile": "File already uploaded",
+    "duplicateYoutube": "This YouTube link was already added",
+    "duplicateText": "This text was already added",
     "uploadedMaterials": "Uploaded Materials",
     "chooseForQuiz": "Select materials in 'Create Quiz' tab to generate questions",
     "text": "Text"
@@ -348,6 +355,7 @@
   },
   "pdfViewer": {
     "pageLabel": "Page:",
+    "sectionLabel": "Section:",
     "noPageInfo": "No page information",
     "zoomOut": "Zoom out",
     "zoomIn": "Zoom in",
@@ -378,6 +386,29 @@
     "questionsWithKeywords": "questions with keywords",
     "noSourcePage": "no source page",
     "questionN": "Question {{n}}"
+  },
+  "textViewer": {
+    "title": "Source Text",
+    "sourceText": "Text",
+    "section": "Section",
+    "sections": "sections",
+    "chars": "chars",
+    "noContent": "No source text available"
+  },
+  "youtubeViewer": {
+    "title": "YouTube Source",
+    "openVideo": "Open video",
+    "timelineTitle": "Question density by timeline",
+    "duration": "Duration",
+    "conceptMatches": "concept matches",
+    "conceptsFound": "{{count}} concepts found",
+    "worthStudying": "Worth studying",
+    "fewConcepts": "Few",
+    "manyConcepts": "Many",
+    "clickTimeToWatch": "Click timestamp to watch",
+    "clickToWatch": "Click to watch this segment",
+    "watchOnYouTube": "Watch on YouTube",
+    "noTimeline": "Could not build timeline for this video"
   },
   "pageHeatmap": {
     "pageN": "Page {{n}}",
