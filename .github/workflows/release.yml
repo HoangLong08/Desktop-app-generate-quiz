@@ -1,0 +1,184 @@
+name: Release
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  # ─── Quality gate (lint + type-check) ─────────────────────
+  quality-gate:
+    name: Quality gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: front-end/package-lock.json
+
+      - name: Install dependencies
+        working-directory: front-end
+        run: npm ci
+
+      - name: Lint
+        working-directory: front-end
+        run: npm run lint
+
+      - name: TypeScript check
+        working-directory: front-end
+        run: npx tsc -b --noEmit
+
+  # ─── Semantic Release (version + tag + changelog) ─────────
+  semantic-release:
+    name: Semantic Release
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    outputs:
+      new-release: ${{ steps.release.outputs.new-release }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: front-end/package-lock.json
+
+      - name: Install dependencies
+        working-directory: front-end
+        run: npm ci
+
+      - name: Run semantic-release
+        id: release
+        working-directory: front-end
+        run: |
+          npx semantic-release --dry-run 2>&1 | tee sr-output.txt || true
+          # Run for real
+          npx semantic-release 2>&1 | tee sr-real-output.txt
+
+          # Parse version from output
+          VERSION=$(grep -oP 'Published release \K[0-9]+\.[0-9]+\.[0-9]+' sr-real-output.txt || echo "")
+          if [ -n "$VERSION" ]; then
+            echo "new-release=true" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "🎉 Released v$VERSION"
+          else
+            echo "new-release=false" >> "$GITHUB_OUTPUT"
+            echo "version=" >> "$GITHUB_OUTPUT"
+            echo "ℹ️ No new release"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ─── Build desktop apps (parallel across OS) ──────────────
+  build-desktop:
+    name: Build ${{ matrix.platform }}
+    needs: semantic-release
+    if: needs.semantic-release.outputs.new-release == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: Windows
+            electron-args: --win --x64
+            artifact-name: release-windows
+          - os: macos-latest
+            platform: macOS
+            electron-args: --mac --arm64
+            artifact-name: release-macos
+          - os: ubuntu-latest
+            platform: Linux
+            electron-args: --linux --x64
+            artifact-name: release-linux
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: front-end/package-lock.json
+
+      - name: Install dependencies
+        working-directory: front-end
+        run: npm ci
+
+      - name: Sync package version
+        working-directory: front-end
+        run: npm version ${{ needs.semantic-release.outputs.version }} --no-git-tag-version --allow-same-version
+        shell: bash
+
+      - name: Build React (Vite)
+        working-directory: front-end
+        run: npm run build
+
+      - name: Transpile Electron
+        working-directory: front-end
+        run: npm run transpile:electron
+
+      - name: Build Electron app
+        working-directory: front-end
+        run: npx electron-builder ${{ matrix.electron-args }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: |
+            front-end/dist/*.exe
+            front-end/dist/*.msi
+            front-end/dist/*.dmg
+            front-end/dist/*.AppImage
+            front-end/dist/*.snap
+          if-no-files-found: warn
+          retention-days: 5
+
+  # ─── Upload assets to the GitHub Release ──────────────────
+  upload-assets:
+    name: Upload release assets
+    needs: [semantic-release, build-desktop]
+    if: needs.semantic-release.outputs.new-release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: release-*
+          merge-multiple: true
+
+      - name: List release assets
+        run: |
+          echo "📦 Release assets:"
+          find artifacts -type f | head -50
+
+      - name: Upload assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.semantic-release.outputs.version }}
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
