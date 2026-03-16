@@ -1,21 +1,21 @@
-# Hướng dẫn cài đặt và chạy Local
+# Local Setup and Running Guide
 
-Hướng dẫn chi tiết để chạy Quiz Generator trên máy local (development mode).
-
----
-
-## Yêu cầu hệ thống
-
-| Tool        | Phiên bản | Kiểm tra           |
-| ----------- | --------- | ------------------ |
-| **Node.js** | >= 18     | `node --version`   |
-| **npm**     | >= 9      | `npm --version`    |
-| **Python**  | >= 3.10   | `python --version` |
-| **Git**     | bất kỳ    | `git --version`    |
+Detailed guide for running Quiz Generator locally (development mode).
 
 ---
 
-## 1. Clone dự án
+## System Requirements
+
+| Tool        | Version | Check              |
+| ----------- | ------- | ------------------ |
+| **Node.js** | >= 18   | `node --version`   |
+| **npm**     | >= 9    | `npm --version`    |
+| **Python**  | >= 3.10 | `python --version` |
+| **Git**     | any     | `git --version`    |
+
+---
+
+## 1. Clone the Project
 
 ```bash
 git clone https://github.com/<your-username>/web-quizz.git
@@ -24,13 +24,13 @@ cd web-quizz
 
 ---
 
-## 2. Cài đặt Backend
+## 2. Backend Setup
 
 ```bash
 cd back-end
 ```
 
-### 2.1 Tạo virtual environment (khuyến nghị)
+### 2.1 Create a virtual environment (recommended)
 
 ```bash
 python -m venv venv
@@ -42,127 +42,127 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-### 2.2 Cài dependencies
+### 2.2 Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2.3 Cấu hình environment
+### 2.3 Configure environment
 
-Tạo file `.env` trong thư mục `back-end/`:
+Create a `.env` file in the `back-end/` directory:
 
 ```env
-# Bắt buộc nếu muốn tạo quiz (lấy key tại https://aistudio.google.com/apikey)
-# Hoặc có thể thêm key qua giao diện Settings trong app
+# Required if you want to generate quizzes (get a key at https://aistudio.google.com/apikey)
+# Or you can add keys via the Settings page in the app
 GEMINI_API_KEY=your_api_key_here
 
-# Tuỳ chọn
+# Optional
 SECRET_KEY=your-random-secret-key
 FLASK_ENV=development
 ```
 
-> **Gemini API Key:** Bạn có thể lấy miễn phí tại [Google AI Studio](https://aistudio.google.com/apikey). Hoặc thêm key trực tiếp trong app tại trang **Settings > API Keys**.
+> **Gemini API Key:** You can get one for free at [Google AI Studio](https://aistudio.google.com/apikey). Or add a key directly in the app at **Settings > API Keys**.
 
-### 2.4 Chạy backend
+### 2.4 Run the backend
 
 ```bash
 python app.py
 ```
 
-Backend sẽ chạy tại `http://localhost:5000`. Kiểm tra bằng cách truy cập `http://localhost:5000/api/health`.
+The backend will run at `http://localhost:5000`. Verify by visiting `http://localhost:5000/api/health`.
 
 ---
 
-## 3. Cài đặt Frontend
+## 3. Frontend Setup
 
-Mở **terminal mới**, giữ backend đang chạy:
+Open a **new terminal**, keep the backend running:
 
 ```bash
 cd front-end
 npm install
 ```
 
-### 3.1 Chạy Web (chỉ trình duyệt)
+### 3.1 Run Web (browser only)
 
 ```bash
 npm run dev:react
 ```
 
-Mở trình duyệt tại **http://localhost:5123**
+Open browser at **http://localhost:5123**
 
-### 3.2 Chạy Desktop (Electron)
+### 3.2 Run Desktop (Electron)
 
 ```bash
 npm run dev
 ```
 
-Lệnh này chạy song song Vite dev server + Electron app. Cửa sổ desktop sẽ tự mở.
+This command runs Vite dev server + Electron app in parallel. The desktop window will open automatically.
 
 ---
 
 ## 4. Build Desktop App
 
-### Build cho Windows
+### Build for Windows
 
 ```bash
 cd front-end
 npm run dist:win
 ```
 
-File output tại `front-end/dist/`:
+Output files in `front-end/dist/`:
 
-- `front-end 0.0.0.exe` — Portable (chạy trực tiếp)
+- `front-end 0.0.0.exe` — Portable (run directly)
 - `front-end 0.0.0.msi` — Installer
 
-### Build cho macOS
+### Build for macOS
 
 ```bash
 npm run dist:mac
 ```
 
-### Build cho Linux
+### Build for Linux
 
 ```bash
 npm run dist:linux
 ```
 
-### Build đầy đủ (kèm backend đóng gói)
+### Full build (with packaged backend)
 
 ```bash
 npm run build:desktop:win
 ```
 
-Lệnh này sẽ đóng gói backend (PyInstaller) + frontend (Electron) thành một app desktop hoàn chỉnh.
+This command packages the backend (PyInstaller) + frontend (Electron) into a complete desktop app.
 
 ---
 
-## 5. Cấu hình nâng cao
+## 5. Advanced Configuration
 
-### Đổi cổng backend
+### Change backend port
 
 ```bash
-# Sử dụng biến môi trường PORT
+# Use the PORT environment variable
 PORT=8000 python app.py
 ```
 
-### Đổi API URL cho frontend
+### Change frontend API URL
 
 ```bash
-# Khi backend chạy ở port khác
+# When the backend runs on a different port
 VITE_API_URL=http://localhost:8000 npm run dev:react
 ```
 
 ### CORS
 
-Backend mặc định cho phép các origin:
+The backend allows these origins by default:
 
 - `http://localhost:5123` (Vite dev)
 - `http://localhost:5173`
 - `http://localhost:3000`
 - `http://localhost:4173` (Vite preview)
 
-Để thêm origin khác, set biến `CORS_ORIGINS` trong `.env`:
+To add other origins, set the `CORS_ORIGINS` variable in `.env`:
 
 ```env
 CORS_ORIGINS=http://localhost:5123,http://localhost:3000,https://your-domain.com
@@ -170,30 +170,30 @@ CORS_ORIGINS=http://localhost:5123,http://localhost:3000,https://your-domain.com
 
 ---
 
-## 6. Cấu trúc API
+## 6. API Structure
 
-| Method | Endpoint                 | Mô tả                |
-| ------ | ------------------------ | -------------------- |
-| GET    | `/api/health`            | Health check         |
-| GET    | `/api/folders/`          | Danh sách thư mục    |
-| POST   | `/api/folders/`          | Tạo thư mục          |
-| POST   | `/api/quiz/generate`     | Tạo quiz từ tài liệu |
-| POST   | `/api/quiz/extract-text` | Trích xuất văn bản   |
-| GET    | `/api/quiz/sets`         | Danh sách bộ quiz    |
-| GET    | `/api/stats/overview`    | Thống kê tổng quan   |
-| POST   | `/api/stats/attempts`    | Lưu lần làm bài      |
-| GET    | `/api/keys/`             | Danh sách API keys   |
+| Method | Endpoint                 | Description                 |
+| ------ | ------------------------ | --------------------------- |
+| GET    | `/api/health`            | Health check                |
+| GET    | `/api/folders/`          | List folders                |
+| POST   | `/api/folders/`          | Create folder               |
+| POST   | `/api/quiz/generate`     | Generate quiz from document |
+| POST   | `/api/quiz/extract-text` | Extract text                |
+| GET    | `/api/quiz/sets`         | List quiz sets              |
+| GET    | `/api/stats/overview`    | Statistics overview         |
+| POST   | `/api/stats/attempts`    | Save quiz attempt           |
+| GET    | `/api/keys/`             | List API keys               |
 
-Xem chi tiết API tại [back-end/ARCHITECTURE.md](../back-end/ARCHITECTURE.md).
+See API details at [back-end/ARCHITECTURE.md](../back-end/ARCHITECTURE.md).
 
 ---
 
-## Khắc phục sự cố
+## Troubleshooting
 
-### Backend không khởi động
+### Backend won't start
 
 ```bash
-# Kiểm tra port 5000 có bị chiếm không
+# Check if port 5000 is in use
 netstat -ano | findstr ":5000"    # Windows
 lsof -i :5000                     # macOS/Linux
 ```

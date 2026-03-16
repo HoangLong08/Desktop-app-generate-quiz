@@ -1,1 +1,14 @@
-npx lint-staged
+# Lint staged front-end files
+STAGED_FE=$(git diff --cached --name-only --diff-filter=ACM | grep '^front-end/src/.*\.\(ts\|tsx\)$' | sed 's|^front-end/||')
+
+if [ -n "$STAGED_FE" ]; then
+  echo "Running ESLint on staged front-end files..."
+  cd front-end
+  npx eslint $STAGED_FE
+  RESULT=$?
+  cd ..
+  if [ $RESULT -ne 0 ]; then
+    echo "ESLint failed. Commit aborted."
+    exit 1
+  fi
+fi

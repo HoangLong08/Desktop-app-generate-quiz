@@ -2,7 +2,6 @@ import { app, BrowserWindow, globalShortcut, Menu } from "electron";
 import { ipcMainHandle, isDev } from "./util.js";
 import { getStationData, pollResource } from "./resourceManager.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
-import { createTray } from "./tray.js";
 import { killBackend, startBackend } from "./backendManager.js";
 import type { ChildProcess } from "node:child_process";
 
@@ -38,8 +37,6 @@ app.on("ready", async () => {
     return getStationData();
   });
 
-  createTray(mainWindow);
-
   // DevTools, reload, hard reload shortcuts
   globalShortcut.register("F12", () => {
     mainWindow.webContents.toggleDevTools();
@@ -50,33 +47,8 @@ app.on("ready", async () => {
   globalShortcut.register("CommandOrControl+Shift+R", () => {
     mainWindow.webContents.reloadIgnoringCache();
   });
-
-  handleCloseEvents(mainWindow);
 });
 
 app.on("before-quit", () => {
   killBackend(backendProcess);
 });
-
-function handleCloseEvents(mainWindow: BrowserWindow) {
-  let willClose = false;
-
-  mainWindow.on("close", (e) => {
-    if (willClose) {
-      return;
-    }
-    e.preventDefault();
-    mainWindow.hide();
-    if (app.dock) {
-      app.dock.hide();
-    }
-  });
-
-  app.on("before-quit", () => {
-    willClose = true;
-  });
-
-  mainWindow.on("show", () => {
-    willClose = false;
-  });
-}

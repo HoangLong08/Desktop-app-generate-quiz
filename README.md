@@ -5,76 +5,76 @@
 <h1 align="center">Quiz Generator</h1>
 
 <p align="center">
-  <strong>Tạo câu hỏi trắc nghiệm tự động từ tài liệu bằng AI</strong>
+  <strong>Automatically generate quiz questions from documents using AI</strong>
 </p>
 
 <p align="center">
-  Upload PDF, DOCX, ảnh, dán link YouTube hoặc nhập văn bản — AI sẽ tạo bộ đề trắc nghiệm chất lượng trong vài giây.
+  Upload PDF, DOCX, images, paste a YouTube link, or enter text — AI will generate high-quality quiz questions in seconds.
 </p>
 
 <p align="center">
-  <a href="#-tính-năng">Tính năng</a> •
+  <a href="#-features">Features</a> •
   <a href="#-demo">Demo</a> •
-  <a href="#-cài-đặt">Cài đặt</a> •
+  <a href="#-installation">Installation</a> •
   <a href="#%EF%B8%8F-tech-stack">Tech Stack</a> •
-  <a href="#-đóng-góp">Đóng góp</a>
+  <a href="#-contributing">Contributing</a>
 </p>
 
 ---
 
-## ✨ Tính năng
+## ✨ Features
 
-| Tính năng                | Mô tả                                                                   |
-| ------------------------ | ----------------------------------------------------------------------- |
-| 📄 **Đa nguồn đầu vào**  | PDF, DOCX, ảnh (OCR), YouTube transcript, hoặc văn bản thuần            |
-| 🤖 **AI-powered**        | Sử dụng Google Gemini để tạo câu hỏi thông minh, có giải thích          |
-| 📝 **Đa dạng câu hỏi**   | Trắc nghiệm, đúng/sai, điền trống — tùy chọn số lượng, độ khó, ngôn ngữ |
-| 📁 **Quản lý thư mục**   | Tổ chức quiz theo bộ sưu tập, đánh dấu yêu thích                        |
-| 📊 **Thống kê chi tiết** | Heatmap accuracy, timeline tiến bộ, lịch sử làm bài                     |
-| 📤 **Xuất DOCX**         | Export bộ đề ra file Word để in hoặc chia sẻ                            |
-| 🖥️ **Desktop & Web**     | Chạy như app desktop (Electron) hoặc trên trình duyệt web               |
-| 🌙 **Dark mode**         | Giao diện tối mặc định, hỗ trợ chuyển đổi sáng/tối                      |
+| Feature                       | Description                                                                               |
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| 📄 **Multiple input sources** | PDF, DOCX, images (OCR), YouTube transcript, or plain text                                |
+| 🤖 **AI-powered**             | Uses Google Gemini to generate smart questions with explanations                          |
+| 📝 **Diverse question types** | Multiple choice, true/false, fill-in-the-blank — configurable count, difficulty, language |
+| 📁 **Folder management**      | Organize quizzes into collections                                                         |
+| 📊 **Detailed statistics**    | Accuracy heatmap, progress timeline, attempt history                                      |
+| 📤 **DOCX export**            | Export quizzes to Word files for printing or sharing                                      |
+| 🖥️ **Desktop & Web**          | Run as a desktop app (Electron) or in the browser                                         |
+| 🌙 **Dark mode**              | Dark theme by default, with light/dark toggle support                                     |
 
 ## 🖼️ Demo
 
-<!-- Thêm screenshot hoặc GIF demo ở đây -->
+<!-- Add screenshots or GIF demo here -->
 <!-- ![Demo](docs/screenshots/demo.gif) -->
 
-## 📥 Cài đặt
+## 📥 Installation
 
-### Tải app Desktop
+### Download Desktop App
 
-Tải file cài đặt cho hệ điều hành của bạn từ [Releases](../../releases/latest):
+Download the installer for your OS from [Releases](../../releases/latest):
 
-| Hệ điều hành | File                                      |
-| ------------ | ----------------------------------------- |
-| **Windows**  | `.exe` (portable) hoặc `.msi` (installer) |
-| **macOS**    | `.dmg`                                    |
-| **Linux**    | `.AppImage`                               |
+| OS          | File                                    |
+| ----------- | --------------------------------------- |
+| **Windows** | `.exe` (portable) or `.msi` (installer) |
+| **macOS**   | `.dmg`                                  |
+| **Linux**   | `.AppImage`                             |
 
-### Chạy trên Web (local)
+### Run on Web (local)
 
-> Xem hướng dẫn chi tiết tại **[docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md)**
+> See detailed instructions at **[docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md)**
 
-**Nhanh:**
+**Quick start:**
 
 ```bash
 # 1. Clone repo
 git clone https://github.com/<your-username>/web-quizz.git
 cd web-quizz
 
-# 2. Chạy backend
+# 2. Run backend
 cd back-end
 pip install -r requirements.txt
 python app.py
 
-# 3. Chạy frontend (terminal mới)
+# 3. Run frontend (new terminal)
 cd front-end
 npm install
 npm run dev:react
 ```
 
-Mở trình duyệt tại `http://localhost:5123`
+Open browser at `http://localhost:5123`
 
 ## 🏗️ Tech Stack
 
@@ -85,18 +85,18 @@ Mở trình duyệt tại `http://localhost:5123`
 - **Tailwind CSS v4** + **shadcn/ui** — styling
 - **TanStack React Query** — data fetching & cache
 - **Electron 40** — desktop app
-- **Recharts** — biểu đồ thống kê
+- **Recharts** — statistics charts
 - **Framer Motion** — animations
 
 ### Backend
 
 - **Flask** (Python) — REST API
 - **SQLAlchemy** + SQLite — database
-- **Google Gemini** — AI tạo câu hỏi + OCR ảnh (Vision API)
-- **pdfplumber** / **PyMuPDF** — xử lý PDF
-- **youtube-transcript-api** — lấy transcript YouTube
+- **Google Gemini** — AI question generation + image OCR (Vision API)
+- **pdfplumber** / **PyMuPDF** — PDF processing
+- **youtube-transcript-api** — YouTube transcript extraction
 
-## 📁 Cấu trúc dự án
+## 📁 Project Structure
 
 ```
 web-quizz/
@@ -116,38 +116,38 @@ web-quizz/
 │   └── app.py          # Entry point
 │
 └── docs/               # Documentation
-    └── LOCAL_SETUP.md  # Hướng dẫn cài đặt local
+    └── LOCAL_SETUP.md  # Local setup guide
 ```
 
-## 🔧 Scripts chính
+## 🔧 Main Scripts
 
 ### Frontend (`front-end/`)
 
-| Script               | Mô tả                                |
-| -------------------- | ------------------------------------ |
-| `npm run dev`        | Chạy dev (Vite + Electron song song) |
-| `npm run dev:react`  | Chỉ Vite dev server (web)            |
-| `npm run build`      | Build React production               |
-| `npm run dist:win`   | Đóng gói Electron cho Windows        |
-| `npm run dist:mac`   | Đóng gói Electron cho macOS          |
-| `npm run dist:linux` | Đóng gói Electron cho Linux          |
+| Script               | Description                           |
+| -------------------- | ------------------------------------- |
+| `npm run dev`        | Run dev (Vite + Electron in parallel) |
+| `npm run dev:react`  | Vite dev server only (web)            |
+| `npm run build`      | Build React production                |
+| `npm run dist:win`   | Package Electron for Windows          |
+| `npm run dist:mac`   | Package Electron for macOS            |
+| `npm run dist:linux` | Package Electron for Linux            |
 
 ### Backend (`back-end/`)
 
 ```bash
-python app.py              # Chạy server (port 5000)
+python app.py              # Run server (port 5000)
 ```
 
-## 🤝 Đóng góp
+## 🤝 Contributing
 
-Mọi đóng góp đều được chào đón! Hãy:
+All contributions are welcome! Please:
 
-1. Fork repo
-2. Tạo branch mới (`git checkout -b feature/ten-tinh-nang`)
-3. Commit thay đổi (`git commit -m "Add: mô tả"`)
-4. Push lên branch (`git push origin feature/ten-tinh-nang`)
-5. Tạo Pull Request
+1. Fork the repo
+2. Create a new branch (`git checkout -b feature/feature-name`)
+3. Commit your changes (`git commit -m "Add: description"`)
+4. Push to the branch (`git push origin feature/feature-name`)
+5. Create a Pull Request
 
 ## 📄 License
 
-MIT License — xem file [LICENSE](LICENSE) để biết thêm chi tiết.
+MIT License — see [LICENSE](LICENSE) for more details.
