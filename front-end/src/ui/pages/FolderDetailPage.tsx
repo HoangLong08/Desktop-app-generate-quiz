@@ -30,7 +30,6 @@ import {
   Loader2,
   Settings2,
   Upload,
-  FlaskConical,
   ArrowLeft,
   Folder,
   Play,
@@ -811,36 +810,6 @@ export function FolderDetailPage() {
     );
   };
 
-  const handleMockQuiz = () => {
-    const mockQuestions: QuizQuestion[] = Array.from({ length: 5 }, (_, i) => {
-      const qNum = i + 1;
-      return {
-        id: `q${qNum}_mock${String(i + 1).padStart(2, "0")}`,
-        questionNumber: qNum,
-        questionText: `Câu hỏi số ${qNum}: Đây là câu hỏi mock số ${qNum}. Đáp án đúng là A.`,
-        type: "multiple-choice",
-        options: [
-          { id: "a", text: `Đáp án A cho câu ${qNum}` },
-          { id: "b", text: `Đáp án B cho câu ${qNum}` },
-          { id: "c", text: `Đáp án C cho câu ${qNum}` },
-          { id: "d", text: `Đáp án D cho câu ${qNum}` },
-        ],
-        correctAnswerId: "a",
-        explanation: `Giải thích: Đáp án đúng cho câu ${qNum} là A. Đây là dữ liệu mock để kiểm tra UI quiz.`,
-      };
-    });
-
-    navigate("/quiz", {
-      state: {
-        questions: mockQuestions,
-        config,
-        extractedText: "Đây là dữ liệu mock để kiểm tra giao diện.",
-        filesProcessed: 0,
-        folderId: id,
-        sourceFiles: [],
-      },
-    });
-  };
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-1 min-h-0 flex-col gap-4 p-6">
@@ -968,15 +937,6 @@ export function FolderDetailPage() {
                     )}
                   </Button>
 
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full gap-2 border-dashed text-base"
-                    onClick={handleMockQuiz}
-                  >
-                    <FlaskConical className="size-5" />
-                    Mock Quiz (Test UI)
-                  </Button>
                 </CardFooter>
               </Card>
             </div>

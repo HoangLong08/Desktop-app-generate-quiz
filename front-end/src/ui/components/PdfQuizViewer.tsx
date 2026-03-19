@@ -70,15 +70,26 @@ function QuestionRow({
 }) {
   const { t } = useTranslation();
   const pages = question.sourcePages ?? [];
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleClick = () => {
+    setIsExpanded((prev) => !prev);
+    if (!active) {
+      onClick();
+    }
+  };
+
   return (
-    <button
-      onClick={onClick}
+    <div
       className={cn(
-        "w-full rounded-lg p-3 text-left transition-all",
+        "w-full rounded-lg transition-all text-left",
         active ? "bg-primary/12 ring-2 ring-primary/40" : "hover:bg-muted/60",
       )}
     >
-      <div className="flex items-start gap-2">
+      <button
+        onClick={handleClick}
+        className="w-full p-3 flex items-start gap-2 text-left"
+      >
         <span
           className={cn(
             "mt-0.5 flex h-5 min-w-5 items-center justify-center rounded-full text-[10px] font-bold shrink-0",
@@ -96,9 +107,11 @@ function QuestionRow({
               active ? "font-medium text-foreground" : "text-muted-foreground",
             )}
           >
-            {question.questionText.length > 120
-              ? question.questionText.slice(0, 120) + "…"
-              : question.questionText}
+            {isExpanded
+              ? question.questionText
+              : question.questionText.length > 120
+                ? question.questionText.slice(0, 120) + "…"
+                : question.questionText}
           </p>
           {pages.length > 0 && (
             <div className="flex flex-wrap items-center gap-1">
@@ -134,11 +147,48 @@ function QuestionRow({
             </div>
           )}
         </div>
-        {active && (
-          <ChevronRight className="mt-0.5 size-3.5 shrink-0 text-primary" />
-        )}
-      </div>
-    </button>
+        <ChevronRight
+          className={cn(
+            "mt-0.5 size-3.5 shrink-0 transition-transform",
+            isExpanded ? "rotate-90 text-primary" : "text-muted-foreground/50",
+          )}
+        />
+      </button>
+
+      {isExpanded && (
+        <div className="px-3 pb-3 pt-0 text-sm animate-in slide-in-from-top-2 fade-in duration-200">
+          <div className="space-y-1.5 mt-1 border-t pt-2 border-primary/10">
+            {question.options?.map((opt) => {
+              const isCorrect =
+                opt.id === question.correctAnswerId ||
+                question.correctAnswerIds?.includes(opt.id);
+              return (
+                <div
+                  key={opt.id}
+                  className={cn(
+                    "px-2 py-1.5 rounded text-xs flex gap-2",
+                    isCorrect
+                      ? "bg-emerald-100/60 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 font-medium"
+                      : "text-muted-foreground bg-background/50",
+                  )}
+                >
+                  <span className="font-semibold shrink-0 uppercase">
+                    {opt.id}.
+                  </span>
+                  <span>{opt.text}</span>
+                </div>
+              );
+            })}
+            {question.explanation && (
+              <div className="mt-3 text-xs text-muted-foreground bg-muted p-2 rounded-md">
+                <span className="font-semibold text-foreground">Giải thích:</span>{" "}
+                {question.explanation}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

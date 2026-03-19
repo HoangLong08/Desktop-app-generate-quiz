@@ -1,16 +1,106 @@
 """
-YouTube Service - Extract transcript/subtitles from YouTube videos
-using youtube-transcript-api.
+YouTube Service - Extract transcript/subtitles from YouTube videos.
+
+Primary:  youtube-transcript-api  (fast, no extra deps)
+Fallback: yt-dlp                  (more robust, bypasses IP bans)
 """
 
 import re
 import json
 import logging
+import os
+import tempfile
 import urllib.request
 import urllib.parse
+import functools
 from typing import Optional, List
 
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# yt-dlp fallback helpers
+# ---------------------------------------------------------------------------
+
+def _ytdlp_fetch_timed(video_id: str, lang: str = "vi") -> List[dict]:
+    """
+    Use yt-dlp to download auto-generated / manual subtitles and return
+    a list of {start, duration, text} dicts — same shape as youtube-transcript-api.
+
+    yt-dlp writes a .vtt or .srv1/.json3 file; we read and parse it.
+    Raises ValueError if subtitles cannot be fetched.
+    """
+    try:
+        import yt_dlp  # noqa: F401 — just confirm it's installed
+    except ImportError:
+        raise RuntimeError("yt-dlp is not installed. Run: pip install yt-dlp")
+
+    url = f"https://www.youtube.com/watch?v={video_id}"
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_tmpl = os.path.join(tmpdir, "sub")
+        langs = [lang, "en"] if lang != "en" else ["en"]
+        ydl_opts = {
+            "skip_download": True,
+            "writeautomaticsub": True,
+            "writesubtitles": True,
+            "subtitleslangs": langs,
+            "subtitlesformat": "json3",
+            "outtmpl": output_tmpl,
+            "quiet": True,
+            "no_warnings": True,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            if not info:
+                raise ValueError("yt-dlp could not extract video info")
+
+        # Find the downloaded subtitle file
+        sub_file = None
+        for candidate_lang in langs + ["en-US", "en-GB", "vi-VN"]:
+            p = f"{output_tmpl}.{candidate_lang}.json3"
+            if os.path.exists(p):
+                sub_file = p
+                break
+        # Fallback: any json3
+        if sub_file is None:
+            for fname in os.listdir(tmpdir):
+                if fname.endswith(".json3"):
+                    sub_file = os.path.join(tmpdir, fname)
+                    break
+        if sub_file is None:
+            raise ValueError(
+                f"yt-dlp downloaded no subtitle file for video_id={video_id!r}"
+            )
+
+        with open(sub_file, encoding="utf-8") as f:
+            data = json.load(f)
+
+    result = []
+    # json3 format: {"events": [{"tStartMs", "dDurationMs", "segs": [{"utf8"}]}]}
+    events = data.get("events", [])
+    for event in events:
+        start_ms = event.get("tStartMs", 0)
+        dur_ms = event.get("dDurationMs", 0)
+        segs = event.get("segs", [])
+        text = "".join(s.get("utf8", "") for s in segs).replace("\n", " ").strip()
+        if text:
+            result.append({
+                "start": start_ms / 1000.0,
+                "duration": dur_ms / 1000.0,
+                "text": text,
+            })
+    if not result:
+        raise ValueError("yt-dlp subtitle file was empty")
+    logger.info(
+        "yt-dlp fetched %d subtitle segments for video_id=%s", len(result), video_id
+    )
+    return result
+
+
+def _ytdlp_fetch_text(video_id: str, lang: str = "vi") -> str:
+    """Convenience wrapper — returns plain text from _ytdlp_fetch_timed."""
+    entries = _ytdlp_fetch_timed(video_id, lang)
+    return " ".join(e["text"] for e in entries)
 
 
 def fetch_video_title(url: str) -> Optional[str]:
@@ -48,29 +138,22 @@ def extract_video_id(url: str) -> Optional[str]:
     return None
 
 
+@functools.lru_cache(maxsize=128)
 def extract_transcript(url: str, lang: str = "vi") -> str:
     """
     Extract transcript text from a YouTube video.
 
-    Tries languages in order:
-    1. Requested lang (manual, then auto-generated)
-    2. English ('en') as fallback
-    3. Any available language as last resort
-
-    Args:
-        url: YouTube video URL
-        lang: Preferred transcript language code (e.g. 'vi', 'en', 'ja', 'ko', 'zh-Hans')
-
-    Returns:
-        Transcript as plain text
-
-    Raises:
-        ValueError: If URL is invalid or no transcript available
-        RuntimeError: If youtube-transcript-api is not installed
+    Primary: youtube-transcript-api → Fallback: yt-dlp (bypasses IP bans)
     """
+    video_id = extract_video_id(url)
+    if not video_id:
+        raise ValueError(f"Invalid YouTube URL: {url!r}")
+
+    logger.info(f"Fetching transcript for video_id={video_id}, lang={lang}")
+
+    # ── Primary: youtube-transcript-api ────────────────────────────────────
     try:
         from youtube_transcript_api import YouTubeTranscriptApi
-        # Exception classes moved around between v0.x and v1.x — import defensively
         try:
             from youtube_transcript_api import NoTranscriptFound, TranscriptsDisabled
         except ImportError:
@@ -80,151 +163,143 @@ def extract_transcript(url: str, lang: str = "vi") -> str:
                     TranscriptsDisabled,
                 )
             except ImportError:
-                # Last resort: treat any exception as the target error
                 NoTranscriptFound = Exception
                 TranscriptsDisabled = Exception
-    except ImportError:
-        raise RuntimeError(
-            "youtube-transcript-api is not installed. "
-            "Run: pip install youtube-transcript-api"
-        )
 
-    video_id = extract_video_id(url)
-    if not video_id:
-        raise ValueError(f"Invalid YouTube URL: {url!r}")
-
-    logger.info(f"Fetching transcript for video_id={video_id}, lang={lang}")
-
-    # Support both v0.x (class methods) and v1.x (instance methods)
-    _use_new_api = not hasattr(YouTubeTranscriptApi, "list_transcripts")
-
-    try:
+        _use_new_api = not hasattr(YouTubeTranscriptApi, "list_transcripts")
         if _use_new_api:
             api = YouTubeTranscriptApi()
             transcript_list = api.list(video_id)
         else:
             transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-    except TranscriptsDisabled:
-        raise ValueError("This video has transcripts/captions disabled.")
-    except Exception as e:
-        raise ValueError(f"Could not fetch transcripts for video: {e}") from e
 
-    transcript = None
-
-    # 1. Try requested language first
-    try:
-        transcript = transcript_list.find_transcript([lang])
-    except NoTranscriptFound:
-        pass
-
-    # 2. Fallback to English (if requested lang was not English)
-    if transcript is None and lang != "en":
+        transcript = None
         try:
-            transcript = transcript_list.find_transcript(["en"])
-            logger.info(f"Falling back to English transcript for video_id={video_id}")
+            transcript = transcript_list.find_transcript([lang])
         except NoTranscriptFound:
             pass
+        if transcript is None and lang != "en":
+            try:
+                transcript = transcript_list.find_transcript(["en"])
+                logger.info("Falling back to English transcript")
+            except NoTranscriptFound:
+                pass
+        if transcript is None:
+            for t in transcript_list:
+                transcript = t
+                break
 
-    # 3. Fallback to any available transcript
-    if transcript is None:
-        for t in transcript_list:
-            transcript = t
+        if transcript is not None:
+            entries = transcript.fetch()
+            lines = []
+            for entry in entries:
+                if hasattr(entry, "text"):
+                    text_val = str(entry.text).strip()
+                else:
+                    text_val = str(entry.get("text", "")).strip()
+                if text_val:
+                    lines.append(text_val)
+            text = " ".join(lines)
             logger.info(
-                f"Using any available transcript: lang={t.language_code}, "
-                f"generated={t.is_generated}"
+                "Extracted %d segments (%d chars) from video_id=%s",
+                len(lines), len(text), video_id,
             )
-            break
+            return text
 
-    if transcript is None:
-        raise ValueError("No transcripts available for this video.")
+    except Exception as e:
+        logger.warning(
+            "youtube-transcript-api failed for %s: %s — trying yt-dlp fallback",
+            video_id, e,
+        )
 
-    entries = transcript.fetch()
-
-    lines = []
-    for entry in entries:
-        # v1.x: FetchedTranscriptSnippet objects with .text attribute
-        # v0.x: dicts with "text" key
-        if hasattr(entry, "text"):
-            text_val = str(entry.text).strip()
-        else:
-            text_val = str(entry.get("text", "")).strip()
-        if text_val:
-            lines.append(text_val)
-
-    text = " ".join(lines)
-
-    logger.info(
-        f"Extracted {len(lines)} transcript segments ({len(text)} chars) "
-        f"from video_id={video_id}"
-    )
-    return text
+    # ── Fallback: yt-dlp ───────────────────────────────────────────────────
+    try:
+        text = _ytdlp_fetch_text(video_id, lang)
+        logger.info("yt-dlp fallback succeeded for video_id=%s (%d chars)", video_id, len(text))
+        return text
+    except Exception as e2:
+        raise ValueError(
+            f"Could not fetch transcript for video {video_id!r}. "
+            f"youtube-transcript-api and yt-dlp both failed. Last error: {e2}"
+        ) from e2
 
 
+@functools.lru_cache(maxsize=128)
 def extract_transcript_timed(url: str, lang: str = "vi") -> List[dict]:
     """
     Extract transcript with timestamps from a YouTube video.
 
     Returns:
         List of {"start": float, "duration": float, "text": str}
+
+    Primary: youtube-transcript-api → Fallback: yt-dlp (bypasses IP bans)
     """
+    video_id = extract_video_id(url)
+    if not video_id:
+        raise ValueError(f"Invalid YouTube URL: {url!r}")
+
+    # ── Primary: youtube-transcript-api ────────────────────────────────────
     try:
         from youtube_transcript_api import (
             YouTubeTranscriptApi,
             TranscriptsDisabled,
             NoTranscriptFound,
         )
-    except ImportError:
-        raise RuntimeError("youtube-transcript-api is not installed")
 
-    video_id = extract_video_id(url)
-    if not video_id:
-        raise ValueError(f"Invalid YouTube URL: {url!r}")
-
-    _use_new_api = not hasattr(YouTubeTranscriptApi, "list_transcripts")
-
-    try:
+        _use_new_api = not hasattr(YouTubeTranscriptApi, "list_transcripts")
         if _use_new_api:
             api = YouTubeTranscriptApi()
             transcript_list = api.list(video_id)
         else:
             transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-    except TranscriptsDisabled:
-        raise ValueError("This video has transcripts/captions disabled.")
-    except Exception as e:
-        raise ValueError(f"Could not fetch transcripts for video: {e}") from e
 
-    transcript = None
-    try:
-        transcript = transcript_list.find_transcript([lang])
-    except NoTranscriptFound:
-        pass
-    if transcript is None and lang != "en":
+        transcript = None
         try:
-            transcript = transcript_list.find_transcript(["en"])
+            transcript = transcript_list.find_transcript([lang])
         except NoTranscriptFound:
             pass
-    if transcript is None:
-        for t in transcript_list:
-            transcript = t
-            break
-    if transcript is None:
-        raise ValueError("No transcripts available for this video.")
+        if transcript is None and lang != "en":
+            try:
+                transcript = transcript_list.find_transcript(["en"])
+            except NoTranscriptFound:
+                pass
+        if transcript is None:
+            for t in transcript_list:
+                transcript = t
+                break
 
-    entries = transcript.fetch()
-    result = []
-    for entry in entries:
-        if hasattr(entry, "text"):
-            text_val = str(entry.text).strip()
-            start = float(getattr(entry, "start", 0))
-            duration = float(getattr(entry, "duration", 0))
-        else:
-            text_val = str(entry.get("text", "")).strip()
-            start = float(entry.get("start", 0))
-            duration = float(entry.get("duration", 0))
-        if text_val:
-            result.append({"start": start, "duration": duration, "text": text_val})
+        if transcript is not None:
+            entries = transcript.fetch()
+            result = []
+            for entry in entries:
+                if hasattr(entry, "text"):
+                    text_val = str(entry.text).strip()
+                    start = float(getattr(entry, "start", 0))
+                    duration = float(getattr(entry, "duration", 0))
+                else:
+                    text_val = str(entry.get("text", "")).strip()
+                    start = float(entry.get("start", 0))
+                    duration = float(entry.get("duration", 0))
+                if text_val:
+                    result.append({"start": start, "duration": duration, "text": text_val})
+            return result
 
-    return result
+    except Exception as e:
+        logger.warning(
+            "youtube-transcript-api failed (timed) for %s: %s — trying yt-dlp fallback",
+            video_id, e,
+        )
+
+    # ── Fallback: yt-dlp ───────────────────────────────────────────────────
+    try:
+        result = _ytdlp_fetch_timed(video_id, lang)
+        logger.info("yt-dlp timed fallback succeeded for video_id=%s", video_id)
+        return result
+    except Exception as e2:
+        raise ValueError(
+            f"Could not fetch timed transcript for video {video_id!r}. "
+            f"youtube-transcript-api and yt-dlp both failed. Last error: {e2}"
+        ) from e2
 
 
 # ---------------------------------------------------------------------------

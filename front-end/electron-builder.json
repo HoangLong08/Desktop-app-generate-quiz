@@ -1,5 +1,6 @@
 {
-  "appId": "com.n-ziermann.front-end",
+  "appId": "com.hoanglong.generate-quiz",
+  "productName": "Generate Quiz",
   "files": ["dist-electron", "dist-react"],
   "extraResources": ["dist-electron/preload.cjs", "src/assets/**", "backend"],
   "publish": {
@@ -7,7 +8,7 @@
     "owner": "HoangLong08",
     "repo": "Desktop-app-generate-quiz"
   },
-  "mac": { "target": "dmg" },
-  "linux": { "target": "AppImage", "category": "Utility" },
-  "win": { "target": ["portable", "nsis"] }
+  "mac": { "target": "zip" },
+  "linux": { "target": "zip", "category": "Utility" },
+  "win": { "target": "zip" }
 }

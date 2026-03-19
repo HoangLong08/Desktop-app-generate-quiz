@@ -44,7 +44,7 @@ import type { UploadRecord } from "@/features/upload";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const TEXT_MAX_CHARS = 20_000;
+const TEXT_MAX_CHARS = 100_000;
 
 const ACCEPTED_TYPES = [
   "application/pdf",

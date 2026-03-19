@@ -44,6 +44,38 @@ _MAX_PARALLEL_CHUNKS = 6
 _MAX_QUESTIONS_PER_CALL = 15
 
 # ---------------------------------------------------------------------------
+# Quiz Difficulty Engine Constants
+# ---------------------------------------------------------------------------
+
+DIFFICULTY_RULES = {
+    "easy": {
+        "types": ["definition", "fact"],
+        "description": "Simple recall, direct from text"
+    },
+    "medium": {
+        "types": ["explanation", "workflow"],
+        "description": "Requires understanding relationships"
+    },
+    "hard": {
+        "types": ["scenario", "reasoning"],
+        "description": "Requires multi-step thinking or real-world application"
+    },
+    "mixed": {
+        "types": ["definition", "fact", "explanation", "workflow", "scenario", "reasoning"],
+        "description": "A balanced mix of easy recall, medium relationship-understanding, and hard multi-step reasoning"
+    }
+}
+
+QUESTION_TYPE_PROMPTS = {
+    "definition": "Ask about definitions or basic facts",
+    "fact": "Ask about specific details directly from the text",
+    "explanation": "Ask why or how something works",
+    "workflow": "Ask about process, steps, or pipeline",
+    "scenario": "Create a real-world situation and ask for best solution",
+    "reasoning": "Ask a question that requires multi-step thinking"
+}
+
+# ---------------------------------------------------------------------------
 # Simple in-memory LRU cache (avoids redundant Gemini calls during testing)
 # ---------------------------------------------------------------------------
 _CACHE_MAX = 30
@@ -666,10 +698,21 @@ def _build_prompt(
     }
     type_desc = type_map.get(question_type, type_map["multiple-choice"])
 
-    diff_map = {
-        "easy": "easy", "medium": "medium", "hard": "hard", "mixed": "mixed difficulty",
-    }
-    diff = diff_map.get(difficulty, "medium")
+    if difficulty in DIFFICULTY_RULES:
+        rule = DIFFICULTY_RULES[difficulty]
+        diff_desc = rule["description"]
+        hints = [f"  * {qt}: {QUESTION_TYPE_PROMPTS.get(qt, '')}" for qt in rule["types"]]
+        cognitive_guidance = (
+            f"DIFFICULTY ENGINE ({difficulty.upper()}):\n"
+            f"- Target cognitive level: {diff_desc}\n"
+            "- Use these question archetypes:\n" + "\n".join(hints) + "\n"
+        )
+    else:
+        diff_desc = f"{difficulty} difficulty"
+        cognitive_guidance = (
+            f"DIFFICULTY ENGINE ({difficulty.upper()}):\n"
+            f"- Target cognitive level: {diff_desc}\n"
+        )
 
     if question_type == "mixed":
         type_field = '"type": "multiple-choice"|"true-false"|"fill-blank"'
@@ -690,7 +733,7 @@ def _build_prompt(
 
     prompt = (
         f"{label_line}Generate exactly {num_questions} {type_desc} quiz questions in {lang}, "
-        f"difficulty={diff}, based solely on the text below.\n"
+        f"based solely on the text below.\n"
         f"Output ONLY a raw JSON array (no markdown, no code fences). "
         f"Each element: {{{type_field}, "
         '"questionText": "string", "options": [{"id": "string", "text": "string"}], '
@@ -703,6 +746,7 @@ def _build_prompt(
         "from the source text that are the core evidence answering this question. "
         "Do NOT paraphrase — copy the exact original wording.\n"
         f"{coverage_block}"
+        f"{cognitive_guidance}\n"
         "QUALITY RULES (strictly enforced):\n"
         "1. Prioritize questions that test TECHNICAL knowledge, code understanding, core concepts, "
         "algorithms, APIs, error handling, or comparisons between approaches.\n"
