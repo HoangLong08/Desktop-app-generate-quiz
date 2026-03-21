@@ -193,6 +193,26 @@ export async function getQuizSetApi(id: string): Promise<QuizSetDetail> {
 }
 
 /**
+ * PUT /api/quiz/sets/<id>
+ * Update a quiz set's title, config, and questions
+ */
+export async function updateQuizSetApi(
+  id: string,
+  payload: Partial<QuizSetDetail>
+): Promise<QuizSetDetail> {
+  const response = await fetch(`${API_URL}/api/quiz/sets/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to update quiz set");
+  }
+  return response.json();
+}
+
+/**
  * DELETE /api/quiz/sets/<id>
  */
 export async function deleteQuizSetApi(id: string): Promise<void> {

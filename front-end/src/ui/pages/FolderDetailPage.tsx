@@ -42,6 +42,7 @@ import {
   CheckCircle2,
   ScanText,
   BookOpenCheck,
+  Edit3,
 } from "lucide-react";
 import { PdfQuizViewer } from "../components/PdfQuizViewer";
 import { TextSourceViewer } from "../components/TextSourceViewer";
@@ -371,6 +372,19 @@ function QuizHistorySection({ folderId }: QuizHistorySectionProps) {
                             <BookOpenCheck className="size-3.5" />
                             <span className="hidden sm:inline">
                               {i18n.t("quizHistory.viewSource")}
+                            </span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="h-7 gap-1 text-xs"
+                            disabled={loadingId === set.id}
+                            onClick={() => navigate(`/quiz/${set.id}/edit`)}
+                            title="Edit"
+                          >
+                            <Edit3 className="size-3" />
+                            <span className="hidden sm:inline">
+                              Edit
                             </span>
                           </Button>
                           <Button

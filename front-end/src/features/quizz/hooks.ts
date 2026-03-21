@@ -4,6 +4,7 @@ import {
   extractTextApi,
   getQuizSetsApi,
   deleteQuizSetApi,
+  updateQuizSetApi,
 } from "./api";
 import type {
   GenerateQuizResponse,
@@ -11,7 +12,7 @@ import type {
   GenerateQuizOptions,
   ExtractTextOptions,
 } from "./api";
-import type { QuizConfig, QuizSetSummary } from "./types";
+import type { QuizConfig, QuizSetSummary, QuizSetDetail } from "./types";
 
 interface GenerateQuizInput {
   options: GenerateQuizOptions;
@@ -61,6 +62,25 @@ export function useDeleteQuizSet() {
     mutationFn: deleteQuizSetApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quizSets"] });
+    },
+  });
+}
+
+/**
+ * Hook to update a quiz set and its questions
+ */
+export function useUpdateQuizSet() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    QuizSetDetail,
+    Error,
+    { id: string; payload: Partial<QuizSetDetail> }
+  >({
+    mutationFn: ({ id, payload }) => updateQuizSetApi(id, payload),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["quizSets"] });
+      // Invalidate specific quiz query if cached
+      queryClient.invalidateQueries({ queryKey: ["quizSet", data.id] });
     },
   });
 }

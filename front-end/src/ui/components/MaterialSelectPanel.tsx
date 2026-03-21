@@ -21,7 +21,7 @@ import {
   Upload,
   CheckSquare,
   Loader2,
-  Database,
+  CheckCircle2,
 } from "lucide-react";
 import { useUploadRecords } from "@/features/upload";
 import type { UploadRecord } from "@/features/upload";
@@ -211,9 +211,9 @@ export function MaterialSelectPanel({
                             <span>{formatFileSize(record.fileSize)}</span>
                           </>
                         )}
-                        <span className="inline-flex items-center gap-1 text-green-500">
-                          <Database className="size-3" />
-                          {record.chunkCount} chunks
+                        <span className="inline-flex items-center gap-1 text-[10px] text-green-500">
+                          <CheckCircle2 className="size-3" />
+                          {i18n.t("materials.ready", "Ready")}
                         </span>
                       </div>
                     </div>

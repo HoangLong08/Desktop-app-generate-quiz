@@ -32,7 +32,6 @@ import {
   File,
   FileSpreadsheet,
   RefreshCw,
-  Database,
 } from "lucide-react";
 import {
   useUploadRecords,
@@ -124,8 +123,8 @@ function getProcessingBadge(record: UploadRecord) {
     case "completed":
       return (
         <span className="inline-flex items-center gap-1 text-[10px] text-green-500">
-          <Database className="size-3" />
-          {record.chunkCount} chunks
+          <CheckCircle2 className="size-3" />
+          {i18n.t("materials.ready", "Ready")}
         </span>
       );
     case "failed":
