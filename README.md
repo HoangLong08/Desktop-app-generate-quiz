@@ -58,7 +58,10 @@ The easiest way to use the application. You do **not** need to install Python, N
 3. **Extract** the `.zip` file to any folder.
 4. **Run** the application executable — that's it!
 
-> **Note:** On macOS you may need to right-click → Open the first time (to allow unsigned apps). On Linux, you may need to `chmod +x` the executable.
+> **⚠️ First launch notes:**
+> - **Windows:** SmartScreen may show *"Windows protected your PC"*. Click **"More info"** → **"Run anyway"**. This is normal for open-source apps without a paid code-signing certificate.
+> - **macOS:** Right-click the app → **Open** the first time (to allow unsigned apps).
+> - **Linux:** You may need to run `chmod +x` on the executable first.
 
 ### Run on Web (local — for developers)
 
@@ -159,3 +162,14 @@ All contributions are welcome! Please:
 ## 📄 License
 
 MIT License — see [LICENSE](LICENSE) for more details.
+
+## 🔐 Code signing policy
+
+Free code signing provided by [SignPath.io](https://signpath.io), certificate by SignPath Foundation.
+
+**Team roles:**
+* Committers and reviewers: [Project Maintainers](https://github.com/HoangLong08)
+* Approvers: [Project Owners](https://github.com/HoangLong08)
+
+### Privacy Policy
+This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it. (Note: The application sends user-provided documents to Google Gemini API only when the user explicitly triggers the quiz generation process using their own provided API key).
