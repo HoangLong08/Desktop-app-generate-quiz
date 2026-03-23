@@ -45,6 +45,12 @@ back-end/uploads/
 back-end/app/features/quizz/debug/
 .paddleocr/
 
+# ─── PyInstaller / Desktop build ───────────────────────────────────────────
+back-end/build/
+back-end/dist/
+*.spec
+front-end/backend/
+
 # ─── Logs ──────────────────────────────────────────────────────────────────
 *.log
 npm-debug.log*

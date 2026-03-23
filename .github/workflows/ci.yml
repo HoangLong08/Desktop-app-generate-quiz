@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: [20]
+        node-version: [22]
 
     steps:
       - name: Checkout repository
@@ -58,21 +58,49 @@ jobs:
           - os: windows-latest
             electron-args: --win --x64
             artifact-name: desktop-windows
+            backend-script: powershell -ExecutionPolicy Bypass -File build_backend.ps1
           - os: macos-latest
             electron-args: --mac --arm64
             artifact-name: desktop-macos
+            backend-script: bash build_backend.sh
           - os: ubuntu-latest
             electron-args: --linux --x64
             artifact-name: desktop-linux
+            backend-script: bash build_backend.sh
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ── Python (for PyInstaller backend build) ─────────────
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        working-directory: back-end
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build backend executable
+        working-directory: back-end
+        run: ${{ matrix.backend-script }}
+
+      - name: Verify backend artifact
+        shell: bash
+        run: |
+          echo "📦 Backend contents:"
+          ls -la front-end/backend/ | head -20
+          echo "✅ Backend build verified"
+
+      # ── Node.js (for Electron build) ───────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: front-end/package-lock.json
 
@@ -99,8 +127,11 @@ jobs:
         with:
           name: ${{ matrix.artifact-name }}
           path: |
+            front-end/dist/*.zip
             front-end/dist/*.exe
             front-end/dist/*.dmg
             front-end/dist/*.AppImage
+            front-end/dist/*.deb
+            front-end/dist/*.rpm
           if-no-files-found: warn
           retention-days: 14

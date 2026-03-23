@@ -66,8 +66,17 @@ export async function startBackend(): Promise<ChildProcess | null> {
 export function killBackend(child: ChildProcess | null): void {
   if (!child || child.killed) return;
   child.kill("SIGTERM");
-  // Force kill after a short delay if still alive (optional; child.kill() often enough)
+  // Force kill after a short delay if still alive
   setTimeout(() => {
-    if (!child.killed) child.kill("SIGKILL");
+    if (!child.killed) {
+      if (process.platform === "win32" && child.pid) {
+        // Windows: SIGKILL not supported; use taskkill to kill the process tree
+        spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
+          stdio: "ignore",
+        });
+      } else {
+        child.kill("SIGKILL");
+      }
+    }
   }, 2000);
 }

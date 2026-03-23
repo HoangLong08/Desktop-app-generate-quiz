@@ -111,14 +111,17 @@ jobs:
             platform: Windows
             electron-args: --win --x64
             artifact-name: release-windows
+            backend-script: powershell -ExecutionPolicy Bypass -File build_backend.ps1
           - os: macos-latest
             platform: macOS
             electron-args: --mac --arm64
             artifact-name: release-macos
+            backend-script: bash build_backend.sh
           - os: ubuntu-latest
             platform: Linux
             electron-args: --linux --x64
             artifact-name: release-linux
+            backend-script: bash build_backend.sh
 
     steps:
       - uses: actions/checkout@v4
@@ -126,6 +129,35 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
+      # ── Python (for PyInstaller backend build) ─────────────
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        working-directory: back-end
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build backend executable
+        working-directory: back-end
+        run: ${{ matrix.backend-script }}
+
+      - name: Verify backend artifact
+        shell: bash
+        run: |
+          echo "📦 Backend contents:"
+          ls -la front-end/backend/ | head -20
+          if [ "${{ matrix.platform }}" = "Windows" ]; then
+            test -f front-end/backend/WebQuizBackend.exe || { echo "❌ WebQuizBackend.exe not found"; exit 1; }
+          else
+            test -f front-end/backend/WebQuizBackend || { echo "❌ WebQuizBackend not found"; exit 1; }
+          fi
+          echo "✅ Backend build verified"
+
+      # ── Node.js (for Electron build) ───────────────────────
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -155,14 +187,23 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: List build output
+        shell: bash
+        run: |
+          echo "📦 Electron build output:"
+          ls -la front-end/dist/ || true
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
           path: |
+            front-end/dist/*.zip
             front-end/dist/*.exe
             front-end/dist/*.dmg
             front-end/dist/*.AppImage
+            front-end/dist/*.deb
+            front-end/dist/*.rpm
           if-no-files-found: warn
           retention-days: 5
 

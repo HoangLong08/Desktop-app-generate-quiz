@@ -42,16 +42,25 @@
 
 ## 📥 Installation
 
-### 🎁 Download Portable Release (Recommended)
+### 🎁 Download Portable Release (Recommended — no coding required!)
 
-The easiest way to use the application is to download the pre-packaged release. You do not need to install Python or Node.js.
+The easiest way to use the application. You do **not** need to install Python, Node.js, or any other tools.
 
-1. Go to the [Releases](https://github.com/HoangLong08/Desktop-app-generate-quiz/releases/latest) page.
-2. Download the latest `.zip` release asset for your operating system.
-3. **Extract** the `.zip` file to a folder on your computer.
-4. Open the extracted folder and run the application executable.
+1. Go to the [**Latest Release**](https://github.com/HoangLong08/Desktop-app-generate-quiz/releases/latest) page.
+2. Under **Assets**, download the `.zip` file for your operating system:
 
-### Run on Web (local)
+| Your OS | Download file | How to run |
+|---------|--------------|------------|
+| **Windows** | `Generate-Quiz-X.X.X-win.zip` | Extract → double-click `Generate Quiz.exe` |
+| **macOS** | `Generate-Quiz-X.X.X-mac.zip` | Extract → open `Generate Quiz.app` |
+| **Linux** | `Generate-Quiz-X.X.X-linux.zip` | Extract → run `./Generate Quiz` (or `.AppImage`) |
+
+3. **Extract** the `.zip` file to any folder.
+4. **Run** the application executable — that's it!
+
+> **Note:** On macOS you may need to right-click → Open the first time (to allow unsigned apps). On Linux, you may need to `chmod +x` the executable.
+
+### Run on Web (local — for developers)
 
 > See detailed instructions at **[docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md)**
 

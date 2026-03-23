@@ -2,7 +2,8 @@ import path from "node:path";
 import { app } from "electron";
 import { isDev } from "./util.js";
 
-const BACKEND_EXE_NAME = "WebQuizBackend.exe";
+const BACKEND_EXE_NAME =
+  process.platform === "win32" ? "WebQuizBackend.exe" : "WebQuizBackend";
 
 export function getPreloadPath() {
   return path.join(
