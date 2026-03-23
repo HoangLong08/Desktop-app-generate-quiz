@@ -31,7 +31,7 @@
 | 📝 **Diverse question types** | Multiple choice, true/false, fill-in-the-blank — configurable count, difficulty, language |
 | 📁 **Folder management**      | Organize quizzes into collections                                                         |
 | 📊 **Detailed statistics**    | Accuracy heatmap, progress timeline, attempt history                                      |
-| 📤 **DOCX export**            | Export quizzes to Word files for printing or sharing                                      |
+| 📤 **Export options**         | Export quizzes to DOCX for printing or Kahoot! for interactive playing                    |
 | 🖥️ **Desktop & Web**          | Run as a desktop app (Electron) or in the browser                                         |
 | 🌙 **Dark mode**              | Dark theme by default, with light/dark toggle support                                     |
 
@@ -42,15 +42,14 @@
 
 ## 📥 Installation
 
-### Download Desktop App
+### 🎁 Download Portable Release (Recommended)
 
-Download the installer for your OS from [Releases](../../releases/latest):
+The easiest way to use the application is to download the pre-packaged release. You do not need to install Python or Node.js.
 
-| OS          | File                                    |
-| ----------- | --------------------------------------- |
-| **Windows** | `.exe` (portable) or `.msi` (installer) |
-| **macOS**   | `.dmg`                                  |
-| **Linux**   | `.AppImage`                             |
+1. Go to the [Releases](https://github.com/HoangLong08/Desktop-app-generate-quiz/releases/latest) page.
+2. Download the latest `.zip` release asset for your operating system.
+3. **Extract** the `.zip` file to a folder on your computer.
+4. Open the extracted folder and run the application executable.
 
 ### Run on Web (local)
 
@@ -60,8 +59,8 @@ Download the installer for your OS from [Releases](../../releases/latest):
 
 ```bash
 # 1. Clone repo
-git clone https://github.com/<your-username>/web-quizz.git
-cd web-quizz
+git clone https://github.com/HoangLong08/Desktop-app-generate-quiz.git
+cd Desktop-app-generate-quiz
 
 # 2. Run backend
 cd back-end
@@ -70,8 +69,8 @@ python app.py
 
 # 3. Run frontend (new terminal)
 cd front-end
-npm install
-npm run dev:react
+yarn install
+yarn dev
 ```
 
 Open browser at `http://localhost:5123`
@@ -98,8 +97,8 @@ Open browser at `http://localhost:5123`
 
 ## 📁 Project Structure
 
-```
-web-quizz/
+```text
+Desktop-app-generate-quiz/
 ├── front-end/          # React + Electron app
 │   ├── src/
 │   │   ├── ui/         # Pages, components, styling

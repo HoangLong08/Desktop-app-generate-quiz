@@ -93,6 +93,61 @@ def get_quiz_set(quiz_set_id):
     return jsonify(quiz_set.to_dict(include_questions=True)), 200
 
 
+@quiz_bp.route("/sets/<quiz_set_id>", methods=["PUT"])
+def update_quiz_set(quiz_set_id):
+    """Update a quiz set's metadata and questions."""
+    quiz_set = QuizSet.query.get(quiz_set_id)
+    if not quiz_set:
+        return jsonify({"error": "Quiz set not found"}), 404
+
+    data = request.json
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    if "title" in data:
+        quiz_set.title = data["title"]
+    if "config" in data:
+        quiz_set.set_config(data["config"])
+
+    if "questions" in data:
+        incoming_qs = data["questions"]
+        existing_qs = {q.id: q for q in quiz_set.questions}
+        
+        # Keep track of updated ids
+        updated_ids = set()
+
+        for idx, q_data in enumerate(incoming_qs):
+            q_id = q_data.get("id")
+            if not q_id:
+                q_id = f"q{idx+1}_{uuid.uuid4().hex[:6]}"
+
+            updated_ids.add(q_id)
+            if q_id in existing_qs:
+                q = existing_qs[q_id]
+            else:
+                q = Question(id=q_id, quiz_set_id=quiz_set.id)
+                db.session.add(q)
+            
+            q.question_number = q_data.get("questionNumber", idx + 1)
+            q.type = q_data.get("type", "multiple-choice")
+            q.question_text = q_data.get("questionText", "")
+            q.set_options(q_data.get("options", []))
+            q.correct_answer_id = q_data.get("correctAnswerId", "")
+            if q.type == "multiple-answer":
+                q.set_correct_answer_ids(q_data.get("correctAnswerIds", []))
+            q.explanation = q_data.get("explanation", "")
+            q.set_source_pages(q_data.get("sourcePages", []))
+            q.set_source_keyword(q_data.get("sourceKeyword", []))
+
+        # Remove deleted questions
+        for existing_id, q in existing_qs.items():
+            if existing_id not in updated_ids:
+                db.session.delete(q)
+
+    db.session.commit()
+    return jsonify(quiz_set.to_dict(include_questions=True)), 200
+
+
 @quiz_bp.route("/sets/<quiz_set_id>", methods=["DELETE"])
 def delete_quiz_set(quiz_set_id):
     """Delete a quiz set and its questions."""
