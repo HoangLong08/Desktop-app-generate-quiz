@@ -14,7 +14,7 @@
 $ErrorActionPreference = "Stop"
 
 $BackendDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$FrontendBackendDir = Join-Path (Split-Path -Parent $BackendDir) "front-end" "backend"
+$FrontendBackendDir = Join-Path (Join-Path (Split-Path -Parent $BackendDir) "front-end") "backend"
 
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Building Flask backend (PyInstaller)" -ForegroundColor Cyan
