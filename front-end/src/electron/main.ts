@@ -11,7 +11,7 @@ import {
 } from "electron";
 import path from "node:path";
 import { ipcMainHandle, ipcMainHandleWithArg, isDev } from "./util.js";
-import { getStationData, pollResource } from "./resourceManager.js";
+import { logMain, startMainLog } from "./logger.js";
 import {
   getAssetsPath,
   getPreloadPath,
@@ -150,8 +150,62 @@ async function ensureBackend(parent: BrowserWindow): Promise<string | null> {
   }
 }
 
+/**
+ * Give the main process a voice.
+ *
+ * A user reporting "the window froze" left nothing on disk to read: the backend
+ * writes a log, this side wrote none. These are the three ways a freeze reaches
+ * the main process — a GPU or utility child dying, the renderer dying, and the
+ * window failing to pump messages — plus a one-off record of what Chromium
+ * actually negotiated with the graphics driver, which is the first thing worth
+ * knowing on a hybrid-graphics laptop. None of it costs anything until it fires.
+ */
+function watchForStalls(mainWindow: BrowserWindow): void {
+  logMain(`gpu feature status: ${JSON.stringify(app.getGPUFeatureStatus())}`);
+
+  // Which adapter Chromium actually settled on. On a hybrid-graphics laptop this
+  // one line is the difference between guessing and knowing.
+  void app
+    .getGPUInfo("complete")
+    .then((info) => {
+      const detail = info as {
+        gpuDevice?: unknown;
+        auxAttributes?: { glRenderer?: string };
+      };
+      logMain(
+        `gpu devices: ${JSON.stringify(detail.gpuDevice ?? null)} renderer=${detail.auxAttributes?.glRenderer ?? "unknown"}`,
+      );
+    })
+    .catch((err: unknown) => logMain(`gpu info unavailable: ${String(err)}`));
+
+  app.on("child-process-gone", (_event, details) => {
+    const name = details.name ? ` name=${details.name}` : "";
+    logMain(
+      `child-process-gone type=${details.type} reason=${details.reason} exitCode=${details.exitCode}${name}`,
+    );
+  });
+
+  app.on("render-process-gone", (_event, _contents, details) => {
+    logMain(
+      `render-process-gone reason=${details.reason} exitCode=${details.exitCode}`,
+    );
+  });
+
+  let unresponsiveSince = 0;
+  mainWindow.webContents.on("unresponsive", () => {
+    unresponsiveSince = Date.now();
+    logMain("window unresponsive");
+  });
+  mainWindow.webContents.on("responsive", () => {
+    const heldFor = unresponsiveSince ? Date.now() - unresponsiveSince : 0;
+    logMain(`window responsive again after ${heldFor}ms`);
+  });
+}
+
 app.on("ready", async () => {
   if (!isPrimaryInstance) return;
+
+  startMainLog();
 
   if (process.platform === "win32") {
     // Required so OS toast notifications show the app's name + icon instead of "electron.exe".
@@ -190,11 +244,7 @@ app.on("ready", async () => {
   });
   mainWindowRef = mainWindow;
 
-  pollResource(mainWindow);
-
-  ipcMainHandle("getStaticData", () => {
-    return getStationData();
-  });
+  watchForStalls(mainWindow);
 
   // Native folder picker for Smart Import
   ipcMainHandle("selectFolder", async () => {
@@ -273,6 +323,16 @@ app.on("ready", async () => {
   await mainWindow.loadFile(getUIPath());
 });
 
-app.on("before-quit", () => {
-  killBackend(backendProcess);
+// `before-quit` does not await anything, so the old one-liner let the app exit
+// with the kill still in flight and the outcome unobserved. Hold the quit open
+// for one pass, then leave regardless of how it went.
+let isQuitting = false;
+app.on("before-quit", (event) => {
+  if (isQuitting) return;
+  isQuitting = true;
+  event.preventDefault();
+  void killBackend(backendProcess).then(() => {
+    logMain("backend stopped, exiting");
+    app.exit(0);
+  });
 });

@@ -4,6 +4,7 @@ import { createServer } from "node:net";
 import path from "node:path";
 import { app } from "electron";
 import { getBackendDir, getBackendExePath } from "./pathResolver.js";
+import { logMain, rotateLog } from "./logger.js";
 
 /**
  * The port the OAuth redirect URIs are registered against, so it is worth
@@ -25,6 +26,10 @@ const BOOT_TIMEOUT_MS = 240_000;
 
 /** Log lines kept in memory to show in the failure dialog — the full log is on disk. */
 const TAIL_LINES = 20;
+
+/** How long SIGTERM gets before the forced kill, and how long quit waits in total. */
+const ESCALATE_AFTER_MS = 1_500;
+const KILL_TIMEOUT_MS = 3_000;
 
 export type BackendStartResult =
   /** `child` is null in dev, where the developer runs the backend themselves. */
@@ -65,7 +70,10 @@ function ephemeralPort(): Promise<number> {
 async function choosePort(): Promise<number> {
   if (await isPortFree(PREFERRED_PORT)) return PREFERRED_PORT;
   const fallback = await ephemeralPort();
-  console.warn(`Port ${PREFERRED_PORT} is taken; backend will use ${fallback}`);
+  // Worth a log line rather than a console warning nobody sees: the usual reason
+  // 5000 is taken is a backend left over from the previous run, and two backends
+  // on one SQLite file is its own class of bug.
+  logMain(`port ${PREFERRED_PORT} is taken; backend will use ${fallback}`);
   return fallback;
 }
 
@@ -108,9 +116,13 @@ function waitForBackend(baseUrl: string, child: ChildProcess): Promise<boolean> 
 function openLogSink(): { write: (chunk: Buffer) => void; path: string } {
   const logPath = getBackendLogPath();
   mkdirSync(path.dirname(logPath), { recursive: true });
-  // Truncated per launch: this is a diagnostic for the run that just failed,
-  // not an archive, and the log lives in the user's data directory. A retry
-  // closes the previous stream rather than leaving two writers on one file.
+  // One file per launch, but the previous launch is rolled aside rather than
+  // overwritten: a user only reports a freeze after closing and reopening the
+  // app, and truncating here erased the very run they were reporting. Rotate on
+  // the first sink of this launch only, so a Retry in the failure dialog does
+  // not push that run's own output out of reach.
+  if (!logStream) rotateLog(logPath);
+  // A retry closes the previous stream rather than leaving two writers on one file.
   logStream?.end();
   const stream = createWriteStream(logPath, { flags: "w" });
   // A backend that is being killed can emit one last chunk; losing a log line is
@@ -173,7 +185,7 @@ export async function startBackend(): Promise<BackendStartResult> {
   if (ready) return { ok: true, child, baseUrl };
 
   const exited = child.exitCode !== null || child.signalCode !== null;
-  killBackend(child);
+  void killBackend(child);
   return {
     ok: false,
     reason: spawnError
@@ -192,22 +204,38 @@ export function defaultBaseUrl(): string {
 }
 
 /**
- * Kill the backend process when app quits.
+ * Stop the backend, resolving once it is actually gone.
+ *
+ * The escalation was unreachable: `child.killed` means "a signal was delivered",
+ * so it is already true the instant `kill()` returns, and the `if (!child.killed)`
+ * guard around the force-kill therefore never passed. SIGTERM alone does happen
+ * to stop the current onedir bundle — measured: it exits and releases the port,
+ * and it spawns no child processes — so the escalation was never missed. It is
+ * still the only thing that would cover a build that stops exiting cleanly, and
+ * `taskkill /T` is the only form of it that reaches a process tree on Windows.
+ *
+ * SIGTERM first rather than straight to /F: a forced kill gives SQLite and
+ * ChromaDB no chance to close their files.
+ *
+ * Resolves on exit or after KILL_TIMEOUT_MS — a quit that cannot finish is worse
+ * than a leaked process.
  */
-export function killBackend(child: ChildProcess | null): void {
-  if (!child || child.killed) return;
+export function killBackend(child: ChildProcess | null): Promise<void> {
+  if (!child) return Promise.resolve();
+  if (child.exitCode !== null || child.signalCode !== null) return Promise.resolve();
+
+  const exited = new Promise<void>((resolve) => child.once("exit", () => resolve()));
   child.kill("SIGTERM");
-  // Force kill after a short delay if still alive
-  setTimeout(() => {
-    if (!child.killed) {
-      if (process.platform === "win32" && child.pid) {
-        // Windows: SIGKILL not supported; use taskkill to kill the process tree
-        spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
-          stdio: "ignore",
-        });
-      } else {
-        child.kill("SIGKILL");
-      }
+
+  const escalate = setTimeout(() => {
+    if (child.exitCode !== null || child.signalCode !== null) return;
+    if (process.platform === "win32" && child.pid) {
+      spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+    } else {
+      child.kill("SIGKILL");
     }
-  }, 2000);
+  }, ESCALATE_AFTER_MS);
+
+  const deadline = new Promise<void>((resolve) => setTimeout(resolve, KILL_TIMEOUT_MS));
+  return Promise.race([exited, deadline]).finally(() => clearTimeout(escalate));
 }

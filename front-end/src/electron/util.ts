@@ -30,14 +30,6 @@ export function ipcMainHandleWithArg<
   });
 }
 
-export function ipcWebContentsSend<Key extends keyof EventPayloadMapping>(
-  key: Key,
-  webContents: Electron.WebContents,
-  payload: EventPayloadMapping[Key],
-) {
-  webContents.send(key, payload);
-}
-
 export function validateEventFrame(frame: WebFrameMain) {
   if (isDev() && new URL(frame.url).host === "localhost:5123") {
     return;

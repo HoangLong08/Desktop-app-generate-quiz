@@ -8,11 +8,6 @@ const apiBaseUrl: string =
 
 electron.contextBridge.exposeInMainWorld("electron", {
   apiBaseUrl,
-  subscribeStatistics: (callback) =>
-    ipcOn("statistics", (stats) => {
-      callback(stats);
-    }),
-  getStaticData: () => ipcInvoke("getStaticData"),
   selectFolder: () => ipcInvoke("selectFolder"),
   focusWindow: () => ipcInvoke("focusWindow"),
   setNativeTheme: (theme) => ipcInvokeWithArg("setNativeTheme", theme),
@@ -34,18 +29,4 @@ function ipcInvokeWithArg<
   payload: EventRequestMapping[Key],
 ): Promise<EventPayloadMapping[Key]> {
   return electron.ipcRenderer.invoke(key, payload);
-}
-
-function ipcOn<Key extends keyof EventPayloadMapping>(
-  key: Key,
-  callback: (payload: EventPayloadMapping[Key]) => void,
-) {
-  const cb = (
-    _: Electron.IpcRendererEvent,
-    payload: EventPayloadMapping[Key],
-  ) => {
-    callback(payload);
-  };
-  electron.ipcRenderer.on(key, cb);
-  return () => electron.ipcRenderer.off(key, cb);
 }
